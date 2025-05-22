@@ -1,0 +1,10 @@
+version: "1.0"
+linter: jetbrains/qodana-js:2024.1
+bootstrap: pnpm install
+include:
+  - name: Eslint
+exclude:
+  - name: All
+    paths:
+      - .pnpm-store
+      - src/components/ui
