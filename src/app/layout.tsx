@@ -1,14 +1,14 @@
 import "~/styles/globals.css";
 
 import type { Metadata } from "next";
-import { Geist, Inter as FontSans } from "next/font/google";
-import {cn} from "~/lib/utils";
+import { Inter as FontSans, Geist } from "next/font/google";
 import ClientProvider from "~/components/ClientProvider";
-import {TooltipProvider} from "~/components/ui/tooltip";
-import {SidebarProvider} from "~/components/ui/sidebar";
-import SideBar from "~/components/SideBar";
 import Headerbar from "~/components/Headerbar";
-import {Toaster} from "~/components/ui/sonner";
+import SideBar from "~/components/SideBar";
+import { SidebarProvider } from "~/components/ui/sidebar";
+import { Toaster } from "~/components/ui/sonner";
+import { TooltipProvider } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
 
 export const metadata: Metadata = {
 	title: "Policies",
@@ -24,22 +24,34 @@ const geist = Geist({
 const fontSans = FontSans({
 	subsets: ["latin"],
 	variable: "--font-sans",
-})
+});
 
 export default function RootLayout({
 	children,
 }: Readonly<{ children: React.ReactNode }>) {
 	return (
-		<html lang="en" className={`${geist.variable}`} suppressHydrationWarning={true}>
-			<body className={cn("min-h-screen bg-background font-sans antialiased", fontSans.variable)}>
+		<html
+			lang="en"
+			className={`${geist.variable}`}
+			suppressHydrationWarning={true}
+		>
+			<body
+				className={cn(
+					"min-h-screen bg-background font-sans antialiased",
+					fontSans.variable,
+				)}
+			>
 				<ClientProvider>
 					<TooltipProvider>
 						<div className={"relative flex min-h-screen flex-col bg-muted/40"}>
 							<SidebarProvider>
 								<SideBar />
-								<div className={"flex flex-col sm:py-4 size-full"}>
+								<div className={"flex size-full flex-col sm:py-4"}>
 									<Headerbar />
-									<main className={"flex-1 size-full p-4"} suppressHydrationWarning={true}>
+									<main
+										className={"size-full flex-1 p-4"}
+										suppressHydrationWarning={true}
+									>
 										{children}
 									</main>
 								</div>
