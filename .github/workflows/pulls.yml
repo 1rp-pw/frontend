@@ -20,7 +20,7 @@ jobs:
         with:
           version: 9
       - run: pnpm install --frozen-lockfile
-      - run: SKIP_ENV_VALIDATION=true pnpm lint
+      - run: SKIP_ENV_VALIDATION=true pnpm check
       - run: SKIP_ENV_VALIDATION=true NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }} pnpm build --turbopack
   qodana:
     needs: test
