@@ -1,6 +1,7 @@
 "use client";
 import { useRef } from "react";
 import type React from "react";
+import { highlightText } from "~/components/editor/highlight";
 
 interface EditorProps {
 	text: string;
@@ -10,66 +11,6 @@ interface EditorProps {
 export function Editor({ text, onChange }: EditorProps) {
 	const editorRef = useRef<HTMLPreElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-	const highlightText = (text: string) => {
-		// Escape &, <, >
-		let html = text
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;");
-
-		// First highlight numbers
-		html = html.replace(
-			/\b(\d+)\b/g,
-			'<span class="text-orange-500">$1</span>',
-		);
-
-		// Highlight comparison phrases in purple
-		const comparisonPhrases = [
-			"is greater than or equal to",
-			"is less than or equal to",
-			"is equal to",
-			"is not equal to",
-			"is the same as",
-			"is not the same as",
-			"is later than",
-			"is earlier than",
-			"is greater than",
-			"is less than",
-			"is in",
-			"is not in",
-			"contains",
-		];
-
-		// Create a regex pattern from the phrases, escaping special characters
-		const escapedPhrases = comparisonPhrases.map((phrase) =>
-			phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
-		);
-		const phrasePattern = new RegExp(
-			`\\b(${escapedPhrases.join("|")})\\b`,
-			"g",
-		);
-
-		// Apply the highlighting
-		html = html.replace(
-			phrasePattern,
-			'<span class="text-purple-500">$1</span>',
-		);
-
-		// Then highlight lines starting with # (comments) - grey
-		html = html.replace(/(^#.*$)/gm, '<span class="text-gray-400">$1</span>');
-
-		// Highlight double asterisks - blue (keep ** markers), non-greedy
-		html = html.replace(
-			/(\*\*.+?\*\*)/g,
-			'<span class="text-blue-500">$1</span>',
-		);
-
-		// Highlight double underscores - green (keep __ markers), non-greedy
-		html = html.replace(/(__.+?__)/g, '<span class="text-green-500">$1</span>');
-
-		return html;
-	};
 
 	// Sync scroll position between textarea and highlighted view
 	const syncScroll = () => {
