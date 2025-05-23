@@ -21,7 +21,9 @@ export const highlightText = (text: string) => {
 		if (match) {
 			// Extract just the action part (e.g., "passes the practical driving test")
 			// without the **Person** part
-			definedRules.push(match[1].trim());
+			if (match[1] !== undefined) {
+				definedRules.push(match[1].trim());
+			}
 		}
 	});
 
@@ -138,9 +140,11 @@ export const highlightText = (text: string) => {
 	});
 
 	// Step 5: Replace all placeholders with their actual HTML
-	for (let i = 0; i < placeholders.length; i++) {
-		html = html.replace(`\x00PLACEHOLDER${i}\x00`, placeholders[i]);
-	}
+	placeholders.forEach((placeholder, i) => {
+		if (placeholder !== undefined && placeholder !== "") {
+			html = html.replace(`\x00PLACEHOLDER${i}\x00`, placeholder);
+		}
+	});
 
 	//console.info("highlighted", html);
 
