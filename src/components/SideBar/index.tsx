@@ -13,12 +13,13 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "~/components/ui/sidebar";
+import Image from "next/image";
 
 export default function SideBar() {
 	return (
 		<Sidebar>
 			<SidebarHeader>
-				<Link href={"/"}>Policies</Link>
+				<Link href={"/"}><Image src={"/logo.png"} alt={"Policies"} width={50} height={50} /></Link>
 			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>
