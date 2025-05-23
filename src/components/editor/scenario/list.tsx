@@ -94,16 +94,14 @@ export function ScenarioList({
 								onClick={(e) => {
 									e.stopPropagation();
 								}}
-								className={
-									"h-6 w-6 cursor-pointer text-zinc-400 hover:text-green-400"
-								}
+								className={"h-6 w-6 text-zinc-400 hover:text-green-400"}
 							>
 								<PlayIcon />
 							</Button>
 							<Button
 								variant="ghost"
 								size="icon"
-								className="h-6 w-6 cursor-pointer text-zinc-400 hover:text-red-400"
+								className="h-6 w-6 text-zinc-400 hover:text-red-400"
 								onClick={() => handleDeleteScenario(scenario)}
 							>
 								<TrashIcon />

@@ -5,6 +5,7 @@ import { Editor } from "~/components/editor/editor";
 import { ScenarioForm } from "~/components/editor/scenario/form";
 import { ScenarioList } from "~/components/editor/scenario/list";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
+import { Button } from "~/components/ui/button";
 
 interface Scenario {
 	id: string;
@@ -74,8 +75,11 @@ export default function IDEPage() {
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
-			<header className="border-zinc-700 border-b p-4">
+			<header className="flex border-zinc-700 border-b p-4">
 				<h1 className="font-bold text-xl">Policy Maker</h1>
+				<div className={"ml-auto flex items-center gap-1"}>
+					<Button className={"rounded text-sm"}>Save Policy</Button>
+				</div>
 			</header>
 
 			<main className="grid flex-1 grid-cols-2 grid-rows-2 gap-1 p-1">
@@ -91,14 +95,14 @@ export default function IDEPage() {
 				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 					<div className="flex items-center justify-between bg-zinc-700 px-4 py-2 font-medium text-sm">
 						<span>Scenarios</span>
-						{/* biome-ignore lint/a11y/useButtonType: stuff */}
-						<button
+						<Button
+							variant="secondary"
 							onClick={createNewScenario}
-							className="rounded bg-blue-600 px-2 py-1 text-xs hover:bg-blue-700"
+							className="rounded px-2 py-1 text-xs"
 							disabled={Object.keys(schema.properties).length === 0}
 						>
 							New Scenario
-						</button>
+						</Button>
 					</div>
 					<div className="flex-1 overflow-auto">
 						<ScenarioList
@@ -121,7 +125,7 @@ export default function IDEPage() {
 
 				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
-						Scenario Form
+						Scenario Editor
 					</div>
 					<div className="flex-1 overflow-auto p-4">
 						<ScenarioForm
