@@ -417,7 +417,7 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 					{/* Schema Preview */}
 					<div className="space-y-2">
 						<h3 className="font-medium text-sm">Schema Preview</h3>
-						<pre className="max-h-32 overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
+						<pre className="max-h-70 overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
 							{JSON.stringify(schema, null, 2)}
 						</pre>
 					</div>
