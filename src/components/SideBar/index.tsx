@@ -1,6 +1,7 @@
 "use client";
 
 import { ChartNetwork, Home } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import {
 	Sidebar,
@@ -13,13 +14,14 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import Image from "next/image";
 
 export default function SideBar() {
 	return (
 		<Sidebar>
 			<SidebarHeader>
-				<Link href={"/"}><Image src={"/logo.png"} alt={"Policies"} width={50} height={50} /></Link>
+				<Link href={"/"}>
+					<Image src={"/logo.png"} alt={"Policies"} width={50} height={50} />
+				</Link>
 			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>
