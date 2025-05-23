@@ -20,6 +20,7 @@ import {
 	SelectValue,
 } from "~/components/ui/select";
 import { Switch } from "~/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 
 interface SchemaBuilderProps {
@@ -218,85 +219,18 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 	const breadcrumb = editingObject ? editingObject.split(".") : [];
 
 	return (
-		<div className="space-y-4">
-			{/* Tab Navigation */}
-			<div className="flex space-x-1 rounded-lg bg-zinc-800 p-1">
-				{/* biome-ignore lint/a11y/useButtonType: needs fixing */}
-				<button
-					onClick={() => setActiveTab("edit")}
-					className={`flex items-center gap-2 rounded-md px-3 py-2 font-medium text-sm transition-colors ${
-						activeTab === "edit"
-							? "bg-zinc-700 text-zinc-100"
-							: "text-zinc-400 hover:text-zinc-300"
-					}`}
-				>
+		<Tabs defaultValue={"edit"}>
+			<TabsList className={"grid w-full grid-cols-2"}>
+				<TabsTrigger value={"edit"}>
 					<EditIcon className="h-4 w-4" />
 					Edit Schema
-				</button>
-				{/* biome-ignore lint/a11y/useButtonType: needs fixing */}
-				<button
-					onClick={() => setActiveTab("import")}
-					className={`flex items-center gap-2 rounded-md px-3 py-2 font-medium text-sm transition-colors ${
-						activeTab === "import"
-							? "bg-zinc-700 text-zinc-100"
-							: "text-zinc-400 hover:text-zinc-300"
-					}`}
-				>
+				</TabsTrigger>
+				<TabsTrigger value={"import"}>
 					<FileTextIcon className="h-4 w-4" />
 					Import Schema
-				</button>
-			</div>
-
-			{/* Import Tab Content */}
-			{activeTab === "import" && (
-				<div className="space-y-4">
-					<div className="space-y-2">
-						<div className="flex items-center justify-between">
-							<h3 className="font-medium text-sm">Import JSON Schema</h3>
-							<Button variant="outline" size="sm" onClick={loadCurrentSchema}>
-								Load Current Schema
-							</Button>
-						</div>
-						<Textarea
-							placeholder="Paste your JSON schema here..."
-							value={schemaInput}
-							onChange={(e) => {
-								setSchemaInput(e.target.value);
-								setImportError("");
-							}}
-							className="min-h-[200px] font-mono text-sm"
-						/>
-						{importError && (
-							<p className="text-red-400 text-sm">{importError}</p>
-						)}
-						<div className="flex gap-2">
-							<Button onClick={importSchema} disabled={!schemaInput.trim()}>
-								Import Schema
-							</Button>
-							<Button
-								variant="outline"
-								onClick={() => {
-									setSchemaInput("");
-									setImportError("");
-								}}
-							>
-								Clear
-							</Button>
-						</div>
-					</div>
-
-					{/* Current Schema Preview in Import Tab */}
-					<div className="space-y-2">
-						<h3 className="font-medium text-sm">Current Schema</h3>
-						<pre className="max-h-48 overflow-auto rounded bg-zinc-700/30 p-3 text-xs">
-							{JSON.stringify(schema, null, 2)}
-						</pre>
-					</div>
-				</div>
-			)}
-
-			{/* Edit Tab Content */}
-			{activeTab === "edit" && (
+				</TabsTrigger>
+			</TabsList>
+			<TabsContent value={"edit"}>
 				<>
 					{/* Breadcrumb Navigation */}
 					{editingObject && (
@@ -422,7 +356,53 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 						</pre>
 					</div>
 				</>
-			)}
-		</div>
+			</TabsContent>
+			<TabsContent value={"import"}>
+				<div className="space-y-4">
+					<div className="space-y-2">
+						<div className="flex items-center justify-between">
+							<h3 className="font-medium text-sm">Import JSON Schema</h3>
+							<Button variant="outline" size="sm" onClick={loadCurrentSchema}>
+								Load Current Schema
+							</Button>
+						</div>
+						<Textarea
+							placeholder="Paste your JSON schema here..."
+							value={schemaInput}
+							onChange={(e) => {
+								setSchemaInput(e.target.value);
+								setImportError("");
+							}}
+							className="min-h-[200px] font-mono text-sm"
+						/>
+						{importError && (
+							<p className="text-red-400 text-sm">{importError}</p>
+						)}
+						<div className="flex gap-2">
+							<Button onClick={importSchema} disabled={!schemaInput.trim()}>
+								Import Schema
+							</Button>
+							<Button
+								variant="outline"
+								onClick={() => {
+									setSchemaInput("");
+									setImportError("");
+								}}
+							>
+								Clear
+							</Button>
+						</div>
+					</div>
+
+					{/* Current Schema Preview in Import Tab */}
+					<div className="space-y-2">
+						<h3 className="font-medium text-sm">Current Schema</h3>
+						<pre className="max-h-48 overflow-auto rounded bg-zinc-700/30 p-3 text-xs">
+							{JSON.stringify(schema, null, 2)}
+						</pre>
+					</div>
+				</div>
+			</TabsContent>
+		</Tabs>
 	);
 }

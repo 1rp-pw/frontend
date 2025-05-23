@@ -1,6 +1,17 @@
 "use client";
 
-import { FileTextIcon, TrashIcon } from "lucide-react";
+import { FileTextIcon, PlayIcon, TrashIcon } from "lucide-react";
+import { useState } from "react";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 
 interface Scenario {
@@ -24,6 +35,24 @@ export function ScenarioList({
 	onSelectScenario,
 	onDeleteScenario,
 }: ScenarioListProps) {
+	const [scenarioInfo, setScenarioInfo] = useState<Scenario | null>();
+	const [deleteScenarioDialogOpen, setDeleteScenarioDialogOpen] =
+		useState(false);
+
+	const handleDeleteScenario = (scenario: Scenario | null) => {
+		setScenarioInfo(scenario);
+		setDeleteScenarioDialogOpen(true);
+	};
+	const confirmDeleteScenario = () => {
+		if (scenarioInfo === null) {
+			return;
+		}
+		const scenarioId = scenarioInfo?.id || "";
+
+		setDeleteScenarioDialogOpen(false);
+		onDeleteScenario(scenarioId);
+	};
+
 	if (scenarios.length === 0) {
 		return (
 			<div className="p-4 text-center text-zinc-500">
@@ -60,20 +89,54 @@ export function ScenarioList({
 								</div>
 							</div>
 							<Button
-								variant="ghost"
-								size="icon"
+								variant={"ghost"}
+								size={"icon"}
 								onClick={(e) => {
 									e.stopPropagation();
-									onDeleteScenario(scenario.id);
 								}}
-								className="h-6 w-6 text-zinc-400 hover:text-red-400"
+								className={"h-6 w-6 text-zinc-400 hover:text-green-400"}
 							>
-								<TrashIcon className="h-4 w-4" />
+								<PlayIcon />
+							</Button>
+							<Button
+								variant="ghost"
+								size="icon"
+								className="h-6 w-6 text-zinc-400 hover:text-red-400"
+								onClick={() => handleDeleteScenario(scenario)}
+							>
+								<TrashIcon />
 							</Button>
 						</div>
 					</li>
 				))}
 			</ul>
+
+			<AlertDialog open={deleteScenarioDialogOpen}>
+				<AlertDialogContent>
+					<AlertDialogHeader>
+						<AlertDialogTitle className="text-sm">
+							Are you sure you want to delete ?
+						</AlertDialogTitle>
+						<AlertDialogDescription>
+							Delete {scenarioInfo?.name}?
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel
+							onClick={() => setDeleteScenarioDialogOpen(false)}
+							className={"cursor-pointer"}
+						>
+							Cancel
+						</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={confirmDeleteScenario}
+							className={"cursor-pointer"}
+						>
+							Confirm
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</div>
 	);
 }

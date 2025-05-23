@@ -96,7 +96,7 @@ export function ActionNode({ id, data, isConnectable }: NodeProps<NodeData>) {
 						<Button
 							variant="outline"
 							size="sm"
-							className="flex-1 cursor-pointer border-green-500 hover:bg-green-50 hover:text-green-700"
+							className="flex-1 border-green-500 hover:bg-green-50 hover:text-green-700"
 							onClick={() =>
 								window.dispatchEvent(
 									new CustomEvent("add-path", {
@@ -110,7 +110,7 @@ export function ActionNode({ id, data, isConnectable }: NodeProps<NodeData>) {
 						<Button
 							variant="outline"
 							size="sm"
-							className="flex-1 cursor-pointer border-red-500 hover:bg-red-50 hover:text-red-700"
+							className="flex-1 border-red-500 hover:bg-red-50 hover:text-red-700"
 							onClick={() =>
 								window.dispatchEvent(
 									new CustomEvent("add-path", {
