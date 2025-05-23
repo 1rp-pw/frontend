@@ -113,7 +113,7 @@ export function ScenarioList({
 				))}
 			</ul>
 
-			<AlertDialog open={deleteScenarioDialogOpen} onClose={onDeleteScenario}>
+			<AlertDialog open={deleteScenarioDialogOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle className="text-sm">
