@@ -75,13 +75,13 @@ export default function IDEPage() {
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="border-zinc-700 border-b p-4">
-				<h1 className="font-bold text-xl">IDE Interface</h1>
+				<h1 className="font-bold text-xl">Policy Maker</h1>
 			</header>
 
 			<main className="grid flex-1 grid-cols-2 grid-rows-2 gap-1 p-1">
 				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
-						Plain Text Editor
+						Policy Text
 					</div>
 					<div className="flex-1 overflow-auto p-4">
 						<Editor text={plainText} onChange={setPlainText} />
