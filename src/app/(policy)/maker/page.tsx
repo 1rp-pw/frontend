@@ -1,12 +1,11 @@
 "use client";
 
-import { Outdent } from "lucide-react";
-import { useState } from "react";
 import { Editor } from "~/components/editor/editor";
 import { ScenarioForm } from "~/components/editor/scenario/form";
 import { ScenarioList } from "~/components/editor/scenario/list";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { Button } from "~/components/ui/button";
+import {useScenarioStore} from "~/lib/state/maker";
 
 interface Outcome {
 	passed: boolean;
@@ -52,70 +51,20 @@ async function runScenarioLive(
 }
 
 export default function IDEPage() {
-	// biome-ignore lint/suspicious/noExplicitAny: stuff
-	const [schema, setSchema] = useState<any>({
-		type: "object",
-		properties: {},
-		required: [],
-	});
-
-	const [scenarios, setScenarios] = useState<Scenario[]>([]);
-	const [currentScenario, setCurrentScenario] = useState<Scenario | null>(null);
-	const [policyText, setPolicyText] = useState(
-		"# Driving Test Rules\nA **Person** gets a full driving license\n if the __age__ of the **Person** is greater than or equal to 17\n and the **Person** passes the practical driving test\n and the **Person** passes the eye test.\n\nA **Person** passes the practical driving test\n if the __driving test score__ of the **Person** is greater than or equal to 60.",
-	);
-
-	const createNewScenario = () => {
-		const newScenario: Scenario = {
-			id: Date.now().toString(),
-			name: `Scenario ${scenarios.length + 1}`,
-			data: {},
-			createdAt: new Date(),
-			outcome: {
-				passed: false,
-				ran: false,
-			},
-		};
-		setCurrentScenario(newScenario);
-	};
-
-	// biome-ignore lint/suspicious/noExplicitAny: stuff
-	const saveScenario = (scenarioData: any, name?: string) => {
-		if (currentScenario) {
-			const updatedScenario = {
-				...currentScenario,
-				data: scenarioData,
-				name: name || currentScenario.name,
-			};
-
-			const existingIndex = scenarios.findIndex(
-				(s) => s.id === currentScenario.id,
-			);
-			if (existingIndex >= 0) {
-				const updatedScenarios = [...scenarios];
-				updatedScenarios[existingIndex] = updatedScenario;
-				setScenarios(updatedScenarios);
-			} else {
-				setScenarios([...scenarios, updatedScenario]);
-			}
-			setCurrentScenario(updatedScenario);
-		}
-	};
-
-	const selectScenario = (scenario: Scenario) => {
-		setCurrentScenario(scenario);
-	};
-
-	const runScenario = (scenario: Scenario) => {
-		runScenarioLive(scenario, schema, policyText);
-	};
-
-	const deleteScenario = (scenarioId: string) => {
-		setScenarios(scenarios.filter((s) => s.id !== scenarioId));
-		if (currentScenario?.id === scenarioId) {
-			setCurrentScenario(null);
-		}
-	};
+	const {
+		schema,
+		scenarios,
+		currentScenario,
+		policyText,
+		setSchema,
+		setPolicyText,
+		createScenario,
+		saveScenario,
+		selectScenario,
+		deleteScenario,
+		runScenario,
+		// runAllScenarios
+	} = useScenarioStore()
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
@@ -141,7 +90,7 @@ export default function IDEPage() {
 						<span>Scenarios</span>
 						<Button
 							variant="secondary"
-							onClick={createNewScenario}
+							onClick={createScenario}
 							className="rounded px-2 py-1 text-xs"
 							disabled={Object.keys(schema.properties).length === 0}
 						>
