@@ -53,7 +53,7 @@ const defaultScenarios: Scenario[] = [
 		outcome: {
 			passed: false,
 			ran: false,
-			status: "not-run",
+			status: "not-run" as ScenarioStatus,
 		},
 	},
 	{
@@ -70,7 +70,7 @@ const defaultScenarios: Scenario[] = [
 		outcome: {
 			passed: false,
 			ran: false,
-			status: "not-run",
+			status: "not-run" as ScenarioStatus,
 		},
 	},
 ];
@@ -170,7 +170,7 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 					...scenario,
 					outcome: {
 						...scenario.outcome,
-						status,
+						status: status as ScenarioStatus,
 					},
 				};
 			}
@@ -204,10 +204,10 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 			}
 
 			const resp = await response.json();
-			console.info("response", resp);
+			//console.info("response", resp);
 
 			const passed = resp.result === true;
-			updateScenarioStatus(scenarioId, passed ? "passed" : "failed");
+			updateScenarioStatus(scenarioId, passed ? "passed" : "failed" as ScenarioStatus);
 
 			// Update the scenario outcome
 			const updatedScenarios = scenarios.map((s) => {
@@ -217,7 +217,7 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 						outcome: {
 							passed,
 							ran: true,
-							status: passed ? "passed" : "failed",
+							status: passed ? "passed" : "failed" as ScenarioStatus,
 						},
 					};
 				}
