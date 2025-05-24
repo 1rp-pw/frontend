@@ -6,13 +6,47 @@ import { ScenarioForm } from "~/components/editor/scenario/form";
 import { ScenarioList } from "~/components/editor/scenario/list";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { Button } from "~/components/ui/button";
+import {Outdent} from "lucide-react";
 
+interface Outcome {
+	passed: boolean;
+	ran: boolean;
+}
 interface Scenario {
 	id: string;
 	name: string;
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	data: any;
 	createdAt: Date;
+	outcome: Outcome;
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: schema could be anything
+async function runScenarioLive(scenario: Scenario, schema: any, policyText: string) {
+	scenario.outcome.ran = true;
+
+	try {
+		const dataSet = {
+			data: scenario.data,
+			rule: policyText
+		}
+
+		const response = await fetch("/api/scenario", {
+			method: "POST",
+			body: JSON.stringify(dataSet),
+		})
+
+		if (!response.ok) {
+			scenario.outcome.passed = false;
+		}
+
+		const resp = await response.json();
+		console.info("response", resp);
+
+		scenario.outcome.passed = resp.result === true;
+	} catch (e) {
+		scenario.outcome.ran = false;
+	}
 }
 
 export default function IDEPage() {
@@ -25,7 +59,7 @@ export default function IDEPage() {
 
 	const [scenarios, setScenarios] = useState<Scenario[]>([]);
 	const [currentScenario, setCurrentScenario] = useState<Scenario | null>(null);
-	const [plainText, setPlainText] = useState(
+	const [policyText, setPolicyText] = useState(
 		"# Driving Test Rules\nA **Person** gets a full driving license\n if the __age__ of the **Person** is greater than or equal to 17\n and the **Person** passes the practical driving test\n and the **Person** passes the eye test.\n\nA **Person** passes the practical driving test\n if the __driving test score__ of the **Person** is greater than or equal to 60.",
 	);
 
@@ -35,6 +69,10 @@ export default function IDEPage() {
 			name: `Scenario ${scenarios.length + 1}`,
 			data: {},
 			createdAt: new Date(),
+			outcome: {
+				passed: false,
+				ran: false,
+			}
 		};
 		setCurrentScenario(newScenario);
 	};
@@ -66,6 +104,10 @@ export default function IDEPage() {
 		setCurrentScenario(scenario);
 	};
 
+	const runScenario = (scenario: Scenario) => {
+		runScenarioLive(scenario, schema, policyText);
+	}
+
 	const deleteScenario = (scenarioId: string) => {
 		setScenarios(scenarios.filter((s) => s.id !== scenarioId));
 		if (currentScenario?.id === scenarioId) {
@@ -88,7 +130,7 @@ export default function IDEPage() {
 						Policy Text
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<Editor text={plainText} onChange={setPlainText} />
+						<Editor text={policyText} onChange={setPolicyText} />
 					</div>
 				</div>
 
@@ -110,6 +152,7 @@ export default function IDEPage() {
 							currentScenario={currentScenario}
 							onSelectScenario={selectScenario}
 							onDeleteScenario={deleteScenario}
+							onRunScenario={runScenario}
 						/>
 					</div>
 				</div>
