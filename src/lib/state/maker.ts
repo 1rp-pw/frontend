@@ -87,24 +87,24 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
     properties: {
       person: {
         type: "object",
-        "required": [
+        required: [
           "name",
           "age",
           "drivingTestScore"
-        ]
-      },
-      properties: {
-        name: {
-          type: "string",
-          title: "Name"
-        },
-        age: {
-          type: "number",
-          title: "Age"
-        },
-        drivingTestScore: {
-          type: "number",
-          title: "Driving Test Score"
+        ],
+        properties: {
+          name: {
+            type: "string",
+            title: "Name"
+          },
+          age: {
+            type: "number",
+            title: "Age"
+          },
+          drivingTestScore: {
+            type: "number",
+            title: "Driving Test Score"
+          }
         }
       }
     },
