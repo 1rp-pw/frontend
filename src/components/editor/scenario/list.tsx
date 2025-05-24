@@ -1,11 +1,12 @@
 "use client";
 
 import {
-	CircleAlertIcon, CircleCheckIcon,
+	CircleAlertIcon,
+	CircleCheckIcon,
 	CircleXIcon,
 	FileTextIcon,
 	PlayIcon,
-	TrashIcon
+	TrashIcon,
 } from "lucide-react";
 import { useState } from "react";
 import {

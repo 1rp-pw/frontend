@@ -9,7 +9,7 @@ export const env = createEnv({
 	server: {
 		NODE_ENV: z.enum(["development", "test", "production"]),
 
-		API_SERVER: z.string().default("https://api.1rp.pw")
+		API_SERVER: z.string().default("https://api.1rp.pw"),
 	},
 
 	/**

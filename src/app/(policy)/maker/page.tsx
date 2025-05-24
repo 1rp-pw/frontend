@@ -1,12 +1,12 @@
 "use client";
 
+import { Outdent } from "lucide-react";
 import { useState } from "react";
 import { Editor } from "~/components/editor/editor";
 import { ScenarioForm } from "~/components/editor/scenario/form";
 import { ScenarioList } from "~/components/editor/scenario/list";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { Button } from "~/components/ui/button";
-import {Outdent} from "lucide-react";
 
 interface Outcome {
 	passed: boolean;
@@ -15,26 +15,28 @@ interface Outcome {
 interface Scenario {
 	id: string;
 	name: string;
-	// biome-ignore lint/suspicious/noExplicitAny: stuff
-	data: any;
+	data: object;
 	createdAt: Date;
 	outcome: Outcome;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: schema could be anything
-async function runScenarioLive(scenario: Scenario, schema: any, policyText: string) {
+async function runScenarioLive(
+	scenario: Scenario,
+	schema: object,
+	policyText: string,
+) {
 	scenario.outcome.ran = true;
 
 	try {
 		const dataSet = {
 			data: scenario.data,
-			rule: policyText
-		}
+			rule: policyText,
+		};
 
 		const response = await fetch("/api/scenario", {
 			method: "POST",
 			body: JSON.stringify(dataSet),
-		})
+		});
 
 		if (!response.ok) {
 			scenario.outcome.passed = false;
@@ -72,7 +74,7 @@ export default function IDEPage() {
 			outcome: {
 				passed: false,
 				ran: false,
-			}
+			},
 		};
 		setCurrentScenario(newScenario);
 	};
@@ -106,7 +108,7 @@ export default function IDEPage() {
 
 	const runScenario = (scenario: Scenario) => {
 		runScenarioLive(scenario, schema, policyText);
-	}
+	};
 
 	const deleteScenario = (scenarioId: string) => {
 		setScenarios(scenarios.filter((s) => s.id !== scenarioId));
