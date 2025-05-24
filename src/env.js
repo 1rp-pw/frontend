@@ -8,6 +8,8 @@ export const env = createEnv({
 	 */
 	server: {
 		NODE_ENV: z.enum(["development", "test", "production"]),
+
+		API_SERVER: z.string().default("https://api.1rp.pw"),
 	},
 
 	/**
@@ -25,6 +27,8 @@ export const env = createEnv({
 	 */
 	runtimeEnv: {
 		NODE_ENV: process.env.NODE_ENV,
+
+		API_SERVER: process.env.API_SERVER,
 		// NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 	},
 	/**

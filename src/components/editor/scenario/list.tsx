@@ -1,6 +1,13 @@
 "use client";
 
-import { FileTextIcon, PlayIcon, TrashIcon } from "lucide-react";
+import {
+	CircleAlertIcon,
+	CircleCheckIcon,
+	CircleXIcon,
+	FileTextIcon,
+	PlayIcon,
+	TrashIcon,
+} from "lucide-react";
 import { useState } from "react";
 import {
 	AlertDialog,
@@ -14,12 +21,18 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
 
+interface Outcome {
+	passed: boolean;
+	ran: boolean;
+}
+
 interface Scenario {
 	id: string;
 	name: string;
 	// biome-ignore lint/suspicious/noExplicitAny: it could be any data since its generated
 	data: any;
 	createdAt: Date;
+	outcome: Outcome;
 }
 
 interface ScenarioListProps {
@@ -27,6 +40,7 @@ interface ScenarioListProps {
 	currentScenario: Scenario | null;
 	onSelectScenario: (scenario: Scenario) => void;
 	onDeleteScenario: (scenarioId: string) => void;
+	onRunScenario: (scenario: Scenario) => void;
 }
 
 export function ScenarioList({
@@ -34,6 +48,7 @@ export function ScenarioList({
 	currentScenario,
 	onSelectScenario,
 	onDeleteScenario,
+	onRunScenario,
 }: ScenarioListProps) {
 	const [scenarioInfo, setScenarioInfo] = useState<Scenario | null>();
 	const [deleteScenarioDialogOpen, setDeleteScenarioDialogOpen] =
@@ -88,12 +103,21 @@ export function ScenarioList({
 									</div>
 								</div>
 							</div>
+							<div>
+								{scenario.outcome.ran ? (
+									scenario.outcome.passed ? (
+										<CircleCheckIcon />
+									) : (
+										<CircleXIcon />
+									)
+								) : (
+									<CircleAlertIcon />
+								)}
+							</div>
 							<Button
 								variant={"ghost"}
 								size={"icon"}
-								onClick={(e) => {
-									e.stopPropagation();
-								}}
+								onClick={() => onRunScenario(scenario)}
 								className={"h-6 w-6 text-zinc-400 hover:text-green-400"}
 							>
 								<PlayIcon />
