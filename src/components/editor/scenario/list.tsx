@@ -5,6 +5,7 @@ import {
 	CircleCheckIcon,
 	CircleXIcon,
 	FileTextIcon,
+	Loader2Icon,
 	PlayIcon,
 	TrashIcon,
 } from "lucide-react";
@@ -20,27 +21,14 @@ import {
 	AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
-
-interface Outcome {
-	passed: boolean;
-	ran: boolean;
-}
-
-interface Scenario {
-	id: string;
-	name: string;
-	// biome-ignore lint/suspicious/noExplicitAny: it could be any data since its generated
-	data: any;
-	createdAt: Date;
-	outcome: Outcome;
-}
+import type { Scenario, ScenarioStatus } from "~/lib/state/maker";
 
 interface ScenarioListProps {
 	scenarios: Scenario[];
 	currentScenario: Scenario | null;
 	onSelectScenario: (scenario: Scenario) => void;
 	onDeleteScenario: (scenarioId: string) => void;
-	onRunScenario: (scenario: Scenario) => void;
+	onRunScenario: (scenarioId: string) => Promise<void>;
 }
 
 export function ScenarioList({
@@ -58,6 +46,7 @@ export function ScenarioList({
 		setScenarioInfo(scenario);
 		setDeleteScenarioDialogOpen(true);
 	};
+
 	const confirmDeleteScenario = () => {
 		if (scenarioInfo === null) {
 			return;
@@ -66,6 +55,19 @@ export function ScenarioList({
 
 		setDeleteScenarioDialogOpen(false);
 		onDeleteScenario(scenarioId);
+	};
+
+	const getStatusIcon = (status: ScenarioStatus) => {
+		switch (status) {
+			case "not-run":
+				return <CircleAlertIcon className="h-5 w-5 text-zinc-400" />;
+			case "running":
+				return <Loader2Icon className="h-5 w-5 animate-spin text-blue-400" />;
+			case "passed":
+				return <CircleCheckIcon className="h-5 w-5 text-green-400" />;
+			case "failed":
+				return <CircleXIcon className="h-5 w-5 text-red-400" />;
+		}
 	};
 
 	if (scenarios.length === 0) {
@@ -84,13 +86,18 @@ export function ScenarioList({
 		<div className="w-full">
 			<ul className="divide-y divide-zinc-700">
 				{scenarios.map((scenario) => (
-					// biome-ignore lint/a11y/useKeyWithClickEvents: just makes it easier
 					<li
 						key={scenario.id}
 						className={`cursor-pointer px-4 py-3 hover:bg-zinc-700 ${
 							currentScenario?.id === scenario.id ? "bg-zinc-700" : ""
 						}`}
 						onClick={() => onSelectScenario(scenario)}
+						onKeyDown={(e) => {
+							if (e.key === "Enter" || e.key === " ") {
+								e.preventDefault(); // Prevent scrolling when space is pressed
+								onSelectScenario(scenario);
+							}
+						}}
 					>
 						<div className="flex items-center justify-between">
 							<div className="flex flex-1 items-center gap-2">
@@ -103,33 +110,33 @@ export function ScenarioList({
 									</div>
 								</div>
 							</div>
-							<div>
-								{scenario.outcome.ran ? (
-									scenario.outcome.passed ? (
-										<CircleCheckIcon />
-									) : (
-										<CircleXIcon />
-									)
-								) : (
-									<CircleAlertIcon />
-								)}
+							<div className="flex items-center gap-2">
+								{getStatusIcon(scenario.outcome.status || "not-run")}
+								<Button
+									variant={"ghost"}
+									size={"icon"}
+									onClick={(e) => {
+										e.stopPropagation();
+										onRunScenario(scenario.id);
+									}}
+									className={"h-6 w-6 text-zinc-400 hover:text-green-400"}
+									disabled={scenario.outcome.status === "running"}
+								>
+									<PlayIcon />
+								</Button>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="h-6 w-6 text-zinc-400 hover:text-red-400"
+									onClick={(e) => {
+										e.stopPropagation();
+										handleDeleteScenario(scenario);
+									}}
+									disabled={scenario.outcome.status === "running"}
+								>
+									<TrashIcon />
+								</Button>
 							</div>
-							<Button
-								variant={"ghost"}
-								size={"icon"}
-								onClick={() => onRunScenario(scenario)}
-								className={"h-6 w-6 text-zinc-400 hover:text-green-400"}
-							>
-								<PlayIcon />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="h-6 w-6 text-zinc-400 hover:text-red-400"
-								onClick={() => handleDeleteScenario(scenario)}
-							>
-								<TrashIcon />
-							</Button>
 						</div>
 					</li>
 				))}
