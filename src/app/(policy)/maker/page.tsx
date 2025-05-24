@@ -5,7 +5,7 @@ import { ScenarioForm } from "~/components/editor/scenario/form";
 import { ScenarioList } from "~/components/editor/scenario/list";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { Button } from "~/components/ui/button";
-import {useScenarioStore} from "~/lib/state/maker";
+import { useScenarioStore } from "~/lib/state/maker";
 
 interface Outcome {
 	passed: boolean;
@@ -64,7 +64,7 @@ export default function IDEPage() {
 		deleteScenario,
 		runScenario,
 		// runAllScenarios
-	} = useScenarioStore()
+	} = useScenarioStore();
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">

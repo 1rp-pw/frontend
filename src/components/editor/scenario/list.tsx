@@ -21,7 +21,7 @@ import {
 	AlertDialogTitle,
 } from "~/components/ui/alert-dialog";
 import { Button } from "~/components/ui/button";
-import type { Scenario, ScenarioStatus} from "~/lib/state/maker";
+import type { Scenario, ScenarioStatus } from "~/lib/state/maker";
 
 interface ScenarioListProps {
 	scenarios: Scenario[];
@@ -32,12 +32,12 @@ interface ScenarioListProps {
 }
 
 export function ScenarioList({
-															 scenarios,
-															 currentScenario,
-															 onSelectScenario,
-															 onDeleteScenario,
-															 onRunScenario,
-														 }: ScenarioListProps) {
+	scenarios,
+	currentScenario,
+	onSelectScenario,
+	onDeleteScenario,
+	onRunScenario,
+}: ScenarioListProps) {
 	const [scenarioInfo, setScenarioInfo] = useState<Scenario | null>();
 	const [deleteScenarioDialogOpen, setDeleteScenarioDialogOpen] =
 		useState(false);
@@ -59,13 +59,13 @@ export function ScenarioList({
 
 	const getStatusIcon = (status: ScenarioStatus) => {
 		switch (status) {
-			case 'not-run':
+			case "not-run":
 				return <CircleAlertIcon className="h-5 w-5 text-zinc-400" />;
-			case 'running':
-				return <Loader2Icon className="h-5 w-5 text-blue-400 animate-spin" />;
-			case 'passed':
+			case "running":
+				return <Loader2Icon className="h-5 w-5 animate-spin text-blue-400" />;
+			case "passed":
 				return <CircleCheckIcon className="h-5 w-5 text-green-400" />;
-			case 'failed':
+			case "failed":
 				return <CircleXIcon className="h-5 w-5 text-red-400" />;
 		}
 	};
@@ -111,7 +111,7 @@ export function ScenarioList({
 								</div>
 							</div>
 							<div className="flex items-center gap-2">
-								{getStatusIcon(scenario.outcome.status || 'not-run')}
+								{getStatusIcon(scenario.outcome.status || "not-run")}
 								<Button
 									variant={"ghost"}
 									size={"icon"}
@@ -120,7 +120,7 @@ export function ScenarioList({
 										onRunScenario(scenario.id);
 									}}
 									className={"h-6 w-6 text-zinc-400 hover:text-green-400"}
-									disabled={scenario.outcome.status === 'running'}
+									disabled={scenario.outcome.status === "running"}
 								>
 									<PlayIcon />
 								</Button>
@@ -132,7 +132,7 @@ export function ScenarioList({
 										e.stopPropagation();
 										handleDeleteScenario(scenario);
 									}}
-									disabled={scenario.outcome.status === 'running'}
+									disabled={scenario.outcome.status === "running"}
 								>
 									<TrashIcon />
 								</Button>
