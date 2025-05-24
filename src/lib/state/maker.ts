@@ -207,7 +207,10 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 			//console.info("response", resp);
 
 			const passed = resp.result === true;
-			updateScenarioStatus(scenarioId, passed ? "passed" : "failed" as ScenarioStatus);
+			updateScenarioStatus(
+				scenarioId,
+				passed ? "passed" : ("failed" as ScenarioStatus),
+			);
 
 			// Update the scenario outcome
 			const updatedScenarios = scenarios.map((s) => {
@@ -217,7 +220,7 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 						outcome: {
 							passed,
 							ran: true,
-							status: passed ? "passed" : "failed" as ScenarioStatus,
+							status: passed ? "passed" : ("failed" as ScenarioStatus),
 						},
 					};
 				}
