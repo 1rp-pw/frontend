@@ -230,7 +230,7 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 							trace: resp.trace,
 							data: resp.data,
 							text: resp.text,
-						}
+						},
 					};
 				}
 				return s;

@@ -21,12 +21,15 @@ export async function POST(request: Request) {
 
 		const resp = await response.json();
 
-		return NextResponse.json({
-			result: resp.result,
-			trace: resp.trace,
-			text: resp.text,
-			data: resp.data,
-		}, { status: 200 });
+		return NextResponse.json(
+			{
+				result: resp.result,
+				trace: resp.trace,
+				text: resp.text,
+				data: resp.data,
+			},
+			{ status: 200 },
+		);
 	} catch (e) {
 		console.error("Error while creating route", e, request);
 
