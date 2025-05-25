@@ -14,6 +14,7 @@ export interface Scenario {
 	data: object;
 	createdAt: Date;
 	outcome: Outcome;
+	resultSet: object | null;
 }
 
 interface ScenarioStore {
@@ -55,6 +56,7 @@ const defaultScenarios: Scenario[] = [
 			ran: false,
 			status: "not-run" as ScenarioStatus,
 		},
+		resultSet: null,
 	},
 	{
 		id: "default-2",
@@ -72,6 +74,7 @@ const defaultScenarios: Scenario[] = [
 			ran: false,
 			status: "not-run" as ScenarioStatus,
 		},
+		resultSet: null,
 	},
 ];
 
@@ -122,6 +125,7 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 				ran: false,
 				status: "not-run",
 			},
+			resultSet: null,
 		};
 		set({ currentScenario: newScenario });
 	},
@@ -222,10 +226,16 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 							ran: true,
 							status: passed ? "passed" : ("failed" as ScenarioStatus),
 						},
+						resultSet: {
+							trace: resp.trace,
+							data: resp.data,
+							text: resp.text,
+						}
 					};
 				}
 				return s;
 			});
+			console.info("updatedScenarios", updatedScenarios, resp);
 			set({ scenarios: updatedScenarios });
 		} catch (e) {
 			console.error("Error running scenario:", e);

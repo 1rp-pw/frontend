@@ -86,6 +86,28 @@ export default function IDEPage() {
 				</div>
 
 				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
+					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
+						Scenario Editor
+					</div>
+					<div className="flex-1 overflow-auto p-4">
+						<ScenarioForm
+							schema={schema}
+							currentScenario={currentScenario}
+							onSaveScenario={saveScenario}
+						/>
+					</div>
+				</div>
+
+				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
+					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
+						Schema Builder
+					</div>
+					<div className="flex-1 overflow-auto p-4">
+						<SchemaBuilder schema={schema} setSchema={setSchema} />
+					</div>
+				</div>
+
+				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 					<div className="flex items-center justify-between bg-zinc-700 px-4 py-2 font-medium text-sm">
 						<span>Scenarios</span>
 						<Button
@@ -104,28 +126,6 @@ export default function IDEPage() {
 							onSelectScenario={selectScenario}
 							onDeleteScenario={deleteScenario}
 							onRunScenario={runScenario}
-						/>
-					</div>
-				</div>
-
-				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
-					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
-						Schema Builder
-					</div>
-					<div className="flex-1 overflow-auto p-4">
-						<SchemaBuilder schema={schema} setSchema={setSchema} />
-					</div>
-				</div>
-
-				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
-					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
-						Scenario Editor
-					</div>
-					<div className="flex-1 overflow-auto p-4">
-						<ScenarioForm
-							schema={schema}
-							currentScenario={currentScenario}
-							onSaveScenario={saveScenario}
 						/>
 					</div>
 				</div>

@@ -115,10 +115,7 @@ export function ScenarioList({
 								<Button
 									variant={"ghost"}
 									size={"icon"}
-									onClick={(e) => {
-										e.stopPropagation();
-										onRunScenario(scenario.id);
-									}}
+									onClick={() => onRunScenario(scenario.id)}
 									className={"h-6 w-6 text-zinc-400 hover:text-green-400"}
 									disabled={scenario.outcome.status === "running"}
 								>
