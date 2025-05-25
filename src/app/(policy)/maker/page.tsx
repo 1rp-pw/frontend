@@ -63,6 +63,7 @@ export default function IDEPage() {
 		selectScenario,
 		deleteScenario,
 		runScenario,
+		repairScenario,
 		// runAllScenarios
 	} = useScenarioStore();
 
@@ -126,6 +127,7 @@ export default function IDEPage() {
 							onSelectScenario={selectScenario}
 							onDeleteScenario={deleteScenario}
 							onRunScenario={runScenario}
+							onRepairScenario={repairScenario}
 						/>
 					</div>
 				</div>
