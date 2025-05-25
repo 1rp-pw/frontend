@@ -2,11 +2,13 @@
 
 import {
 	ArrowLeftIcon,
+	CheckIcon,
 	ChevronRightIcon,
 	EditIcon,
 	FileTextIcon,
 	PlusIcon,
 	TrashIcon,
+	XIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -80,6 +82,12 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 	const [editingObject, setEditingObject] = useState<string | null>(null);
 	const [schemaInput, setSchemaInput] = useState("");
 	const [importError, setImportError] = useState("");
+
+	// New state for inline editing
+	const [editingProperty, setEditingProperty] = useState<string | null>(null);
+	const [editingName, setEditingName] = useState("");
+	const [editingType, setEditingType] = useState("");
+	const [editingRequired, setEditingRequired] = useState(false);
 
 	const getCurrentSchema = () => {
 		if (!editingObject) return schema;
@@ -163,6 +171,79 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 		}
 
 		updateNestedSchema(updatedSchema);
+	};
+
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	const startEditing = (propName: string, propDetails: any) => {
+		setEditingProperty(propName);
+		setEditingName(propName);
+		setEditingType(propDetails.type);
+		const currentSchema = getCurrentSchema();
+		setEditingRequired(currentSchema.required?.includes(propName) || false);
+	};
+
+	const cancelEditing = () => {
+		setEditingProperty(null);
+		setEditingName("");
+		setEditingType("");
+		setEditingRequired(false);
+	};
+
+	const saveEdit = () => {
+		if (!editingProperty || !editingName.trim()) return;
+
+		const currentSchema = getCurrentSchema();
+		const updatedSchema = { ...currentSchema };
+		const oldProperty = updatedSchema.properties[editingProperty];
+
+		// Create the updated property
+		const newProperty = {
+			...oldProperty,
+			type: editingType,
+		};
+
+		// If changing to object type and it wasn't before, initialize structure
+		if (editingType === "object" && oldProperty.type !== "object") {
+			newProperty.properties = {};
+			newProperty.required = [];
+		}
+
+		// If the name changed, we need to rename the property
+		if (editingProperty !== editingName) {
+			// Remove old property
+			const { [editingProperty]: _, ...restProperties } =
+				updatedSchema.properties;
+			// Add new property
+			updatedSchema.properties = {
+				...restProperties,
+				[editingName]: newProperty,
+			};
+
+			// Update required array
+			if (updatedSchema.required) {
+				updatedSchema.required = updatedSchema.required.map((name: string) =>
+					name === editingProperty ? editingName : name,
+				);
+			}
+		} else {
+			// Just update the existing property
+			updatedSchema.properties[editingProperty] = newProperty;
+		}
+
+		// Handle required status
+		const currentRequired = updatedSchema.required || [];
+		const finalPropName = editingName;
+
+		if (editingRequired && !currentRequired.includes(finalPropName)) {
+			updatedSchema.required = [...currentRequired, finalPropName];
+		} else if (!editingRequired && currentRequired.includes(finalPropName)) {
+			updatedSchema.required = currentRequired.filter(
+				(name: string) => name !== finalPropName,
+			);
+		}
+
+		updateNestedSchema(updatedSchema);
+		cancelEditing();
 	};
 
 	const editObject = (propName: string) => {
@@ -307,40 +388,114 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 											key={propName}
 											className="flex items-center justify-between rounded bg-zinc-700/50 p-2"
 										>
-											<div className="flex items-center gap-2">
-												<div>
-													<span className="font-medium text-sm">
-														{propName}
-													</span>
-													<span className="ml-2 text-xs text-zinc-400">
-														({propDetails.type})
-													</span>
-													{currentSchema.required?.includes(propName) && (
-														<span className="ml-2 text-amber-400 text-xs">
-															required
-														</span>
-													)}
-												</div>
-												{propDetails.type === "object" && (
-													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() => editObject(propName)}
-														className="h-6 px-2 text-zinc-400 hover:text-zinc-100"
+											{editingProperty === propName ? (
+												// Editing mode
+												<div className="flex flex-auto items-center gap-2">
+													<Input
+														value={editingName}
+														onChange={(e) => setEditingName(e.target.value)}
+														className="h-8 text-sm"
+														onKeyDown={(e) => {
+															if (e.key === "Enter") {
+																saveEdit();
+															} else if (e.key === "Escape") {
+																cancelEditing();
+															}
+														}}
+													/>
+													<Select
+														value={editingType}
+														onValueChange={setEditingType}
 													>
-														<ChevronRightIcon className="h-4 w-4" />
-														<span className="ml-1 text-xs">Edit</span>
-													</Button>
-												)}
-											</div>
-											<Button
-												variant="ghost"
-												size="icon"
-												onClick={() => removeProperty(propName)}
-												className="h-6 w-6 text-zinc-400 hover:text-zinc-100"
-											>
-												<TrashIcon className="h-4 w-4" />
-											</Button>
+														<SelectTrigger className="flex h-8 w-24 flex-auto">
+															<SelectValue />
+														</SelectTrigger>
+														<SelectContent>
+															<SelectItem value="string">String</SelectItem>
+															<SelectItem value="number">Number</SelectItem>
+															<SelectItem value="boolean">Boolean</SelectItem>
+															<SelectItem value="object">Object</SelectItem>
+															<SelectItem value="array">Array</SelectItem>
+														</SelectContent>
+													</Select>
+													<div className="flex items-center space-x-1">
+														<Switch
+															checked={editingRequired}
+															onCheckedChange={setEditingRequired}
+															className="scale-75"
+														/>
+														<span className="text-xs text-zinc-400">Req</span>
+													</div>
+													<div className="flex gap-1">
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={saveEdit}
+															className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
+														>
+															<CheckIcon className="h-4 w-4" />
+														</Button>
+														<Button
+															variant="ghost"
+															size="sm"
+															onClick={cancelEditing}
+															className="h-6 w-6 p-0 text-zinc-400 hover:text-zinc-300"
+														>
+															<XIcon className="h-4 w-4" />
+														</Button>
+													</div>
+												</div>
+											) : (
+												// Display mode
+												<>
+													<div className="flex items-center gap-2">
+														<div>
+															<span className="font-medium text-sm">
+																{propName}
+															</span>
+															<span className="ml-2 text-xs text-zinc-400">
+																({propDetails.type})
+															</span>
+															{currentSchema.required?.includes(propName) && (
+																<span className="ml-2 text-amber-400 text-xs">
+																	required
+																</span>
+															)}
+														</div>
+														{propDetails.type === "object" && (
+															<Button
+																variant="ghost"
+																size="sm"
+																onClick={() => editObject(propName)}
+																className="h-6 px-2 text-zinc-400 hover:text-zinc-100"
+															>
+																<ChevronRightIcon className="h-4 w-4" />
+																<span className="ml-1 text-xs">Edit</span>
+															</Button>
+														)}
+													</div>
+													<div className="flex gap-1">
+														<Button
+															variant="ghost"
+															size="icon"
+															onClick={() =>
+																startEditing(propName, propDetails)
+															}
+															className="h-6 w-6 text-zinc-400 hover:text-zinc-100"
+														>
+															<EditIcon className="h-3 w-3" />
+														</Button>
+														<Button
+															variant="ghost"
+															size="icon"
+															onClick={() => removeProperty(propName)}
+															className="h-6 w-6 text-zinc-400 hover:text-red-400"
+														>
+															<TrashIcon className="h-4 w-4" />
+														</Button>
+													</div>
+												</>
+											)}
 										</div>
 									),
 								)
