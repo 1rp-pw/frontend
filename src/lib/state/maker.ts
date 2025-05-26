@@ -440,7 +440,6 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 					text: resp.text,
 				},
 			});
-
 		} catch (e) {
 			console.error("Error running scenario:", e);
 			// Complete error state update
