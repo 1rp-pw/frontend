@@ -283,7 +283,7 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 			schemaVersion,
 			outcome: {
 				...currentScenario.outcome,
-				statis: "not-run" as ScenarioStatus,
+				status: "not-run" as ScenarioStatus,
 			},
 		};
 
@@ -377,12 +377,29 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 	},
 
 	runScenario: async (scenarioId) => {
-		const { scenarios, schema, policyText, updateScenarioStatus } = get();
+		const { scenarios, schema, policyText } = get();
 		const scenario = scenarios.find((s) => s.id === scenarioId);
 		if (!scenario) return;
 
-		// Set status to running
-		updateScenarioStatus(scenarioId, "running");
+		// Set status to running with complete state update
+		const updateScenarioState = (updates: Partial<Scenario>) => {
+			const currentScenarios = get().scenarios;
+			const updatedScenarios = currentScenarios.map((s) => {
+				if (s.id === scenarioId) {
+					return { ...s, ...updates };
+				}
+				return s;
+			});
+			set({ scenarios: updatedScenarios });
+		};
+
+		// Set initial running state
+		updateScenarioState({
+			outcome: {
+				...scenario.outcome,
+				status: "running" as ScenarioStatus,
+			},
+		});
 
 		try {
 			const dataSet = {
@@ -396,42 +413,43 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 			});
 
 			if (!response.ok) {
-				updateScenarioStatus(scenarioId, "failed");
+				// Complete failure state update
+				updateScenarioState({
+					outcome: {
+						passed: false,
+						ran: true,
+						status: "failed" as ScenarioStatus,
+					},
+				});
 				return;
 			}
 
 			const resp = await response.json();
-			//console.info("response", resp);
-
 			const passed = resp.result === true;
-			updateScenarioStatus(
-				scenarioId,
-				passed ? "passed" : ("failed" as ScenarioStatus),
-			);
 
-			// Update the scenario outcome
-			const updatedScenarios = scenarios.map((s) => {
-				if (s.id === scenarioId) {
-					return {
-						...s,
-						outcome: {
-							passed,
-							ran: true,
-							status: passed ? "passed" : ("failed" as ScenarioStatus),
-						},
-						resultSet: {
-							trace: resp.trace,
-							data: resp.data,
-							text: resp.text,
-						},
-					};
-				}
-				return s;
+			// Complete success state update
+			updateScenarioState({
+				outcome: {
+					passed,
+					ran: true,
+					status: passed ? "passed" : ("failed" as ScenarioStatus),
+				},
+				resultSet: {
+					trace: resp.trace,
+					data: resp.data,
+					text: resp.text,
+				},
 			});
-			set({ scenarios: updatedScenarios });
 		} catch (e) {
 			console.error("Error running scenario:", e);
-			updateScenarioStatus(scenarioId, "failed");
+			// Complete error state update
+			updateScenarioState({
+				outcome: {
+					passed: false,
+					ran: true,
+					status: "failed" as ScenarioStatus,
+				},
+			});
 		}
 	},
 
