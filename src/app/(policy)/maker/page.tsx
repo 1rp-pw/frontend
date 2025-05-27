@@ -1,5 +1,6 @@
 "use client";
 
+import { FilePlusIcon, PlayIcon } from "lucide-react";
 import { Editor } from "~/components/editor/editor";
 import { ScenarioForm } from "~/components/editor/scenario/form";
 import { ScenarioList } from "~/components/editor/scenario/list";
@@ -64,7 +65,7 @@ export default function IDEPage() {
 		deleteScenario,
 		runScenario,
 		repairScenario,
-		// runAllScenarios
+		runAllScenarios,
 	} = useScenarioStore();
 
 	return (
@@ -112,11 +113,21 @@ export default function IDEPage() {
 					<div className="flex items-center justify-between bg-zinc-700 px-4 py-2 font-medium text-sm">
 						<span>Scenarios</span>
 						<Button
+							variant={"secondary"}
+							onClick={runAllScenarios}
+							className={"rounded px-2 py-1 text-xs"}
+							disabled={scenarios.length === 0}
+						>
+							<PlayIcon />
+							Run All
+						</Button>
+						<Button
 							variant="secondary"
 							onClick={createScenario}
 							className="rounded px-2 py-1 text-xs"
 							disabled={Object.keys(schema.properties).length === 0}
 						>
+							<FilePlusIcon />
 							New Scenario
 						</Button>
 					</div>
