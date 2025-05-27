@@ -78,7 +78,7 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 	const [activeTab, setActiveTab] = useState<TabType>("edit");
 	const [newPropName, setNewPropName] = useState("");
 	const [newPropType, setNewPropType] = useState("string");
-	const [newPropRequired, setNewPropRequired] = useState(false);
+	const [newPropRequired, setNewPropRequired] = useState(true);
 	const [editingObject, setEditingObject] = useState<string | null>(null);
 	const [schemaInput, setSchemaInput] = useState("");
 	const [importError, setImportError] = useState("");
@@ -87,7 +87,7 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 	const [editingProperty, setEditingProperty] = useState<string | null>(null);
 	const [editingName, setEditingName] = useState("");
 	const [editingType, setEditingType] = useState("");
-	const [editingRequired, setEditingRequired] = useState(false);
+	const [editingRequired, setEditingRequired] = useState(true);
 
 	const getCurrentSchema = () => {
 		if (!editingObject) return schema;
@@ -155,7 +155,7 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 		updateNestedSchema(updatedSchema);
 		setNewPropName("");
 		setNewPropType("string");
-		setNewPropRequired(false);
+		setNewPropRequired(true);
 	};
 
 	const removeProperty = (propName: string) => {
