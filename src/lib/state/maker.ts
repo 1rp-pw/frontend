@@ -488,7 +488,7 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 		await Promise.all(
 			runnableScenarios.map((scenario) => {
 				if (scenario.id) {
-					runScenario(scenario.id)
+					runScenario(scenario.id);
 				}
 			}),
 		);
