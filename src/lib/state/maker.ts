@@ -17,6 +17,8 @@ export interface Scenario {
 	id: string;
 	name: string;
 	data: object;
+	expectPass: boolean; // Added expectPass property
+	created: boolean; // Added to track if scenario has been saved
 	createdAt: Date;
 	outcome: Outcome;
 	resultSet: object | null;
@@ -35,9 +37,14 @@ interface ScenarioStore {
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	setSchema: (schema: any) => void;
 	setPolicyText: (text: string) => void;
+
 	createScenario: () => void;
-	// biome-ignore lint/suspicious/noExplicitAny: scenario data can be anything
-	saveScenario: (scenarioData: any, name?: string) => void;
+	saveScenario: (
+		// biome-ignore lint/suspicious/noExplicitAny: scenario data can be anything
+		scenarioData: any,
+		name?: string,
+		expectPass?: boolean,
+	) => void; // Updated to include expectPass
 	selectScenario: (scenario: Scenario) => void;
 	deleteScenario: (scenarioId: string) => void;
 	runScenario: (scenarioId: string) => Promise<void>;
@@ -178,6 +185,8 @@ const defaultScenarios: Scenario[] = [
 				age: 19,
 			},
 		},
+		expectPass: true, // Expects test to pass
+		created: true, // Already created
 		createdAt: new Date(),
 		outcome: {
 			passed: false,
@@ -196,6 +205,8 @@ const defaultScenarios: Scenario[] = [
 				age: 19,
 			},
 		},
+		expectPass: false, // Expects test to fail (fail = pass)
+		created: true, // Already created
 		createdAt: new Date(),
 		outcome: {
 			passed: false,
@@ -257,9 +268,11 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 	createScenario: () => {
 		const { scenarios, schema, schemaVersion } = get();
 		const newScenario: Scenario = {
-			id: Date.now().toString(),
+			id: `temp-${Date.now()}`, // Generate temporary ID
 			name: `Scenario ${scenarios.length + 1}`,
 			data: {},
+			expectPass: true, // Default to expecting pass for new scenarios
+			created: false, // Mark as not yet created/saved
 			createdAt: new Date(),
 			outcome: {
 				passed: false,
@@ -272,29 +285,48 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 		set({ currentScenario: newScenario });
 	},
 
-	saveScenario: (scenarioData, name) => {
+	saveScenario: (scenarioData, name, expectPass = true) => {
+		// Updated to accept expectPass parameter
 		const { currentScenario, scenarios, schemaVersion } = get();
 		if (!currentScenario) return;
 
-		const updatedScenario = {
-			...currentScenario,
-			data: scenarioData,
-			name: name || currentScenario.name,
-			schemaVersion,
-			outcome: {
-				...currentScenario.outcome,
-				status: "not-run" as ScenarioStatus,
-			},
-		};
+		let updatedScenario: Scenario;
+		const scenarioName = name || currentScenario.name;
 
-		const existingIndex = scenarios.findIndex(
-			(s) => s.id === currentScenario.id,
-		);
-		if (existingIndex >= 0) {
+		if (currentScenario.created) {
+			// Update existing scenario
+			updatedScenario = {
+				...currentScenario,
+				data: scenarioData,
+				name: scenarioName,
+				expectPass, // Update expectPass
+				schemaVersion,
+				outcome: {
+					...currentScenario.outcome,
+					status: "not-run" as ScenarioStatus,
+				},
+			};
+			const existingIndex = scenarios.findIndex(
+				(s) => s.id === currentScenario.id,
+			);
 			const updatedScenarios = [...scenarios];
 			updatedScenarios[existingIndex] = updatedScenario;
 			set({ scenarios: updatedScenarios, currentScenario: updatedScenario });
 		} else {
+			// Create new scenario
+			updatedScenario = {
+				...currentScenario,
+				id: `scenario-${Date.now()}`, // Generate proper ID for saved scenario
+				data: scenarioData,
+				name: scenarioName,
+				expectPass, // Set expectPass
+				created: true, // Mark as created/saved
+				schemaVersion,
+				outcome: {
+					...currentScenario.outcome,
+					status: "not-run" as ScenarioStatus,
+				},
+			};
 			set({
 				scenarios: [...scenarios, updatedScenario],
 				currentScenario: updatedScenario,
@@ -425,14 +457,17 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 			}
 
 			const resp = await response.json();
-			const passed = resp.result === true;
+			const testPassed = resp.result === true;
+
+			// Apply expectPass logic: if expectPass is false, invert the result
+			const actuallyPassed = scenario.expectPass ? testPassed : !testPassed;
 
 			// Complete success state update
 			updateScenarioState({
 				outcome: {
-					passed,
+					passed: actuallyPassed,
 					ran: true,
-					status: passed ? "passed" : ("failed" as ScenarioStatus),
+					status: actuallyPassed ? "passed" : ("failed" as ScenarioStatus),
 				},
 				resultSet: {
 					trace: resp.trace,
@@ -455,7 +490,10 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 
 	runAllScenarios: async () => {
 		const { scenarios, runScenario } = get();
+		const runnableScenarios = scenarios.filter((s) => s.created); // Only run created scenarios
 		// Run all scenarios concurrently
-		await Promise.all(scenarios.map((scenario) => runScenario(scenario.id)));
+		await Promise.all(
+			runnableScenarios.map((scenario) => runScenario(scenario.id)),
+		);
 	},
 }));

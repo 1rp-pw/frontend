@@ -68,6 +68,8 @@ export default function IDEPage() {
 		runAllScenarios,
 	} = useScenarioStore();
 
+	// @ts-ignore
+	// @ts-ignore
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
@@ -77,7 +79,7 @@ export default function IDEPage() {
 				</div>
 			</header>
 
-			<main className="grid flex-1 grid-cols-2 grid-rows-2 gap-1 p-1">
+			<main className="grid flex-1 grid-cols-2 grid-rows-[1fr_1fr] gap-1 overflow-auto p-1">
 				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
 						Policy Text
@@ -92,11 +94,13 @@ export default function IDEPage() {
 						Scenario Editor
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<ScenarioForm
-							schema={schema}
-							currentScenario={currentScenario}
-							onSaveScenario={saveScenario}
-						/>
+						{currentScenario && true && (
+							<ScenarioForm
+								schema={schema}
+								currentScenario={currentScenario}
+								onSaveScenario={saveScenario}
+							/>
+						)}
 					</div>
 				</div>
 

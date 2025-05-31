@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	CheckIcon,
 	CircleAlertIcon,
 	CircleCheckIcon,
 	CircleXIcon,
@@ -10,6 +11,7 @@ import {
 	RefreshCwIcon,
 	TrashIcon,
 	TriangleAlertIcon,
+	XIcon,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -124,6 +126,28 @@ export function ScenarioList({
 		}
 	};
 
+	const getExpectPassBadge = (expectPass: boolean) => {
+		return expectPass ? (
+			<Badge
+				variant="outline"
+				className="border-green-500/30 bg-green-500/10 text-green-400 text-xs"
+				title="Expects test to pass"
+			>
+				<CheckIcon className="mr-1 h-3 w-3" />
+				Expect Pass
+			</Badge>
+		) : (
+			<Badge
+				variant="outline"
+				className="border-red-500/30 bg-red-500/10 text-red-400 text-xs"
+				title="Expects test to fail"
+			>
+				<XIcon className="mr-1 h-3 w-3" />
+				Expect Fail
+			</Badge>
+		);
+	};
+
 	const validScenarios = scenarios.filter(
 		(s) => s.outcome.status !== "invalid",
 	);
@@ -161,9 +185,10 @@ export function ScenarioList({
 				<div className="flex flex-1 items-center gap-2">
 					<FileTextIcon className="h-4 w-4 text-zinc-400" />
 					<div className="flex-1">
-						<div className="flex items-center gap-2">
+						<div className="flex flex-wrap items-center gap-2">
 							<span className="font-medium text-sm">{scenario.name}</span>
 							{getStatusBadge(scenario.outcome.status || "not-run")}
+							{getExpectPassBadge(scenario.expectPass)}
 						</div>
 						<div className="text-xs text-zinc-500">
 							{scenario.createdAt.toLocaleDateString()}{" "}
@@ -180,7 +205,9 @@ export function ScenarioList({
 							size="icon"
 							onClick={(e) => {
 								e.stopPropagation();
-								onRepairScenario(scenario.id);
+								if (scenario.id) {
+									onRepairScenario(scenario.id);
+								}
 							}}
 							className="h-6 w-6 text-zinc-400 hover:text-amber-400"
 							title="Repair scenario to match current schema"
@@ -193,7 +220,9 @@ export function ScenarioList({
 							size="icon"
 							onClick={(e) => {
 								e.stopPropagation();
-								onRunScenario(scenario.id);
+								if (scenario.id) {
+									onRunScenario(scenario.id);
+								}
 							}}
 							className="h-6 w-6 text-zinc-400 hover:text-green-400"
 							disabled={
