@@ -486,7 +486,11 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 		const runnableScenarios = scenarios.filter((s) => s.id !== null);
 		// Run all scenarios concurrently
 		await Promise.all(
-			runnableScenarios.map((scenario) => runScenario(scenario.id)),
+			runnableScenarios.map((scenario) => {
+				if (scenario.id) {
+					runScenario(scenario.id)
+				}
+			}),
 		);
 	},
 }));

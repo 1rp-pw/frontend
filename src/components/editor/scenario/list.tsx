@@ -205,7 +205,9 @@ export function ScenarioList({
 							size="icon"
 							onClick={(e) => {
 								e.stopPropagation();
-								onRepairScenario(scenario.id);
+								if (scenario.id) {
+									onRepairScenario(scenario.id);
+								}
 							}}
 							className="h-6 w-6 text-zinc-400 hover:text-amber-400"
 							title="Repair scenario to match current schema"
@@ -218,7 +220,9 @@ export function ScenarioList({
 							size="icon"
 							onClick={(e) => {
 								e.stopPropagation();
-								onRunScenario(scenario.id);
+								if (scenario.id) {
+									onRunScenario(scenario.id);
+								}
 							}}
 							className="h-6 w-6 text-zinc-400 hover:text-green-400"
 							disabled={
