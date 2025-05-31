@@ -38,8 +38,12 @@ interface ScenarioStore {
 	setPolicyText: (text: string) => void;
 
 	createScenario: () => void;
-	// biome-ignore lint/suspicious/noExplicitAny: scenario data can be anything
-	saveScenario: (scenarioData: any, name?: string, expectPass?: boolean) => void; // Updated to include expectPass
+	saveScenario: (
+		// biome-ignore lint/suspicious/noExplicitAny: scenario data can be anything
+		scenarioData: any,
+		name?: string,
+		expectPass?: boolean,
+	) => void; // Updated to include expectPass
 	selectScenario: (scenario: Scenario) => void;
 	deleteScenario: (scenarioId: string) => void;
 	runScenario: (scenarioId: string) => Promise<void>;
@@ -277,11 +281,12 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 		set({ currentScenario: newScenario });
 	},
 
-	saveScenario: (scenarioData, name, expectPass = true) => { // Updated to accept expectPass parameter
+	saveScenario: (scenarioData, name, expectPass = true) => {
+		// Updated to accept expectPass parameter
 		const { currentScenario, scenarios, schemaVersion } = get();
 		if (!currentScenario) return;
 
-		let updatedScenario: Scenario
+		let updatedScenario: Scenario;
 		const scenarioName = name || currentScenario.name;
 
 		if (currentScenario.id) {
@@ -294,12 +299,14 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 				outcome: {
 					...currentScenario.outcome,
 					status: "not-run" as ScenarioStatus,
-				}
-			}
-			const existingIndex = scenarios.findIndex((s) => s.id === currentScenario.id);
+				},
+			};
+			const existingIndex = scenarios.findIndex(
+				(s) => s.id === currentScenario.id,
+			);
 			const updatedScenarios = [...scenarios];
-			updatedScenarios[existingIndex] = updatedScenario
-			set({scenarios: updatedScenarios, currentScenario: updatedScenario});
+			updatedScenarios[existingIndex] = updatedScenario;
+			set({ scenarios: updatedScenarios, currentScenario: updatedScenario });
 		} else {
 			updatedScenario = {
 				...currentScenario,
@@ -311,12 +318,12 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 				outcome: {
 					...currentScenario.outcome,
 					status: "not-run" as ScenarioStatus,
-				}
-			}
+				},
+			};
 			set({
 				scenarios: [...scenarios, updatedScenario],
 				currentScenario: updatedScenario,
-			})
+			});
 		}
 	},
 
@@ -476,8 +483,10 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 
 	runAllScenarios: async () => {
 		const { scenarios, runScenario } = get();
-		const runnableScenarios = scenarios.filter((s) => s.id !== null)
+		const runnableScenarios = scenarios.filter((s) => s.id !== null);
 		// Run all scenarios concurrently
-		await Promise.all(runnableScenarios.map((scenario) => runScenario(scenario.id)));
+		await Promise.all(
+			runnableScenarios.map((scenario) => runScenario(scenario.id)),
+		);
 	},
 }));

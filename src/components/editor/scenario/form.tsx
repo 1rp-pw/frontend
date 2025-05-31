@@ -36,10 +36,10 @@ interface ScenarioFormProps {
 const FIELDS_PER_PAGE = 4;
 
 export function ScenarioForm({
-															 schema,
-															 currentScenario,
-															 onSaveScenario,
-														 }: ScenarioFormProps) {
+	schema,
+	currentScenario,
+	onSaveScenario,
+}: ScenarioFormProps) {
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	const [formData, setFormData] = useState<any>({});
 	const [scenarioName, setScenarioName] = useState("");
@@ -184,7 +184,11 @@ export function ScenarioForm({
 	};
 
 	const handleSave = () => {
-		onSaveScenario(formData, scenarioName || `Scenario ${Date.now()}`, expectPass);
+		onSaveScenario(
+			formData,
+			scenarioName || `Scenario ${Date.now()}`,
+			expectPass,
+		);
 	};
 
 	const renderFormField = (field: {
@@ -354,7 +358,10 @@ export function ScenarioForm({
 								checked={expectPass}
 								onCheckedChange={setExpectPass}
 							/>
-							<Label htmlFor="expect-pass" className="text-sm whitespace-nowrap">
+							<Label
+								htmlFor="expect-pass"
+								className="whitespace-nowrap text-sm"
+							>
 								Expect Pass
 							</Label>
 						</div>
@@ -398,7 +405,7 @@ export function ScenarioForm({
 						</div>
 					)}
 
-					<div className="pt-4 border-t border-zinc-600 mt-auto">
+					<div className="mt-auto border-zinc-600 border-t pt-4">
 						<Button
 							className="w-full"
 							onClick={handleSave}

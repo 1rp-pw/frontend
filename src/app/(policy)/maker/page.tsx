@@ -77,7 +77,7 @@ export default function IDEPage() {
 				</div>
 			</header>
 
-			<main className="grid flex-1 grid-cols-2 grid-rows-[1fr_1fr] gap-1 p-1 overflow-auto">
+			<main className="grid flex-1 grid-cols-2 grid-rows-[1fr_1fr] gap-1 overflow-auto p-1">
 				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
 						Policy Text

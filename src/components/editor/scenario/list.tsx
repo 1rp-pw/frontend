@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	CheckIcon,
 	CircleAlertIcon,
 	CircleCheckIcon,
 	CircleXIcon,
@@ -10,7 +11,6 @@ import {
 	RefreshCwIcon,
 	TrashIcon,
 	TriangleAlertIcon,
-	CheckIcon,
 	XIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -38,13 +38,13 @@ interface ScenarioListProps {
 }
 
 export function ScenarioList({
-															 scenarios,
-															 currentScenario,
-															 onSelectScenario,
-															 onDeleteScenario,
-															 onRunScenario,
-															 onRepairScenario,
-														 }: ScenarioListProps) {
+	scenarios,
+	currentScenario,
+	onSelectScenario,
+	onDeleteScenario,
+	onRunScenario,
+	onRepairScenario,
+}: ScenarioListProps) {
 	const [scenarioInfo, setScenarioInfo] = useState<Scenario | null>();
 	const [deleteScenarioDialogOpen, setDeleteScenarioDialogOpen] =
 		useState(false);
@@ -130,19 +130,19 @@ export function ScenarioList({
 		return expectPass ? (
 			<Badge
 				variant="outline"
-				className="text-xs border-green-500/30 bg-green-500/10 text-green-400"
+				className="border-green-500/30 bg-green-500/10 text-green-400 text-xs"
 				title="Expects test to pass"
 			>
-				<CheckIcon className="h-3 w-3 mr-1" />
+				<CheckIcon className="mr-1 h-3 w-3" />
 				Expect Pass
 			</Badge>
 		) : (
 			<Badge
 				variant="outline"
-				className="text-xs border-red-500/30 bg-red-500/10 text-red-400"
+				className="border-red-500/30 bg-red-500/10 text-red-400 text-xs"
 				title="Expects test to fail"
 			>
-				<XIcon className="h-3 w-3 mr-1" />
+				<XIcon className="mr-1 h-3 w-3" />
 				Expect Fail
 			</Badge>
 		);
@@ -185,7 +185,7 @@ export function ScenarioList({
 				<div className="flex flex-1 items-center gap-2">
 					<FileTextIcon className="h-4 w-4 text-zinc-400" />
 					<div className="flex-1">
-						<div className="flex items-center gap-2 flex-wrap">
+						<div className="flex flex-wrap items-center gap-2">
 							<span className="font-medium text-sm">{scenario.name}</span>
 							{getStatusBadge(scenario.outcome.status || "not-run")}
 							{getExpectPassBadge(scenario.expectPass)}
