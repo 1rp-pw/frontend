@@ -10,6 +10,8 @@ import {
 	RefreshCwIcon,
 	TrashIcon,
 	TriangleAlertIcon,
+	CheckIcon,
+	XIcon,
 } from "lucide-react";
 import { useState } from "react";
 import {
@@ -36,13 +38,13 @@ interface ScenarioListProps {
 }
 
 export function ScenarioList({
-	scenarios,
-	currentScenario,
-	onSelectScenario,
-	onDeleteScenario,
-	onRunScenario,
-	onRepairScenario,
-}: ScenarioListProps) {
+															 scenarios,
+															 currentScenario,
+															 onSelectScenario,
+															 onDeleteScenario,
+															 onRunScenario,
+															 onRepairScenario,
+														 }: ScenarioListProps) {
 	const [scenarioInfo, setScenarioInfo] = useState<Scenario | null>();
 	const [deleteScenarioDialogOpen, setDeleteScenarioDialogOpen] =
 		useState(false);
@@ -124,6 +126,28 @@ export function ScenarioList({
 		}
 	};
 
+	const getExpectPassBadge = (expectPass: boolean) => {
+		return expectPass ? (
+			<Badge
+				variant="outline"
+				className="text-xs border-green-500/30 bg-green-500/10 text-green-400"
+				title="Expects test to pass"
+			>
+				<CheckIcon className="h-3 w-3 mr-1" />
+				Expect Pass
+			</Badge>
+		) : (
+			<Badge
+				variant="outline"
+				className="text-xs border-red-500/30 bg-red-500/10 text-red-400"
+				title="Expects test to fail"
+			>
+				<XIcon className="h-3 w-3 mr-1" />
+				Expect Fail
+			</Badge>
+		);
+	};
+
 	const validScenarios = scenarios.filter(
 		(s) => s.outcome.status !== "invalid",
 	);
@@ -161,9 +185,10 @@ export function ScenarioList({
 				<div className="flex flex-1 items-center gap-2">
 					<FileTextIcon className="h-4 w-4 text-zinc-400" />
 					<div className="flex-1">
-						<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2 flex-wrap">
 							<span className="font-medium text-sm">{scenario.name}</span>
 							{getStatusBadge(scenario.outcome.status || "not-run")}
+							{getExpectPassBadge(scenario.expectPass)}
 						</div>
 						<div className="text-xs text-zinc-500">
 							{scenario.createdAt.toLocaleDateString()}{" "}

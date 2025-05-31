@@ -21,6 +21,7 @@ interface Scenario {
 	name: string;
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	data: any;
+	expectPass?: boolean; // Added expectPass property
 	createdAt: Date;
 }
 
@@ -29,19 +30,20 @@ interface ScenarioFormProps {
 	schema: any;
 	currentScenario: Scenario | null;
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
-	onSaveScenario: (data: any, name?: string) => void;
+	onSaveScenario: (data: any, name?: string, expectPass?: boolean) => void; // Updated to include expectPass
 }
 
 const FIELDS_PER_PAGE = 4;
 
 export function ScenarioForm({
-	schema,
-	currentScenario,
-	onSaveScenario,
-}: ScenarioFormProps) {
+															 schema,
+															 currentScenario,
+															 onSaveScenario,
+														 }: ScenarioFormProps) {
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	const [formData, setFormData] = useState<any>({});
 	const [scenarioName, setScenarioName] = useState("");
+	const [expectPass, setExpectPass] = useState(true); // Added expectPass state
 	const [currentPage, setCurrentPage] = useState(0);
 	const [flattenedFields, setFlattenedFields] = useState<
 		Array<{
@@ -114,11 +116,13 @@ export function ScenarioForm({
 		if (currentScenario) {
 			setFormData(currentScenario.data || {});
 			setScenarioName(currentScenario.name);
+			setExpectPass(currentScenario.expectPass ?? true); // Initialize expectPass from scenario
 		} else {
 			// Initialize with default values based on schema
 			const initialData = initializeDataFromSchema(schema);
 			setFormData(initialData);
 			setScenarioName("");
+			setExpectPass(true); // Default to expecting pass for new scenarios
 		}
 
 		// Flatten the schema for pagination
@@ -180,7 +184,7 @@ export function ScenarioForm({
 	};
 
 	const handleSave = () => {
-		onSaveScenario(formData, scenarioName || `Scenario ${Date.now()}`);
+		onSaveScenario(formData, scenarioName || `Scenario ${Date.now()}`, expectPass);
 	};
 
 	const renderFormField = (field: {
@@ -195,7 +199,7 @@ export function ScenarioForm({
 		// Object header (just a divider with title)
 		if (details.isObjectHeader) {
 			return (
-				<div key={path} className="col-span-full border-zinc-600 border-t pt-4">
+				<div key={path} className="col-span-full border-zinc-600">
 					<h4 className="mb-2 font-medium text-sm text-zinc-200">
 						{name} {isRequired && <span className="text-red-500">*</span>}
 					</h4>
@@ -313,6 +317,8 @@ export function ScenarioForm({
 	const canGoNext = currentPage < totalPages - 1;
 	const canGoPrevious = currentPage > 0;
 
+	console.info("currentScenario", currentScenario);
+
 	// Show the form when a scenario is selected/being created and schema has properties
 	return (
 		<Tabs defaultValue={"form"}>
@@ -328,22 +334,40 @@ export function ScenarioForm({
 			</TabsList>
 			<TabsContent value={"form"}>
 				<div className="space-y-4">
-					<div className="space-y-2">
-						<Label htmlFor="scenario-name" className="font-medium text-sm">
-							Scenario Name
-						</Label>
-						<Input
-							id="scenario-name"
-							value={scenarioName}
-							onChange={(e) => setScenarioName(e.target.value)}
-							placeholder="Enter scenario name..."
-							className="border-zinc-600 bg-zinc-700"
-						/>
+					{/* Scenario Name and Expect Pass - on the same line */}
+					<div className="flex items-end gap-4">
+						<div className="flex-1 space-y-2">
+							<Label htmlFor="scenario-name" className="font-medium text-sm">
+								Scenario Name
+							</Label>
+							<Input
+								id="scenario-name"
+								value={scenarioName}
+								onChange={(e) => setScenarioName(e.target.value)}
+								placeholder="Enter scenario name..."
+								className="border-zinc-600 bg-zinc-700"
+							/>
+						</div>
+						<div className="flex items-center space-x-2 pb-1">
+							<Switch
+								id="expect-pass"
+								checked={expectPass}
+								onCheckedChange={setExpectPass}
+							/>
+							<Label htmlFor="expect-pass" className="text-sm whitespace-nowrap">
+								Expect Pass
+							</Label>
+						</div>
+					</div>
+
+					{/* Form Fields for Current Page */}
+					<div className="space-y-4">
+						{currentFields.map((field) => renderFormField(field))}
 					</div>
 
 					{/* Pagination Controls */}
 					{totalPages > 1 && (
-						<div className="flex items-center justify-between border-zinc-700 border-b pb-3">
+						<div className="flex items-center justify-between border-zinc-700 border-t pt-3">
 							<Button
 								variant="outline"
 								size="sm"
@@ -374,13 +398,7 @@ export function ScenarioForm({
 						</div>
 					)}
 
-					{/* Form Fields for Current Page */}
-					<div className="space-y-4">
-						{currentFields.map((field) => renderFormField(field))}
-					</div>
-
-					{/* Save Button (only show on last page or if single page) */}
-					{(currentPage === totalPages - 1 || totalPages === 1) && (
+					<div className="pt-4 border-t border-zinc-600 mt-auto">
 						<Button
 							className="w-full"
 							onClick={handleSave}
@@ -388,16 +406,7 @@ export function ScenarioForm({
 						>
 							{currentScenario.id ? "Update Scenario" : "Save Scenario"}
 						</Button>
-					)}
-
-					{/* Navigation hint for multi-page forms */}
-					{totalPages > 1 && currentPage < totalPages - 1 && (
-						<div className="text-center">
-							<p className="text-sm text-zinc-500">
-								Continue to next page to complete the form
-							</p>
-						</div>
-					)}
+					</div>
 				</div>
 			</TabsContent>
 			<TabsContent value={"preview"}>
