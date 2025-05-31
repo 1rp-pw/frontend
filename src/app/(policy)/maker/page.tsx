@@ -68,6 +68,8 @@ export default function IDEPage() {
 		runAllScenarios,
 	} = useScenarioStore();
 
+	// @ts-ignore
+	// @ts-ignore
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
@@ -92,11 +94,13 @@ export default function IDEPage() {
 						Scenario Editor
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<ScenarioForm
-							schema={schema}
-							currentScenario={currentScenario}
-							onSaveScenario={saveScenario}
-						/>
+						{currentScenario && true && (
+							<ScenarioForm
+								schema={schema}
+								currentScenario={currentScenario}
+								onSaveScenario={saveScenario}
+							/>
+						)}
 					</div>
 				</div>
 

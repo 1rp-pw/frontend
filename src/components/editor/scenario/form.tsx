@@ -22,6 +22,7 @@ interface Scenario {
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	data: any;
 	expectPass?: boolean; // Added expectPass property
+	created: boolean; // Added to track if scenario has been saved
 	createdAt: Date;
 }
 
@@ -411,7 +412,7 @@ export function ScenarioForm({
 							onClick={handleSave}
 							disabled={!scenarioName.trim()}
 						>
-							{currentScenario.id ? "Update Scenario" : "Save Scenario"}
+							{currentScenario.created ? "Update Scenario" : "Save Scenario"}
 						</Button>
 					</div>
 				</div>
