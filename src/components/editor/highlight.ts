@@ -76,17 +76,28 @@ export const highlightText = (text: string) => {
 	// Highlight comparison phrases in purple
 	const comparisonPhrases = [
 		"is greater than or equal to",
+		"is at least",
+
 		"is less than or equal to",
+		"is no more than",
+
 		"is equal to",
-		"is not equal to",
 		"is the same as",
+
+		"is not equal to",
 		"is not the same as",
+
 		"is later than",
+
 		"is earlier than",
+
 		"is greater than",
+
 		"is less than",
+
 		"is in",
 		"is not in",
+
 		"contains",
 	];
 
