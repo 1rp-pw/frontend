@@ -2,17 +2,17 @@
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
 import { Editor } from "~/components/editor/editor";
-import { ScenarioForm } from "~/components/editor/scenario/form";
-import { ScenarioList } from "~/components/editor/scenario/list";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
+import { TestForm } from "~/components/editor/test/form";
+import { TestList } from "~/components/editor/test/list";
 import { Button } from "~/components/ui/button";
-import { useScenarioStore } from "~/lib/state/maker";
+import { useTestStore } from "~/lib/state/maker";
 
 interface Outcome {
 	passed: boolean;
 	ran: boolean;
 }
-interface Scenario {
+interface Test {
 	id: string;
 	name: string;
 	data: object;
@@ -20,53 +20,49 @@ interface Scenario {
 	outcome: Outcome;
 }
 
-async function runScenarioLive(
-	scenario: Scenario,
-	schema: object,
-	policyText: string,
-) {
-	scenario.outcome.ran = true;
+async function runTestLive(test: Test, schema: object, policyText: string) {
+	test.outcome.ran = true;
 
 	try {
 		const dataSet = {
-			data: scenario.data,
+			data: test.data,
 			rule: policyText,
 		};
 
-		const response = await fetch("/api/scenario", {
+		const response = await fetch("/api/test", {
 			method: "POST",
 			body: JSON.stringify(dataSet),
 		});
 
 		if (!response.ok) {
-			scenario.outcome.passed = false;
+			test.outcome.passed = false;
 		}
 
 		const resp = await response.json();
 		console.info("response", resp);
 
-		scenario.outcome.passed = resp.result === true;
+		test.outcome.passed = resp.result === true;
 	} catch (e) {
-		scenario.outcome.ran = false;
+		test.outcome.ran = false;
 	}
 }
 
 export default function IDEPage() {
 	const {
 		schema,
-		scenarios,
-		currentScenario,
+		tests,
+		currentTest,
 		policyText,
 		setSchema,
 		setPolicyText,
-		createScenario,
-		saveScenario,
-		selectScenario,
-		deleteScenario,
-		runScenario,
-		repairScenario,
-		runAllScenarios,
-	} = useScenarioStore();
+		createTest,
+		saveTest,
+		selectTest,
+		deleteTest,
+		runTest,
+		repairTest,
+		runAllTests,
+	} = useTestStore();
 
 	// @ts-ignore
 	// @ts-ignore
@@ -91,15 +87,19 @@ export default function IDEPage() {
 
 				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
-						Scenario Editor
+						Test Editor
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						{currentScenario && true && (
-							<ScenarioForm
+						{currentTest ? (
+							<TestForm
 								schema={schema}
-								currentScenario={currentScenario}
-								onSaveScenario={saveScenario}
+								currentTest={currentTest}
+								onSaveTest={saveTest}
 							/>
+						) : (
+							<div className={"content-around object-center text-center"}>
+								Select a test or create a new one
+							</div>
 						)}
 					</div>
 				</div>
@@ -115,34 +115,34 @@ export default function IDEPage() {
 
 				<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 					<div className="flex items-center justify-between bg-zinc-700 px-4 py-2 font-medium text-sm">
-						<span>Scenarios</span>
+						<span>Tests</span>
 						<Button
 							variant={"secondary"}
-							onClick={runAllScenarios}
+							onClick={runAllTests}
 							className={"rounded px-2 py-1 text-xs"}
-							disabled={scenarios.length === 0}
+							disabled={tests.length === 0}
 						>
 							<PlayIcon />
 							Run All
 						</Button>
 						<Button
 							variant="secondary"
-							onClick={createScenario}
+							onClick={createTest}
 							className="rounded px-2 py-1 text-xs"
 							disabled={Object.keys(schema.properties).length === 0}
 						>
 							<FilePlusIcon />
-							New Scenario
+							New Test
 						</Button>
 					</div>
 					<div className="flex-1 overflow-auto">
-						<ScenarioList
-							scenarios={scenarios}
-							currentScenario={currentScenario}
-							onSelectScenario={selectScenario}
-							onDeleteScenario={deleteScenario}
-							onRunScenario={runScenario}
-							onRepairScenario={repairScenario}
+						<TestList
+							tests={tests}
+							currentTest={currentTest}
+							onSelectTest={selectTest}
+							onDeleteTest={deleteTest}
+							onRunTest={runTest}
+							onRepairTest={repairTest}
 						/>
 					</div>
 				</div>

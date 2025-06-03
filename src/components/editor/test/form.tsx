@@ -16,34 +16,30 @@ import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 
-interface Scenario {
+interface Test {
 	id: string;
 	name: string;
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	data: any;
 	expectPass?: boolean; // Added expectPass property
-	created: boolean; // Added to track if scenario has been saved
+	created: boolean; // Added to track if test has been saved
 	createdAt: Date;
 }
 
-interface ScenarioFormProps {
+interface TestFormProps {
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	schema: any;
-	currentScenario: Scenario | null;
+	currentTest: Test | null;
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
-	onSaveScenario: (data: any, name?: string, expectPass?: boolean) => void; // Updated to include expectPass
+	onSaveTest: (data: any, name?: string, expectPass?: boolean) => void; // Updated to include expectPass
 }
 
 const FIELDS_PER_PAGE = 4;
 
-export function ScenarioForm({
-	schema,
-	currentScenario,
-	onSaveScenario,
-}: ScenarioFormProps) {
+export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	const [formData, setFormData] = useState<any>({});
-	const [scenarioName, setScenarioName] = useState("");
+	const [testName, setTestName] = useState("");
 	const [expectPass, setExpectPass] = useState(true); // Added expectPass state
 	const [currentPage, setCurrentPage] = useState(0);
 	const [flattenedFields, setFlattenedFields] = useState<
@@ -111,26 +107,26 @@ export function ScenarioForm({
 		return fields;
 	};
 
-	// Initialize form data when schema or current scenario changes
+	// Initialize form data when schema or current test changes
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		if (currentScenario) {
-			setFormData(currentScenario.data || {});
-			setScenarioName(currentScenario.name);
-			setExpectPass(currentScenario.expectPass ?? true); // Initialize expectPass from scenario
+		if (currentTest) {
+			setFormData(currentTest.data || {});
+			setTestName(currentTest.name);
+			setExpectPass(currentTest.expectPass ?? true); // Initialize expectPass from test
 		} else {
 			// Initialize with default values based on schema
 			const initialData = initializeDataFromSchema(schema);
 			setFormData(initialData);
-			setScenarioName("");
-			setExpectPass(true); // Default to expecting pass for new scenarios
+			setTestName("");
+			setExpectPass(true); // Default to expecting pass for new tests
 		}
 
 		// Flatten the schema for pagination
 		const flattened = flattenSchema(schema, "", schema.required || []);
 		setFlattenedFields(flattened);
 		setCurrentPage(0); // Reset to first page when schema changes
-	}, [schema, currentScenario]);
+	}, [schema, currentTest]);
 
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	const initializeDataFromSchema = (schemaObj: any, parentPath = ""): any => {
@@ -185,11 +181,7 @@ export function ScenarioForm({
 	};
 
 	const handleSave = () => {
-		onSaveScenario(
-			formData,
-			scenarioName || `Scenario ${Date.now()}`,
-			expectPass,
-		);
+		onSaveTest(formData, testName || `Test ${Date.now()}`, expectPass);
 	};
 
 	const renderFormField = (field: {
@@ -287,15 +279,15 @@ export function ScenarioForm({
 		}
 	};
 
-	// If no scenario is selected or being created, show a message
-	if (!currentScenario) {
+	// If no test is selected or being created, show a message
+	if (!currentTest) {
 		return (
 			<div className="flex h-full flex-col items-center justify-center p-8 text-center text-zinc-500">
 				<FileTextIcon className="mb-4 h-12 w-12 opacity-30" />
-				<h3 className="mb-2 font-medium text-lg">No Scenario Selected</h3>
+				<h3 className="mb-2 font-medium text-lg">No Test Selected</h3>
 				<p className="max-w-xs text-sm">
-					Select an existing scenario from the list or click "New Scenario" to
-					create one
+					Select an existing test from the list or click "New Test" to create
+					one
 				</p>
 			</div>
 		);
@@ -305,7 +297,7 @@ export function ScenarioForm({
 	if (!schema.properties || Object.keys(schema.properties).length === 0) {
 		return (
 			<div className="py-8 text-center text-zinc-500">
-				<p className="text-sm">Build a schema first to create scenarios</p>
+				<p className="text-sm">Build a schema first to create tests</p>
 				<p className="mt-1 text-xs">
 					Add properties in the Schema Builder to get started
 				</p>
@@ -322,15 +314,13 @@ export function ScenarioForm({
 	const canGoNext = currentPage < totalPages - 1;
 	const canGoPrevious = currentPage > 0;
 
-	console.info("currentScenario", currentScenario);
-
-	// Show the form when a scenario is selected/being created and schema has properties
+	// Show the form when a test is selected/being created and schema has properties
 	return (
 		<Tabs defaultValue={"form"}>
 			<TabsList className={"grid w-full grid-cols-2"}>
 				<TabsTrigger value={"form"}>
 					<EditIcon className="h-6 w-6" />
-					Scenario Form
+					Test Form
 				</TabsTrigger>
 				<TabsTrigger value={"preview"}>
 					<BracesIcon className="h-6 w-6" />
@@ -339,17 +329,17 @@ export function ScenarioForm({
 			</TabsList>
 			<TabsContent value={"form"}>
 				<div className="space-y-4">
-					{/* Scenario Name and Expect Pass - on the same line */}
+					{/* test Name and Expect Pass - on the same line */}
 					<div className="flex items-end gap-4">
 						<div className="flex-1 space-y-2">
-							<Label htmlFor="scenario-name" className="font-medium text-sm">
-								Scenario Name
+							<Label htmlFor="test-name" className="font-medium text-sm">
+								Test Name
 							</Label>
 							<Input
-								id="scenario-name"
-								value={scenarioName}
-								onChange={(e) => setScenarioName(e.target.value)}
-								placeholder="Enter scenario name..."
+								id="test-name"
+								value={testName}
+								onChange={(e) => setTestName(e.target.value)}
+								placeholder="Enter test name..."
 								className="border-zinc-600 bg-zinc-700"
 							/>
 						</div>
@@ -410,16 +400,16 @@ export function ScenarioForm({
 						<Button
 							className="w-full"
 							onClick={handleSave}
-							disabled={!scenarioName.trim()}
+							disabled={!testName.trim()}
 						>
-							{currentScenario.created ? "Update Scenario" : "Save Scenario"}
+							{currentTest.created ? "Update Test" : "Save Test"}
 						</Button>
 					</div>
 				</div>
 			</TabsContent>
 			<TabsContent value={"preview"}>
 				<div className="space-y-2">
-					<Label className="font-medium text-sm">Scenario Data Preview</Label>
+					<Label className="font-medium text-sm">Test Data Preview</Label>
 					<Textarea
 						value={JSON.stringify(formData, null, 2)}
 						readOnly

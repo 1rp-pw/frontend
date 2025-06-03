@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type ScenarioStatus =
+export type TestStatus =
 	| "not-run"
 	| "running"
 	| "passed"
@@ -10,10 +10,10 @@ export type ScenarioStatus =
 export interface Outcome {
 	passed: boolean;
 	ran: boolean;
-	status: ScenarioStatus;
+	status: TestStatus;
 }
 
-export interface ScenarioResultSet {
+export interface TestResultSet {
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	errors: any | null;
 	result: boolean;
@@ -49,21 +49,21 @@ export interface ScenarioResultSet {
 	data: any | null;
 }
 
-export interface Scenario {
+export interface Test {
 	id: string;
 	name: string;
 	data: object;
 	expectPass: boolean; // Added expectPass property
-	created: boolean; // Added to track if scenario has been saved
+	created: boolean; // Added to track if test has been saved
 	createdAt: Date;
 	outcome: Outcome;
-	resultSet: ScenarioResultSet | null;
+	resultSet: TestResultSet | null;
 	schemaVersion?: string;
 }
 
-interface ScenarioStore {
-	scenarios: Scenario[];
-	currentScenario: Scenario | null;
+interface TestStore {
+	tests: Test[];
+	currentTest: Test | null;
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	schema: any;
 	policyText: string;
@@ -74,21 +74,21 @@ interface ScenarioStore {
 	setSchema: (schema: any) => void;
 	setPolicyText: (text: string) => void;
 
-	createScenario: () => void;
-	saveScenario: (
-		// biome-ignore lint/suspicious/noExplicitAny: scenario data can be anything
-		scenarioData: any,
+	createTest: () => void;
+	saveTest: (
+		// biome-ignore lint/suspicious/noExplicitAny: test data can be anything
+		testData: any,
 		name?: string,
 		expectPass?: boolean,
 	) => void; // Updated to include expectPass
-	selectScenario: (scenario: Scenario) => void;
-	deleteScenario: (scenarioId: string) => void;
-	runScenario: (scenarioId: string) => Promise<void>;
-	runAllScenarios: () => Promise<void>;
-	updateScenarioStatus: (scenarioId: string, status: ScenarioStatus) => void;
-	validateScenarioAgainstSchema: (scenario: Scenario) => boolean;
-	markInvalidScenarios: () => void;
-	repairScenario: (scenarioId: string) => void;
+	selectTest: (test: Test) => void;
+	deleteTest: (testId: string) => void;
+	runTest: (testId: string) => Promise<void>;
+	runAllTests: () => Promise<void>;
+	updateTestStatus: (testId: string, status: TestStatus) => void;
+	validateTestAgainstSchema: (test: Test) => boolean;
+	markInvalidTests: () => void;
+	repairTest: (testId: string) => void;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: schema can be anything
@@ -209,8 +209,8 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 	return repairObject(data, schema);
 };
 
-// Default scenarios
-const defaultScenarios: Scenario[] = [
+// Default tests
+const defaultTests: Test[] = [
 	{
 		id: "default-1",
 		name: "Passing",
@@ -227,7 +227,7 @@ const defaultScenarios: Scenario[] = [
 		outcome: {
 			passed: false,
 			ran: false,
-			status: "not-run" as ScenarioStatus,
+			status: "not-run" as TestStatus,
 		},
 		resultSet: null,
 	},
@@ -247,7 +247,7 @@ const defaultScenarios: Scenario[] = [
 		outcome: {
 			passed: false,
 			ran: false,
-			status: "not-run" as ScenarioStatus,
+			status: "not-run" as TestStatus,
 		},
 		resultSet: null,
 	},
@@ -279,12 +279,12 @@ const defaultSchema = {
 	},
 };
 
-export const useScenarioStore = create<ScenarioStore>((set, get) => ({
-	scenarios: defaultScenarios.map((scenario) => ({
-		...scenario,
+export const useTestStore = create<TestStore>((set, get) => ({
+	tests: defaultTests.map((test) => ({
+		...test,
 		schemaVersion: generateSchemaHash(defaultSchema),
 	})),
-	currentScenario: null,
+	currentTest: null,
 	schema: defaultSchema,
 	schemaVersion: generateSchemaHash(defaultSchema),
 	policyText:
@@ -296,18 +296,18 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 			schema,
 			schemaVersion: newSchemaVersion,
 		});
-		get().markInvalidScenarios();
+		get().markInvalidTests();
 	},
 
 	setPolicyText: (text) => set({ policyText: text }),
 
-	createScenario: () => {
-		const { scenarios, schema, schemaVersion } = get();
-		const newScenario: Scenario = {
+	createTest: () => {
+		const { tests, schema, schemaVersion } = get();
+		const newTest: Test = {
 			id: `temp-${Date.now()}`, // Generate temporary ID
-			name: `Scenario ${scenarios.length + 1}`,
+			name: `Test ${tests.length + 1}`,
 			data: {},
-			expectPass: true, // Default to expecting pass for new scenarios
+			expectPass: true, // Default to expecting pass for new tests
 			created: false, // Mark as not yet created/saved
 			createdAt: new Date(),
 			outcome: {
@@ -318,175 +318,172 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 			resultSet: null,
 			schemaVersion,
 		};
-		set({ currentScenario: newScenario });
+		set({ currentTest: newTest });
 	},
 
-	saveScenario: (scenarioData, name, expectPass = true) => {
+	saveTest: (TestData, name, expectPass = true) => {
 		// Updated to accept expectPass parameter
-		const { currentScenario, scenarios, schemaVersion } = get();
-		if (!currentScenario) return;
+		const { currentTest, tests, schemaVersion } = get();
+		if (!currentTest) return;
 
-		let updatedScenario: Scenario;
-		const scenarioName = name || currentScenario.name;
+		let updatedTest: Test;
+		const testName = name || currentTest.name;
 
-		if (currentScenario.created) {
-			// Update existing scenario
-			updatedScenario = {
-				...currentScenario,
-				data: scenarioData,
-				name: scenarioName,
+		if (currentTest.created) {
+			// Update existing test
+			updatedTest = {
+				...currentTest,
+				data: TestData,
+				name: testName,
 				expectPass, // Update expectPass
 				schemaVersion,
 				outcome: {
-					...currentScenario.outcome,
-					status: "not-run" as ScenarioStatus,
+					...currentTest.outcome,
+					status: "not-run" as TestStatus,
 				},
 			};
-			const existingIndex = scenarios.findIndex(
-				(s) => s.id === currentScenario.id,
-			);
-			const updatedScenarios = [...scenarios];
-			updatedScenarios[existingIndex] = updatedScenario;
-			set({ scenarios: updatedScenarios, currentScenario: updatedScenario });
+			const existingIndex = tests.findIndex((t) => t.id === currentTest.id);
+			const updatedTests = [...tests];
+			updatedTests[existingIndex] = updatedTest;
+			set({ tests: updatedTests, currentTest: updatedTest });
 		} else {
-			// Create new scenario
-			updatedScenario = {
-				...currentScenario,
-				id: `scenario-${Date.now()}`, // Generate proper ID for saved scenario
-				data: scenarioData,
-				name: scenarioName,
+			// Create new test
+			updatedTest = {
+				...currentTest,
+				id: `test-${Date.now()}`, // Generate proper ID for saved test
+				data: TestData,
+				name: testName,
 				expectPass, // Set expectPass
 				created: true, // Mark as created/saved
 				schemaVersion,
 				outcome: {
-					...currentScenario.outcome,
-					status: "not-run" as ScenarioStatus,
+					...currentTest.outcome,
+					status: "not-run" as TestStatus,
 				},
 			};
 			set({
-				scenarios: [...scenarios, updatedScenario],
-				currentScenario: updatedScenario,
+				tests: [...tests, updatedTest],
+				currentTest: updatedTest,
 			});
 		}
 	},
 
-	selectScenario: (scenario) => set({ currentScenario: scenario }),
+	selectTest: (test) => set({ currentTest: test }),
 
-	deleteScenario: (scenarioId) => {
-		const { scenarios, currentScenario } = get();
+	deleteTest: (testId) => {
+		const { tests, currentTest } = get();
 		set({
-			scenarios: scenarios.filter((s) => s.id !== scenarioId),
-			currentScenario:
-				currentScenario?.id === scenarioId ? null : currentScenario,
+			tests: tests.filter((t) => t.id !== testId),
+			currentTest: currentTest?.id === testId ? null : currentTest,
 		});
 	},
 
-	updateScenarioStatus: (scenarioId, status) => {
-		const { scenarios } = get();
-		const updatedScenarios = scenarios.map((scenario) => {
-			if (scenario.id === scenarioId) {
+	updateTestStatus: (testId, status) => {
+		const { tests } = get();
+		const updatedTests = tests.map((test) => {
+			if (test.id === testId) {
 				return {
-					...scenario,
+					...test,
 					outcome: {
-						...scenario.outcome,
-						status: status as ScenarioStatus,
+						...test.outcome,
+						status: status as TestStatus,
 					},
 				};
 			}
-			return scenario;
+			return test;
 		});
-		set({ scenarios: updatedScenarios });
+		set({ tests: updatedTests });
 	},
 
-	validateScenarioAgainstSchema: (scenario) => {
+	validateTestAgainstSchema: (test) => {
 		const { schema } = get();
-		return validateDataAgainstSchema(scenario.data, schema);
+		return validateDataAgainstSchema(test.data, schema);
 	},
 
-	markInvalidScenarios: () => {
-		const { scenarios, schema, schemaVersion } = get();
-		const updatedScenarios = scenarios.map((scenario) => {
-			// If scenario was created with different schema version, check if it's still valid
-			if (scenario.schemaVersion !== schemaVersion) {
-				const isValid = validateDataAgainstSchema(scenario.data, schema);
+	markInvalidTests: () => {
+		const { tests, schema, schemaVersion } = get();
+		const updatedTests = tests.map((test) => {
+			// If test was created with different schema version, check if it's still valid
+			if (test.schemaVersion !== schemaVersion) {
+				const isValid = validateDataAgainstSchema(test.data, schema);
 				return {
-					...scenario,
+					...test,
 					outcome: {
-						...scenario.outcome,
+						...test.outcome,
 						status: isValid
-							? ("not-run" as ScenarioStatus)
-							: ("invalid" as ScenarioStatus),
+							? ("not-run" as TestStatus)
+							: ("invalid" as TestStatus),
 					},
 				};
 			}
-			return scenario;
+			return test;
 		});
-		set({ scenarios: updatedScenarios });
+		set({ tests: updatedTests });
 	},
 
-	repairScenario: (scenarioId) => {
-		const { scenarios, schema, schemaVersion } = get();
-		const updatedScenarios = scenarios.map((scenario) => {
-			if (scenario.id === scenarioId && scenario.outcome.status === "invalid") {
-				const repairedData = repairDataToMatchSchema(scenario.data, schema);
+	repairTest: (testId) => {
+		const { tests, schema, schemaVersion } = get();
+		const updatedTests = tests.map((test) => {
+			if (test.id === testId && test.outcome.status === "invalid") {
+				const repairedData = repairDataToMatchSchema(test.data, schema);
 				return {
-					...scenario,
+					...test,
 					data: repairedData,
 					schemaVersion,
 					outcome: {
-						...scenario.outcome,
-						status: "not-run" as ScenarioStatus,
+						...test.outcome,
+						status: "not-run" as TestStatus,
 					},
 				};
 			}
-			return scenario;
+			return test;
 		});
-		set({ scenarios: updatedScenarios });
+		set({ tests: updatedTests });
 	},
 
-	runScenario: async (scenarioId) => {
-		const { scenarios, schema, policyText } = get();
-		const scenario = scenarios.find((s) => s.id === scenarioId);
-		if (!scenario) return;
+	runTest: async (testId) => {
+		const { tests, schema, policyText } = get();
+		const test = tests.find((t) => t.id === testId);
+		if (!test) return;
 
 		// Set status to running with complete state update
-		const updateScenarioState = (updates: Partial<Scenario>) => {
-			const currentScenarios = get().scenarios;
-			const updatedScenarios = currentScenarios.map((s) => {
-				if (s.id === scenarioId) {
-					return { ...s, ...updates };
+		const updateTestState = (updates: Partial<Test>) => {
+			const currentTests = get().tests;
+			const updatedTests = currentTests.map((t) => {
+				if (t.id === testId) {
+					return { ...t, ...updates };
 				}
-				return s;
+				return t;
 			});
-			set({ scenarios: updatedScenarios });
+			set({ tests: updatedTests });
 		};
 
 		// Set initial running state
-		updateScenarioState({
+		updateTestState({
 			outcome: {
-				...scenario.outcome,
-				status: "running" as ScenarioStatus,
+				...test.outcome,
+				status: "running" as TestStatus,
 			},
 		});
 
 		try {
 			const dataSet = {
-				data: scenario.data,
+				data: test.data,
 				rule: policyText,
 			};
 
-			const response = await fetch("/api/scenario", {
+			const response = await fetch("/api/test", {
 				method: "POST",
 				body: JSON.stringify(dataSet),
 			});
 
 			if (!response.ok) {
 				// Complete failure state update
-				updateScenarioState({
+				updateTestState({
 					outcome: {
 						passed: false,
 						ran: true,
-						status: "failed" as ScenarioStatus,
+						status: "failed" as TestStatus,
 					},
 				});
 				return;
@@ -496,14 +493,14 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 			const testPassed = resp.result === true;
 
 			// Apply expectPass logic: if expectPass is false, invert the result
-			const actuallyPassed = scenario.expectPass ? testPassed : !testPassed;
+			const actuallyPassed = test.expectPass ? testPassed : !testPassed;
 
 			// Complete success state update
-			updateScenarioState({
+			updateTestState({
 				outcome: {
 					passed: actuallyPassed,
 					ran: true,
-					status: actuallyPassed ? "passed" : ("failed" as ScenarioStatus),
+					status: actuallyPassed ? "passed" : ("failed" as TestStatus),
 				},
 				resultSet: {
 					trace: resp.trace,
@@ -514,24 +511,22 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 				},
 			});
 		} catch (e) {
-			console.error("Error running scenario:", e);
+			console.error("Error running test:", e);
 			// Complete error state update
-			updateScenarioState({
+			updateTestState({
 				outcome: {
 					passed: false,
 					ran: true,
-					status: "failed" as ScenarioStatus,
+					status: "failed" as TestStatus,
 				},
 			});
 		}
 	},
 
-	runAllScenarios: async () => {
-		const { scenarios, runScenario } = get();
-		const runnableScenarios = scenarios.filter((s) => s.created); // Only run created scenarios
-		// Run all scenarios concurrently
-		await Promise.all(
-			runnableScenarios.map((scenario) => runScenario(scenario.id)),
-		);
+	runAllTests: async () => {
+		const { tests, runTest } = get();
+		const runnableTests = tests.filter((t) => t.created); // Only run created tests
+		// Run all tests concurrently
+		await Promise.all(runnableTests.map((test) => runTest(test.id)));
 	},
 }));
