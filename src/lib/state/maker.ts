@@ -61,18 +61,22 @@ export interface Test {
 	schemaVersion?: string;
 }
 
-interface TestStore {
+interface PolicyStore {
 	tests: Test[];
 	currentTest: Test | null;
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	schema: any;
-	policyText: string;
+	text: string;
 	schemaVersion: string;
+	name: string;
+	id: string | null;
 
 	// Actions
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	setSchema: (schema: any) => void;
 	setPolicyText: (text: string) => void;
+	setPolicyName: (name: string) => void;
+	setPolicyId: (id: string) => void;
 
 	createTest: () => void;
 	saveTest: (
@@ -89,6 +93,11 @@ interface TestStore {
 	validateTestAgainstSchema: (test: Test) => boolean;
 	markInvalidTests: () => void;
 	repairTest: (testId: string) => void;
+	savePolicy: () => Promise<{
+		success: boolean;
+		returnId?: string;
+		error?: string;
+	}>;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: schema can be anything
@@ -279,7 +288,7 @@ const defaultSchema = {
 	},
 };
 
-export const useTestStore = create<TestStore>((set, get) => ({
+export const usePolicyStore = create<PolicyStore>((set, get) => ({
 	tests: defaultTests.map((test) => ({
 		...test,
 		schemaVersion: generateSchemaHash(defaultSchema),
@@ -287,8 +296,9 @@ export const useTestStore = create<TestStore>((set, get) => ({
 	currentTest: null,
 	schema: defaultSchema,
 	schemaVersion: generateSchemaHash(defaultSchema),
-	policyText:
-		"# Driving Test Rules\nA **Person** gets a full driving license\n if the __age__ of the **Person** is greater than or equal to 17\n and the **Person** passes the practical driving test\n and the **Person** passes the eye test.\n\nA **Person** passes the practical driving test\n if the __driving test score__ of the **Person** is greater than or equal to 60.",
+	text: "# Driving Test Rules\nA **Person** gets a full driving license\n if the __age__ of the **Person** is greater than or equal to 17\n and the **Person** passes the practical driving test\n and the **Person** passes the eye test.\n\nA **Person** passes the practical driving test\n if the __driving test score__ of the **Person** is greater than or equal to 60.",
+	id: null,
+	name: "Test Policy",
 
 	setSchema: (schema) => {
 		const newSchemaVersion = generateSchemaHash(schema);
@@ -299,7 +309,9 @@ export const useTestStore = create<TestStore>((set, get) => ({
 		get().markInvalidTests();
 	},
 
-	setPolicyText: (text) => set({ policyText: text }),
+	setPolicyText: (text) => set({ text: text }),
+	setPolicyId: (id) => set({ id: id }),
+	setPolicyName: (name) => set({ name: name }),
 
 	createTest: () => {
 		const { tests, schema, schemaVersion } = get();
@@ -441,8 +453,53 @@ export const useTestStore = create<TestStore>((set, get) => ({
 		set({ tests: updatedTests });
 	},
 
+	savePolicy: async (): Promise<{
+		success: boolean;
+		returnId?: string;
+		error?: string;
+	}> => {
+		const { tests, text, schema, name, id } = get();
+
+		try {
+			const response = await fetch("/api/policy", {
+				method: id ? "PUT" : "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({
+					name,
+					tests,
+					text,
+					schema,
+					id,
+				}),
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				return {
+					success: false,
+					error: errorData.message || `Server error: ${response.status}`,
+				};
+			}
+
+			const result = await response.json();
+			if (result.id) {
+				set({ id: result.id });
+			}
+
+			return {
+				success: true,
+				returnId: result.id,
+			};
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : "Failed to save policy",
+			};
+		}
+	},
+
 	runTest: async (testId) => {
-		const { tests, schema, policyText } = get();
+		const { tests, schema, text } = get();
 		const test = tests.find((t) => t.id === testId);
 		if (!test) return;
 
@@ -469,7 +526,7 @@ export const useTestStore = create<TestStore>((set, get) => ({
 		try {
 			const dataSet = {
 				data: test.data,
-				rule: policyText,
+				rule: text,
 			};
 
 			const response = await fetch("/api/test", {
