@@ -5,6 +5,7 @@ import { Badge } from "~/components/ui/badge";
 import {
 	Dialog,
 	DialogContent,
+	DialogDescription,
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
@@ -131,6 +132,9 @@ export function PolicyExecutionModal({
 							{executionData.result ? "PASSED" : "FAILED"}
 						</Badge>
 					</DialogTitle>
+					<DialogDescription className="flex items-center gap-2">
+						Summary of the execution
+					</DialogDescription>
 				</DialogHeader>
 
 				<Tabs defaultValue="ast" className="w-full">

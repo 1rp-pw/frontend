@@ -2,57 +2,19 @@
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
 import { Editor } from "~/components/editor/editor";
+import { SavePolicy } from "~/components/editor/save";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
 import { Button } from "~/components/ui/button";
-import { useTestStore } from "~/lib/state/maker";
-
-interface Outcome {
-	passed: boolean;
-	ran: boolean;
-}
-interface Test {
-	id: string;
-	name: string;
-	data: object;
-	createdAt: Date;
-	outcome: Outcome;
-}
-
-async function runTestLive(test: Test, schema: object, policyText: string) {
-	test.outcome.ran = true;
-
-	try {
-		const dataSet = {
-			data: test.data,
-			rule: policyText,
-		};
-
-		const response = await fetch("/api/test", {
-			method: "POST",
-			body: JSON.stringify(dataSet),
-		});
-
-		if (!response.ok) {
-			test.outcome.passed = false;
-		}
-
-		const resp = await response.json();
-		console.info("response", resp);
-
-		test.outcome.passed = resp.result === true;
-	} catch (e) {
-		test.outcome.ran = false;
-	}
-}
+import { usePolicyStore } from "~/lib/state/maker";
 
 export default function IDEPage() {
 	const {
 		schema,
 		tests,
 		currentTest,
-		policyText,
+		text,
 		setSchema,
 		setPolicyText,
 		createTest,
@@ -62,16 +24,14 @@ export default function IDEPage() {
 		runTest,
 		repairTest,
 		runAllTests,
-	} = useTestStore();
+	} = usePolicyStore();
 
-	// @ts-ignore
-	// @ts-ignore
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
 				<h1 className="font-bold text-xl">Policy Maker</h1>
 				<div className={"ml-auto flex items-center gap-1"}>
-					<Button className={"rounded text-sm"}>Save Policy</Button>
+					<SavePolicy />
 				</div>
 			</header>
 
@@ -81,7 +41,7 @@ export default function IDEPage() {
 						Policy Text
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<Editor text={policyText} onChange={setPolicyText} />
+						<Editor text={text} onChange={setPolicyText} />
 					</div>
 				</div>
 
