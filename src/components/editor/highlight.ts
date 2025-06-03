@@ -1,3 +1,12 @@
+const numberColor = "text-orange-500";
+const objectColor = "text-blue-500";
+const commentColor = "text-gray-400";
+const selectorColor = "text-green-500";
+const functionColor = "text-purple-500";
+const referenceColor = "text-teal-500"; // Color for references (e.g., "passes the practical driving test" in if clause)
+const referencedColor = "text-fuchsia-500"; // Color for definitions that ARE referenced elsewhere
+const labelColor = "text-yellow-500";
+
 export const highlightText = (text: string) => {
 	// Escape &, <, >
 	let html = text
@@ -5,152 +14,231 @@ export const highlightText = (text: string) => {
 		.replace(/</g, "&lt;")
 		.replace(/>/g, "&gt;");
 
-	// Step 1: Find all defined rules from the original text
+	// Step 1: Find all defined rules (action parts) and their full definition lines
 	const lines = text.split("\n");
-	const definedRules: string[] = [];
+	const allDefinedRuleActions = new Set<string>(); // All unique action parts
+	// Maps original full definition line to its action part
+	const definitionLineToActionMap = new Map<string, string>();
 
-	// biome-ignore lint/complexity/noForEach: it nees to loop
+	// biome-ignore lint/complexity/noForEach: it needs to loop
 	lines.forEach((line) => {
-		// Two patterns to match:
+		const trimmedLine = line.trim();
+		// Patterns to match:
 		// 1. With labels: "bob. A **Person** gets a full driving license"
 		// 2. Without labels: "A **Person** passes the practical driving test"
-		const matchWithLabel = line.match(/^[\w.]+\.\s+A\s+\*\*\w+\*\*\s+(.+)$/);
-		const matchWithoutLabel = line.match(/^A\s+\*\*\w+\*\*\s+(.+)$/);
+		const matchWithLabel = line.match(/^([\w.]+\.\s+A\s+\*\*\w+\*\*\s+)(.+)$/);
+		const matchWithoutLabel = line.match(/^(A\s+\*\*\w+\*\*\s+)(.+)$/);
 
 		const match = matchWithLabel || matchWithoutLabel;
-		if (match) {
-			// Extract just the action part (e.g., "passes the practical driving test")
-			// without the **Person** part
-			if (match[1] !== undefined) {
-				definedRules.push(match[1].trim());
+		if (match && match[2] !== undefined) {
+			const ruleAction = match[2].trim();
+			allDefinedRuleActions.add(ruleAction);
+			definitionLineToActionMap.set(trimmedLine, ruleAction);
+		}
+	});
+
+	// Step 2: Determine which defined rules are actually referenced elsewhere
+	// We need to iterate through the *entire text* again to find references.
+	const rulesWithExternalReferences = new Set<string>(); // Actions that are referenced
+
+	// biome-ignore lint/complexity/noForEach: it needs to loop
+	lines.forEach((currentLine) => {
+		const trimmedCurrentLine = currentLine.trim();
+		const actionPartOfCurrentDefinition =
+			definitionLineToActionMap.get(trimmedCurrentLine);
+
+		// For each defined rule, check if it's referenced in this line
+		for (const definedAction of allDefinedRuleActions) {
+			// Create a regex for the defined action to find its occurrences
+			const escapedDefinedAction = definedAction.replace(
+				/[.*+?^${}()|[\]\\]/g,
+				"\\$&",
+			);
+			const referencePattern = new RegExp(
+				`\\b(${escapedDefinedAction})\\b`,
+				"gi",
+			);
+
+			// Find all matches in the current line
+			// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+			let match;
+			// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+			while ((match = referencePattern.exec(currentLine)) !== null) {
+				const matchedText = match[1];
+
+				// This is the crucial check: Is this match NOT the action part of its own definition line?
+				// If the current line is a definition line, and the matched text is its exact action part,
+				// then it's not an "external" reference.
+				if (
+					!(
+						actionPartOfCurrentDefinition &&
+						matchedText === actionPartOfCurrentDefinition
+					)
+				) {
+					rulesWithExternalReferences.add(definedAction);
+				}
 			}
 		}
 	});
 
-	// Step 2: Create a placeholder system to protect HTML tags
+	// Step 3: Create a placeholder system to protect HTML tags
 	const placeholders: string[] = [];
 	let placeholderIndex = 0;
 
-	// Step 3: Highlight references FIRST (before other highlighting messes with the text)
-	// biome-ignore lint/complexity/noForEach: it nees to loop
-	definedRules.forEach((rule) => {
-		// For each defined rule, find references to it
-		const escapedRule = rule.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	// Helper function to create a placeholder
+	const createPlaceholder = (content: string) => {
+		const placeholder = `\x00PLACEHOLDER${placeholderIndex}\x00`;
+		placeholders[placeholderIndex] = content;
+		placeholderIndex++;
+		return placeholder;
+	};
 
-		// Look for the rule text anywhere
-		const referencePattern = new RegExp(`(${escapedRule})`, "gi");
+	// Step 4: Apply highlighting based on our pre-analysis
+	const processedHtmlLines: string[] = [];
 
-		html = html.replace(referencePattern, (match, p1, offset) => {
-			// Check if this match is part of a definition line
-			const lineStart = html.lastIndexOf("\n", offset) + 1;
-			const lineEnd = html.indexOf("\n", offset);
-			const currentLine = html.substring(
-				lineStart,
-				lineEnd === -1 ? undefined : lineEnd,
+	// biome-ignore lint/complexity/noForEach: it needs to loop
+	lines.forEach((originalLine) => {
+		let lineHtml = originalLine; // Start with the original (escaped) line content
+		const trimmedOriginalLine = originalLine.trim();
+
+		// Determine if this line is a definition line and get its action part
+		const actionPartOfThisDefinition =
+			definitionLineToActionMap.get(trimmedOriginalLine);
+		const isDefinitionLine = !!actionPartOfThisDefinition;
+
+		// First, apply highlighting for the "referenced" definitions
+		if (isDefinitionLine && actionPartOfThisDefinition) {
+			// Check if this specific definition's action part is referenced elsewhere
+			if (rulesWithExternalReferences.has(actionPartOfThisDefinition)) {
+				// This definition's action part needs the `referencedColor`
+				const escapedAction = actionPartOfThisDefinition.replace(
+					/[.*+?^${}()|[\]\\]/g,
+					"\\$&",
+				);
+				// This regex ensures we only target the action part *within its definition structure*
+				const definitionActionPattern = new RegExp(
+					`^(?:[\\w.]+\\.\\s+)?A\\s+\\*\\*\\w+\\*\\*\\s+(${escapedAction})$`,
+				);
+
+				lineHtml = lineHtml.replace(
+					definitionActionPattern,
+					(match, actionPart) => {
+						// Re-extract the prefix for this specific line's format to rebuild correctly
+						const prefixMatch = originalLine.match(
+							/^(?:[\w.]+\.\s+)?A\s+\*\*\w+\*\*(\s+)?/,
+						);
+						const prefix = prefixMatch ? prefixMatch[0] : "";
+						return `${prefix}${createPlaceholder(`<span class="${referencedColor}">${actionPart}</span>`)}`;
+					},
+				);
+			}
+		}
+
+		// Now, apply highlighting for ALL references (including those that are not definitions,
+		// or those that are definitions but not themselves 'referencedColor')
+		// We need to iterate over all *potential* references
+		for (const definedAction of allDefinedRuleActions) {
+			const escapedDefinedAction = definedAction.replace(
+				/[.*+?^${}()|[\]\\]/g,
+				"\\$&",
+			);
+			const generalReferencePattern = new RegExp(
+				`\\b(${escapedDefinedAction})\\b`,
+				"gi",
 			);
 
-			// Don't highlight if it's in a definition line (starts with "A" or "label. A")
-			if (currentLine.match(/^(?:[\w.]+\.\s+)?A\s+/)) {
-				return match;
-			}
+			lineHtml = lineHtml.replace(generalReferencePattern, (match, p1) => {
+				// A placeholder check: If this match is already a placeholder, don't re-wrap it.
+				if (match.startsWith("\x00PLACEHOLDER") && match.endsWith("\x00")) {
+					return match; // Already processed
+				}
 
-			const placeholder = `\x00PLACEHOLDER${placeholderIndex}\x00`;
-			placeholders[placeholderIndex] =
-				`<span class="text-cyan-500">${match}</span>`;
-			placeholderIndex++;
-			return placeholder;
-		});
+				// IMPORTANT: If this match is the *exact* action part of the *current definition line*,
+				// AND that definition was *not* identified as 'rulesWithExternalReferences',
+				// THEN it should NOT be highlighted as a reference.
+				if (
+					isDefinitionLine &&
+					p1 === actionPartOfThisDefinition &&
+					// biome-ignore lint/style/noNonNullAssertion: <explanation>
+					!rulesWithExternalReferences.has(actionPartOfThisDefinition!)
+				) {
+					return match; // This is a definition that is NOT referenced, keep it unhighlighted.
+				}
+
+				// Otherwise, it's a true reference (or a definition that was referenced, which is already handled above)
+				// If it was already highlighted as a `referencedColor` definition, it will have a placeholder.
+				// The above check handles the case where it's a definition that *isn't* referenced.
+				// So, anything remaining is a reference.
+				return createPlaceholder(
+					`<span class="${referenceColor}">${match}</span>`,
+				);
+			});
+		}
+
+		processedHtmlLines.push(lineHtml);
 	});
 
-	// Step 4: Apply all other highlighting rules
+	html = processedHtmlLines.join("\n"); // Reassemble the lines
+
+	// Step 5: Apply all other static highlighting rules
+	// These should be run *after* the rule-based highlighting to avoid interference.
 
 	// Highlight numbers
 	html = html.replace(/\b(\d+)\b/g, (match, p1) => {
-		const placeholder = `\x00PLACEHOLDER${placeholderIndex}\x00`;
-		placeholders[placeholderIndex] =
-			`<span class="text-orange-500">${p1}</span>`;
-		placeholderIndex++;
-		return placeholder;
+		return createPlaceholder(`<span class="${numberColor}">${p1}</span>`);
 	});
 
-	// Highlight comparison phrases in purple
+	// Highlight comparison phrases (functions)
 	const comparisonPhrases = [
 		"is greater than or equal to",
 		"is at least",
-
 		"is less than or equal to",
 		"is no more than",
-
 		"is equal to",
 		"is the same as",
-
 		"is not equal to",
 		"is not the same as",
-
 		"is later than",
-
 		"is earlier than",
-
 		"is greater than",
-
 		"is less than",
-
 		"is in",
 		"is not in",
-
 		"contains",
 	];
-
 	const escapedPhrases = comparisonPhrases.map((phrase) =>
 		phrase.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
 	);
 	const phrasePattern = new RegExp(`\\b(${escapedPhrases.join("|")})\\b`, "g");
-
 	html = html.replace(phrasePattern, (match) => {
-		const placeholder = `\x00PLACEHOLDER${placeholderIndex}\x00`;
-		placeholders[placeholderIndex] =
-			`<span class="text-purple-500">${match}</span>`;
-		placeholderIndex++;
-		return placeholder;
+		return createPlaceholder(`<span class="${functionColor}">${match}</span>`);
 	});
 
 	// Highlight labels (ending with .) at the start of a line followed by space and "A"
+	// This needs careful placement. If the line structure is "LABEL. A **Object** Action",
+	// we want to highlight LABEL.
+	// This regex should still work on the HTML string with placeholders as it looks for raw text structure.
 	html = html.replace(/^([\w.]+\.)\s+(?=A\s)/gm, (match, p1) => {
-		const placeholder = `\x00PLACEHOLDER${placeholderIndex}\x00`;
-		placeholders[placeholderIndex] =
-			`<span class="text-yellow-500">${p1}</span>`;
-		placeholderIndex++;
-		return `${placeholder} `;
+		// We captured the full match including the space, so just return the placeholder and the space.
+		return `${createPlaceholder(`<span class="${labelColor}">${p1}</span>`)}`;
 	});
 
-	// Highlight lines starting with # (comments) - grey
+	// Highlight lines starting with # (comments)
 	html = html.replace(/(^#.*$)/gm, (match) => {
-		const placeholder = `\x00PLACEHOLDER${placeholderIndex}\x00`;
-		placeholders[placeholderIndex] =
-			`<span class="text-gray-400">${match}</span>`;
-		placeholderIndex++;
-		return placeholder;
+		return createPlaceholder(`<span class="${commentColor}">${match}</span>`);
 	});
 
-	// Highlight double asterisks - blue (keep ** markers), non-greedy
+	// Highlight double asterisks (objects) - non-greedy
 	html = html.replace(/(\*\*.+?\*\*)/g, (match) => {
-		const placeholder = `\x00PLACEHOLDER${placeholderIndex}\x00`;
-		placeholders[placeholderIndex] =
-			`<span class="text-blue-500">${match}</span>`;
-		placeholderIndex++;
-		return placeholder;
+		return createPlaceholder(`<span class="${objectColor}">${match}</span>`);
 	});
 
-	// Highlight double underscores - green (keep __ markers), non-greedy
+	// Highlight double underscores (selectors) - non-greedy
 	html = html.replace(/(__.+?__)/g, (match) => {
-		const placeholder = `\x00PLACEHOLDER${placeholderIndex}\x00`;
-		placeholders[placeholderIndex] =
-			`<span class="text-green-500">${match}</span>`;
-		placeholderIndex++;
-		return placeholder;
+		return createPlaceholder(`<span class="${selectorColor}">${match}</span>`);
 	});
 
-	// Step 5: Replace all placeholders with their actual HTML
+	// Step 6: Replace all placeholders with their actual HTML
 	placeholders.forEach((placeholder, i) => {
 		if (placeholder !== undefined && placeholder !== "") {
 			html = html.replace(`\x00PLACEHOLDER${i}\x00`, placeholder);
