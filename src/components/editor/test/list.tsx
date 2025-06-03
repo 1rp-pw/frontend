@@ -47,8 +47,7 @@ export function TestList({
 	onRepairTest,
 }: TestListProps) {
 	const [testInfo, setTestInfo] = useState<Test | null>();
-	const [deleteTestDialogOpen, setDeleteTestDialogOpen] =
-		useState(false);
+	const [deleteTestDialogOpen, setDeleteTestDialogOpen] = useState(false);
 	const [executionModalOpen, setExecutionModalOpen] = useState(false);
 
 	const handleDeleteTest = (test: Test | null) => {
@@ -184,12 +183,8 @@ export function TestList({
 		);
 	};
 
-	const validTests = tests.filter(
-		(t) => t.outcome.status !== "invalid",
-	);
-	const invalidTests = tests.filter(
-		(t) => t.outcome.status === "invalid",
-	);
+	const validTests = tests.filter((t) => t.outcome.status !== "invalid");
+	const invalidTests = tests.filter((t) => t.outcome.status === "invalid");
 
 	if (tests.length === 0) {
 		return (

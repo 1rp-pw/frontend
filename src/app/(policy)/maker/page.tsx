@@ -2,9 +2,9 @@
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
 import { Editor } from "~/components/editor/editor";
+import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
-import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { Button } from "~/components/ui/button";
 import { useTestStore } from "~/lib/state/maker";
 
@@ -20,11 +20,7 @@ interface Test {
 	outcome: Outcome;
 }
 
-async function runTestLive(
-	test: Test,
-	schema: object,
-	policyText: string,
-) {
+async function runTestLive(test: Test, schema: object, policyText: string) {
 	test.outcome.ran = true;
 
 	try {
@@ -100,7 +96,7 @@ export default function IDEPage() {
 								currentTest={currentTest}
 								onSaveTest={saveTest}
 							/>
-						): (
+						) : (
 							<div className={"content-around object-center text-center"}>
 								Select a test or create a new one
 							</div>

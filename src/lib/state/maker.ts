@@ -342,9 +342,7 @@ export const useTestStore = create<TestStore>((set, get) => ({
 					status: "not-run" as TestStatus,
 				},
 			};
-			const existingIndex = tests.findIndex(
-				(t) => t.id === currentTest.id,
-			);
+			const existingIndex = tests.findIndex((t) => t.id === currentTest.id);
 			const updatedTests = [...tests];
 			updatedTests[existingIndex] = updatedTest;
 			set({ tests: updatedTests, currentTest: updatedTest });
@@ -376,8 +374,7 @@ export const useTestStore = create<TestStore>((set, get) => ({
 		const { tests, currentTest } = get();
 		set({
 			tests: tests.filter((t) => t.id !== testId),
-			currentTest:
-				currentTest?.id === testId ? null : currentTest,
+			currentTest: currentTest?.id === testId ? null : currentTest,
 		});
 	},
 
@@ -530,8 +527,6 @@ export const useTestStore = create<TestStore>((set, get) => ({
 		const { tests, runTest } = get();
 		const runnableTests = tests.filter((t) => t.created); // Only run created tests
 		// Run all tests concurrently
-		await Promise.all(
-			runnableTests.map((test) => runTest(test.id)),
-		);
+		await Promise.all(runnableTests.map((test) => runTest(test.id)));
 	},
 }));

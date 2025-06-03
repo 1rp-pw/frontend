@@ -36,11 +36,7 @@ interface TestFormProps {
 
 const FIELDS_PER_PAGE = 4;
 
-export function TestForm({
-	schema,
-	currentTest,
-	onSaveTest,
-}: TestFormProps) {
+export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	const [formData, setFormData] = useState<any>({});
 	const [testName, setTestName] = useState("");
@@ -185,11 +181,7 @@ export function TestForm({
 	};
 
 	const handleSave = () => {
-		onSaveTest(
-			formData,
-			testName || `Test ${Date.now()}`,
-			expectPass,
-		);
+		onSaveTest(formData, testName || `Test ${Date.now()}`, expectPass);
 	};
 
 	const renderFormField = (field: {
@@ -294,8 +286,8 @@ export function TestForm({
 				<FileTextIcon className="mb-4 h-12 w-12 opacity-30" />
 				<h3 className="mb-2 font-medium text-lg">No Test Selected</h3>
 				<p className="max-w-xs text-sm">
-					Select an existing test from the list or click "New Test" to
-					create one
+					Select an existing test from the list or click "New Test" to create
+					one
 				</p>
 			</div>
 		);
