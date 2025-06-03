@@ -88,7 +88,7 @@ export function PolicyExecutionModal({
 				{condition.operator && condition.property && (
 					<div className="mb-2">
 						<strong>Condition:</strong> {condition.property.path}{" "}
-						{condition.operator.toLowerCase().replace(/([A-Z])/g, " $1")}{" "}
+						{condition.operator.replace(/([A-Z])/g, " $1")}{" "}
 						{condition.value?.value}
 					</div>
 				)}
@@ -99,11 +99,12 @@ export function PolicyExecutionModal({
 							<strong>Evaluation:</strong>
 						</div>
 						<div>
-							Left: {condition.evaluation_details.left_value.value} (
-							{condition.evaluation_details.left_value.type})
+							User Data (Left): {condition.evaluation_details.left_value.value}{" "}
+							({condition.evaluation_details.left_value.type})
 						</div>
 						<div>
-							Right: {condition.evaluation_details.right_value.value} (
+							Control Text (Right):{" "}
+							{condition.evaluation_details.right_value.value} (
 							{condition.evaluation_details.right_value.type})
 						</div>
 						<div>
@@ -185,7 +186,7 @@ export function PolicyExecutionModal({
 					</TabsContent>
 
 					<TabsContent value="text" className="mt-4">
-						<ScrollArea className="h-[60vh] min-h-[400px] w-full">
+						<ScrollArea className="h-[60vh] min-h-[400px] w-full bg-muted">
 							<div className="space-y-2 text-sm leading-relaxed">
 								{executionData.text.map((line, index) => {
 									// Process and render the line with tooltips
@@ -225,8 +226,8 @@ export function PolicyExecutionModal({
 											end: number;
 										}> = [];
 
-										// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
 										while (
+											// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
 											(propertyMatch = propertyRegex.exec(text)) !== null
 										) {
 											propertyMatches.push({
@@ -326,8 +327,8 @@ export function PolicyExecutionModal({
 
 												if (propertyPaths.has(normalized)) {
 													foundPath = propertyPaths.get(normalized);
-													// biome-ignore lint/style/noNonNullAssertion: <explanation>
 													foundValue = getValueFromPath(
+														// biome-ignore lint/style/noNonNullAssertion: <explanation>
 														foundPath!,
 														executionData.data,
 													);
