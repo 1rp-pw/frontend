@@ -44,21 +44,25 @@ export const highlightText = (text: string) => {
 	// biome-ignore lint/complexity/noForEach: it needs to loop
 	lines.forEach((currentLine) => {
 		const trimmedCurrentLine = currentLine.trim();
-		const actionPartOfCurrentDefinition = definitionLineToActionMap.get(
-			trimmedCurrentLine,
-		);
+		const actionPartOfCurrentDefinition =
+			definitionLineToActionMap.get(trimmedCurrentLine);
 
 		// For each defined rule, check if it's referenced in this line
-		allDefinedRuleActions.forEach((definedAction) => {
+		for (const definedAction of allDefinedRuleActions) {
 			// Create a regex for the defined action to find its occurrences
 			const escapedDefinedAction = definedAction.replace(
 				/[.*+?^${}()|[\]\\]/g,
 				"\\$&",
 			);
-			const referencePattern = new RegExp(`\\b(${escapedDefinedAction})\\b`, "gi");
+			const referencePattern = new RegExp(
+				`\\b(${escapedDefinedAction})\\b`,
+				"gi",
+			);
 
 			// Find all matches in the current line
+			// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 			let match;
+			// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
 			while ((match = referencePattern.exec(currentLine)) !== null) {
 				const matchedText = match[1];
 
@@ -67,13 +71,14 @@ export const highlightText = (text: string) => {
 				// then it's not an "external" reference.
 				if (
 					!(
-						actionPartOfCurrentDefinition && matchedText === actionPartOfCurrentDefinition
+						actionPartOfCurrentDefinition &&
+						matchedText === actionPartOfCurrentDefinition
 					)
 				) {
 					rulesWithExternalReferences.add(definedAction);
 				}
 			}
-		});
+		}
 	});
 
 	// Step 3: Create a placeholder system to protect HTML tags
@@ -89,7 +94,7 @@ export const highlightText = (text: string) => {
 	};
 
 	// Step 4: Apply highlighting based on our pre-analysis
-	let processedHtmlLines: string[] = [];
+	const processedHtmlLines: string[] = [];
 
 	// biome-ignore lint/complexity/noForEach: it needs to loop
 	lines.forEach((originalLine) => {
@@ -97,9 +102,8 @@ export const highlightText = (text: string) => {
 		const trimmedOriginalLine = originalLine.trim();
 
 		// Determine if this line is a definition line and get its action part
-		const actionPartOfThisDefinition = definitionLineToActionMap.get(
-			trimmedOriginalLine,
-		);
+		const actionPartOfThisDefinition =
+			definitionLineToActionMap.get(trimmedOriginalLine);
 		const isDefinitionLine = !!actionPartOfThisDefinition;
 
 		// First, apply highlighting for the "referenced" definitions
@@ -133,7 +137,7 @@ export const highlightText = (text: string) => {
 		// Now, apply highlighting for ALL references (including those that are not definitions,
 		// or those that are definitions but not themselves 'referencedColor')
 		// We need to iterate over all *potential* references
-		allDefinedRuleActions.forEach((definedAction) => {
+		for (const definedAction of allDefinedRuleActions) {
 			const escapedDefinedAction = definedAction.replace(
 				/[.*+?^${}()|[\]\\]/g,
 				"\\$&",
@@ -155,6 +159,7 @@ export const highlightText = (text: string) => {
 				if (
 					isDefinitionLine &&
 					p1 === actionPartOfThisDefinition &&
+					// biome-ignore lint/style/noNonNullAssertion: <explanation>
 					!rulesWithExternalReferences.has(actionPartOfThisDefinition!)
 				) {
 					return match; // This is a definition that is NOT referenced, keep it unhighlighted.
@@ -164,9 +169,11 @@ export const highlightText = (text: string) => {
 				// If it was already highlighted as a `referencedColor` definition, it will have a placeholder.
 				// The above check handles the case where it's a definition that *isn't* referenced.
 				// So, anything remaining is a reference.
-				return createPlaceholder(`<span class="${referenceColor}">${match}</span>`);
+				return createPlaceholder(
+					`<span class="${referenceColor}">${match}</span>`,
+				);
 			});
-		});
+		}
 
 		processedHtmlLines.push(lineHtml);
 	});
