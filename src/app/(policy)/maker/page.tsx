@@ -94,12 +94,16 @@ export default function IDEPage() {
 						Scenario Editor
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						{currentScenario && true && (
+						{currentScenario ? (
 							<ScenarioForm
 								schema={schema}
 								currentScenario={currentScenario}
 								onSaveScenario={saveScenario}
 							/>
+						): (
+							<div className={"content-around object-center text-center"}>
+								Select a scenario or create a new one
+							</div>
 						)}
 					</div>
 				</div>

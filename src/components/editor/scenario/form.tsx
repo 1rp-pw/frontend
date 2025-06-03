@@ -322,8 +322,6 @@ export function ScenarioForm({
 	const canGoNext = currentPage < totalPages - 1;
 	const canGoPrevious = currentPage > 0;
 
-	console.info("currentScenario", currentScenario);
-
 	// Show the form when a scenario is selected/being created and schema has properties
 	return (
 		<Tabs defaultValue={"form"}>
