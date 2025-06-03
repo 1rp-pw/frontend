@@ -13,6 +13,42 @@ export interface Outcome {
 	status: ScenarioStatus;
 }
 
+export interface ScenarioResultSet {
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	errors: any | null;
+	result: boolean;
+	trace: {
+		execution: Array<{
+			conditions: Array<{
+				evaluation_details?: {
+					comparison_result: boolean;
+					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+					left_value: { type: string; value: any };
+					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+					right_value: { type: string; value: any };
+				};
+				operator?: string;
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				property?: { path: string; value: any };
+				result: boolean;
+				selector?: { value: string };
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				value?: { pos: any; type: string; value: any };
+				referenced_rule_outcome?: string;
+				rule_name?: string;
+			}>;
+			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			outcome: { pos: any; value: string };
+			result: boolean;
+			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			selector: { pos: any; value: string };
+		}>;
+	};
+	text: string[];
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	data: any | null;
+}
+
 export interface Scenario {
 	id: string;
 	name: string;
@@ -21,7 +57,7 @@ export interface Scenario {
 	created: boolean; // Added to track if scenario has been saved
 	createdAt: Date;
 	outcome: Outcome;
-	resultSet: object | null;
+	resultSet: ScenarioResultSet | null;
 	schemaVersion?: string;
 }
 
@@ -76,7 +112,7 @@ const validateDataAgainstSchema = (data: any, schema: any): boolean => {
 		for (const [propName, propSchema] of Object.entries(schemaObj.properties)) {
 			if (propName in obj) {
 				const propValue = obj[propName];
-				// biome-ignore lint/suspicious/noExplicitAny: prop type can be anything thats the point
+				// biome-ignore lint/suspicious/noExplicitAny: prop type can be anything that's the point
 				const expectedType = (propSchema as any).type;
 
 				if (expectedType === "string" && typeof propValue !== "string")
@@ -473,6 +509,8 @@ export const useScenarioStore = create<ScenarioStore>((set, get) => ({
 					trace: resp.trace,
 					data: resp.data,
 					text: resp.text,
+					errors: resp.errors,
+					result: resp.result,
 				},
 			});
 		} catch (e) {
