@@ -15,20 +15,20 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
-import type { ScenarioResultSet } from "~/lib/state/maker";
+import type { TestResultSet } from "~/lib/state/maker";
 
 interface PolicyExecutionModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
-	executionData: ScenarioResultSet | null;
-	scenarioName?: string;
+	executionData: TestResultSet | null;
+	testName?: string;
 }
 
 export function PolicyExecutionModal({
 	open,
 	onOpenChange,
 	executionData,
-	scenarioName,
+	testName,
 }: PolicyExecutionModalProps) {
 	if (!executionData) return null;
 
@@ -125,7 +125,7 @@ export function PolicyExecutionModal({
 			<DialogContent className="max-w-none w-[90vw] max-h-[80vh] min-w-[600px] min-h-[500px] sm:max-w-none md:max-w-none lg:max-w-none xl:max-w-6xl">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
-						{scenarioName && <span>{scenarioName} - </span>}
+						{testName && <span>{testName} - </span>}
 						Policy Execution Results
 						<Badge variant={executionData.result ? "default" : "destructive"}>
 							{executionData.result ? "PASSED" : "FAILED"}

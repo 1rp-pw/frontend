@@ -14,7 +14,7 @@ import {
 	XIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { PolicyExecutionModal } from "~/components/editor/scenario/execution";
+import { PolicyExecutionModal } from "~/components/editor/test/execution";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -27,47 +27,47 @@ import {
 } from "~/components/ui/alert-dialog";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import type { Scenario, ScenarioStatus } from "~/lib/state/maker";
+import type { Test, TestStatus } from "~/lib/state/maker";
 
-interface ScenarioListProps {
-	scenarios: Scenario[];
-	currentScenario: Scenario | null;
-	onSelectScenario: (scenario: Scenario) => void;
-	onDeleteScenario: (scenarioId: string) => void;
-	onRunScenario: (scenarioId: string) => Promise<void>;
-	onRepairScenario: (scenarioId: string) => void;
+interface TestListProps {
+	tests: Test[];
+	currentTest: Test | null;
+	onSelectTest: (test: Test) => void;
+	onDeleteTest: (testId: string) => void;
+	onRunTest: (testId: string) => Promise<void>;
+	onRepairTest: (testId: string) => void;
 }
 
-export function ScenarioList({
-	scenarios,
-	currentScenario,
-	onSelectScenario,
-	onDeleteScenario,
-	onRunScenario,
-	onRepairScenario,
-}: ScenarioListProps) {
-	const [scenarioInfo, setScenarioInfo] = useState<Scenario | null>();
-	const [deleteScenarioDialogOpen, setDeleteScenarioDialogOpen] =
+export function TestList({
+	tests,
+	currentTest,
+	onSelectTest,
+	onDeleteTest,
+	onRunTest,
+	onRepairTest,
+}: TestListProps) {
+	const [testInfo, setTestInfo] = useState<Test | null>();
+	const [deleteTestDialogOpen, setDeleteTestDialogOpen] =
 		useState(false);
 	const [executionModalOpen, setExecutionModalOpen] = useState(false);
 
-	const handleDeleteScenario = (scenario: Scenario | null) => {
-		setScenarioInfo(scenario);
-		setDeleteScenarioDialogOpen(true);
+	const handleDeleteTest = (test: Test | null) => {
+		setTestInfo(test);
+		setDeleteTestDialogOpen(true);
 	};
 
-	const confirmDeleteScenario = () => {
-		if (scenarioInfo === null) {
+	const confirmDeleteTest = () => {
+		if (testInfo === null) {
 			return;
 		}
-		const scenarioId = scenarioInfo?.id || "";
+		const testId = testInfo?.id || "";
 
-		setDeleteScenarioDialogOpen(false);
-		onDeleteScenario(scenarioId);
+		setDeleteTestDialogOpen(false);
+		onDeleteTest(testId);
 	};
 
-	const getStatusIcon = (scenario: Scenario) => {
-		switch (scenario.outcome.status) {
+	const getStatusIcon = (test: Test) => {
+		switch (test.outcome.status) {
 			case "running":
 				return (
 					<Button variant={null} size="icon">
@@ -80,7 +80,7 @@ export function ScenarioList({
 						variant="ghost"
 						size="icon"
 						onClick={() => {
-							setScenarioInfo(scenario);
+							setTestInfo(test);
 							setExecutionModalOpen(true);
 						}}
 					>
@@ -94,7 +94,7 @@ export function ScenarioList({
 						size="icon"
 						onClick={() => {
 							setExecutionModalOpen(true);
-							setScenarioInfo(scenario);
+							setTestInfo(test);
 						}}
 					>
 						<CircleXIcon className="h-5 w-5 text-red-400" />
@@ -115,7 +115,7 @@ export function ScenarioList({
 		}
 	};
 
-	const getStatusBadge = (status: ScenarioStatus) => {
+	const getStatusBadge = (status: TestStatus) => {
 		switch (status) {
 			case "not-run":
 				return (
@@ -184,36 +184,36 @@ export function ScenarioList({
 		);
 	};
 
-	const validScenarios = scenarios.filter(
-		(s) => s.outcome.status !== "invalid",
+	const validTests = tests.filter(
+		(t) => t.outcome.status !== "invalid",
 	);
-	const invalidScenarios = scenarios.filter(
-		(s) => s.outcome.status === "invalid",
+	const invalidTests = tests.filter(
+		(t) => t.outcome.status === "invalid",
 	);
 
-	if (scenarios.length === 0) {
+	if (tests.length === 0) {
 		return (
 			<div className="p-4 text-center text-zinc-500">
 				<FileTextIcon className="mx-auto mb-2 h-8 w-8 opacity-50" />
-				<p className="text-sm">No scenarios created yet</p>
+				<p className="text-sm">No tests created yet</p>
 				<p className="mt-1 text-xs">
-					Build a schema first, then create a new scenario
+					Build a schema first, then create a new test
 				</p>
 			</div>
 		);
 	}
 
-	const renderScenario = (scenario: Scenario) => (
+	const renderTest = (test: Test) => (
 		<li
-			key={scenario.id}
+			key={test.id}
 			className={`cursor-pointer px-4 py-3 hover:bg-zinc-700 ${
-				currentScenario?.id === scenario.id ? "bg-zinc-700" : ""
+				currentTest?.id === test.id ? "bg-zinc-700" : ""
 			}`}
-			onClick={() => onSelectScenario(scenario)}
+			onClick={() => onSelectTest(test)}
 			onKeyDown={(e) => {
 				if (e.key === "Enter" || e.key === " ") {
 					e.preventDefault();
-					onSelectScenario(scenario);
+					onSelectTest(test);
 				}
 			}}
 		>
@@ -222,31 +222,31 @@ export function ScenarioList({
 					<FileTextIcon className="h-4 w-4 text-zinc-400" />
 					<div className="flex-1">
 						<div className="flex flex-wrap items-center gap-2">
-							<span className="font-medium text-sm">{scenario.name}</span>
-							{getStatusBadge(scenario.outcome.status || "not-run")}
-							{getExpectPassBadge(scenario.expectPass)}
+							<span className="font-medium text-sm">{test.name}</span>
+							{getStatusBadge(test.outcome.status || "not-run")}
+							{getExpectPassBadge(test.expectPass)}
 						</div>
 						<div className="text-xs text-zinc-500">
-							{scenario.createdAt.toLocaleDateString()}{" "}
-							{scenario.createdAt.toLocaleTimeString()}
+							{test.createdAt.toLocaleDateString()}{" "}
+							{test.createdAt.toLocaleTimeString()}
 						</div>
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
-					{getStatusIcon(scenario)}
+					{getStatusIcon(test)}
 
-					{scenario.outcome.status === "invalid" && onRepairScenario ? (
+					{test.outcome.status === "invalid" && onRepairTest ? (
 						<Button
 							variant="ghost"
 							size="icon"
 							onClick={(e) => {
 								e.stopPropagation();
-								if (scenario.id) {
-									onRepairScenario(scenario.id);
+								if (test.id) {
+									onRepairTest(test.id);
 								}
 							}}
 							className="h-6 w-6 text-zinc-400 hover:text-amber-400"
-							title="Repair scenario to match current schema"
+							title="Repair test to match current schema"
 						>
 							<RefreshCwIcon className="h-4 w-4" />
 						</Button>
@@ -256,19 +256,19 @@ export function ScenarioList({
 							size="icon"
 							onClick={(e) => {
 								e.stopPropagation();
-								if (scenario.id) {
-									onRunScenario(scenario.id);
+								if (test.id) {
+									onRunTest(test.id);
 								}
 							}}
 							className="h-6 w-6 text-zinc-400 hover:text-green-400"
 							disabled={
-								scenario.outcome.status === "running" ||
-								scenario.outcome.status === "invalid"
+								test.outcome.status === "running" ||
+								test.outcome.status === "invalid"
 							}
 							title={
-								scenario.outcome.status === "invalid"
-									? "Repair scenario first"
-									: "Run scenario"
+								test.outcome.status === "invalid"
+									? "Repair test first"
+									: "Run test"
 							}
 						>
 							<PlayIcon className="h-4 w-4" />
@@ -281,9 +281,9 @@ export function ScenarioList({
 						className="h-6 w-6 text-zinc-400 hover:text-red-400"
 						onClick={(e) => {
 							e.stopPropagation();
-							handleDeleteScenario(scenario);
+							handleDeleteTest(test);
 						}}
-						disabled={scenario.outcome.status === "running"}
+						disabled={test.outcome.status === "running"}
 					>
 						<TrashIcon className="h-4 w-4" />
 					</Button>
@@ -294,14 +294,14 @@ export function ScenarioList({
 
 	return (
 		<div className={"w-full"}>
-			{validScenarios.length > 0 && (
+			{validTests.length > 0 && (
 				<div>
 					<ul className={"divide-y divide-zinc-700"}>
-						{validScenarios.map(renderScenario)}
+						{validTests.map(renderTest)}
 					</ul>
 				</div>
 			)}
-			{invalidScenarios.length > 0 && (
+			{invalidTests.length > 0 && (
 				<div className={"mt-4"}>
 					<div
 						className={
@@ -310,11 +310,11 @@ export function ScenarioList({
 					>
 						<TriangleAlertIcon className="h-4 w-4" />
 						<span className={"font-medium text-amber-300 text-sm"}>
-							Schema Changed - Scenarios need repair
+							Schema Changed - Tests need repair
 						</span>
 					</div>
 					<ul className={"divide-y divide-zinc-700"}>
-						{invalidScenarios.map(renderScenario)}
+						{invalidTests.map(renderTest)}
 					</ul>
 				</div>
 			)}
@@ -322,29 +322,29 @@ export function ScenarioList({
 			<PolicyExecutionModal
 				open={executionModalOpen}
 				onOpenChange={setExecutionModalOpen}
-				executionData={scenarioInfo?.resultSet || null}
-				scenarioName={scenarioInfo?.name}
+				executionData={testInfo?.resultSet || null}
+				testName={testInfo?.name}
 			/>
 
-			<AlertDialog open={deleteScenarioDialogOpen}>
+			<AlertDialog open={deleteTestDialogOpen}>
 				<AlertDialogContent>
 					<AlertDialogHeader>
 						<AlertDialogTitle className="text-sm">
 							Are you sure you want to delete ?
 						</AlertDialogTitle>
 						<AlertDialogDescription>
-							Delete {scenarioInfo?.name}?
+							Delete {testInfo?.name}?
 						</AlertDialogDescription>
 					</AlertDialogHeader>
 					<AlertDialogFooter>
 						<AlertDialogCancel
-							onClick={() => setDeleteScenarioDialogOpen(false)}
+							onClick={() => setDeleteTestDialogOpen(false)}
 							className={"cursor-pointer"}
 						>
 							Cancel
 						</AlertDialogCancel>
 						<AlertDialogAction
-							onClick={confirmDeleteScenario}
+							onClick={confirmDeleteTest}
 							className={"cursor-pointer"}
 						>
 							Confirm
