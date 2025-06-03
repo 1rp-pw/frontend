@@ -14,6 +14,7 @@ import {
 	XIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { PolicyExecutionModal } from "~/components/editor/scenario/execution";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -48,6 +49,7 @@ export function ScenarioList({
 	const [scenarioInfo, setScenarioInfo] = useState<Scenario | null>();
 	const [deleteScenarioDialogOpen, setDeleteScenarioDialogOpen] =
 		useState(false);
+	const [executionModalOpen, setExecutionModalOpen] = useState(false);
 
 	const handleDeleteScenario = (scenario: Scenario | null) => {
 		setScenarioInfo(scenario);
@@ -64,18 +66,52 @@ export function ScenarioList({
 		onDeleteScenario(scenarioId);
 	};
 
-	const getStatusIcon = (status: ScenarioStatus) => {
-		switch (status) {
-			case "not-run":
-				return <CircleAlertIcon className="h-5 w-5 text-zinc-400" />;
+	const getStatusIcon = (scenario: Scenario) => {
+		switch (scenario.outcome.status) {
 			case "running":
-				return <Loader2Icon className="h-5 w-5 animate-spin text-blue-400" />;
+				return (
+					<Button variant={null} size="icon">
+						<Loader2Icon className="h-5 w-5 animate-spin text-blue-400" />
+					</Button>
+				);
 			case "passed":
-				return <CircleCheckIcon className="h-5 w-5 text-green-400" />;
+				return (
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => {
+							setScenarioInfo(scenario);
+							setExecutionModalOpen(true);
+						}}
+					>
+						<CircleCheckIcon className="h-5 w-5 text-green-400" />
+					</Button>
+				);
 			case "failed":
-				return <CircleXIcon className="h-5 w-5 text-red-400" />;
+				return (
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => {
+							setExecutionModalOpen(true);
+							setScenarioInfo(scenario);
+						}}
+					>
+						<CircleXIcon className="h-5 w-5 text-red-400" />
+					</Button>
+				);
 			case "invalid":
-				return <TriangleAlertIcon className="h-5 w-5 text-amber-400" />;
+				return (
+					<Button variant={null} size="icon">
+						<TriangleAlertIcon className="h-5 w-5 text-amber-400" />
+					</Button>
+				);
+			default:
+				return (
+					<Button variant={null} size="icon">
+						<CircleAlertIcon className="h-5 w-5 text-zinc-400" />
+					</Button>
+				);
 		}
 	};
 
@@ -197,7 +233,7 @@ export function ScenarioList({
 					</div>
 				</div>
 				<div className="flex items-center gap-2">
-					{getStatusIcon(scenario.outcome.status || "not-run")}
+					{getStatusIcon(scenario)}
 
 					{scenario.outcome.status === "invalid" && onRepairScenario ? (
 						<Button
@@ -282,6 +318,13 @@ export function ScenarioList({
 					</ul>
 				</div>
 			)}
+
+			<PolicyExecutionModal
+				open={executionModalOpen}
+				onOpenChange={setExecutionModalOpen}
+				executionData={scenarioInfo?.resultSet || null}
+				scenarioName={scenarioInfo?.name}
+			/>
 
 			<AlertDialog open={deleteScenarioDialogOpen}>
 				<AlertDialogContent>
