@@ -1,15 +1,15 @@
 "use client";
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
+import { useEffect } from "react";
 import { Editor } from "~/components/editor/editor";
-import { SavePolicy } from "~/components/editor/save";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
 import { Button } from "~/components/ui/button";
 import { usePolicyStore } from "~/lib/state/maker";
 
-export default function IDEPage() {
+export default function Maker({ policy_id }: { policy_id: string }) {
 	const {
 		schema,
 		tests,
@@ -24,14 +24,23 @@ export default function IDEPage() {
 		runTest,
 		repairTest,
 		runAllTests,
+		setPolicyId,
+		getPolicy,
 	} = usePolicyStore();
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		setPolicyId(policy_id);
+		getPolicy();
+	}, []);
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
 				<h1 className="font-bold text-xl">Policy Maker</h1>
 				<div className={"ml-auto flex items-center gap-1"}>
-					<SavePolicy />
+					<Button>Update Draft</Button>
+					<Button>Publish Policy</Button>
 				</div>
 			</header>
 
@@ -72,7 +81,7 @@ export default function IDEPage() {
 						<SchemaBuilder
 							schema={schema}
 							setSchema={setSchema}
-							newImportAllowed={true}
+							newImportAllowed={false}
 						/>
 					</div>
 				</div>

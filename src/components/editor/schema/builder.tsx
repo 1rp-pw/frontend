@@ -30,6 +30,7 @@ interface SchemaBuilderProps {
 	schema: any;
 	// biome-ignore lint/suspicious/noExplicitAny: still dynamic
 	setSchema: (schema: any) => void;
+	newImportAllowed: boolean;
 }
 
 type TabType = "edit" | "import";
@@ -57,7 +58,11 @@ const DEFAULT_SCHEMA = {
 	},
 };
 
-export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
+export function SchemaBuilder({
+	schema,
+	setSchema,
+	newImportAllowed,
+}: SchemaBuilderProps) {
 	// Initialize with default schema if schema is empty or minimal
 	const initializeSchema = () => {
 		if (
@@ -299,17 +304,21 @@ export function SchemaBuilder({ schema, setSchema }: SchemaBuilderProps) {
 	const currentSchema = getCurrentSchema();
 	const breadcrumb = editingObject ? editingObject.split(".") : [];
 
+	const gridCols = newImportAllowed ? "grid-cols-2" : "grid-cols-1";
+
 	return (
 		<Tabs defaultValue={"edit"}>
-			<TabsList className={"grid w-full grid-cols-2"}>
+			<TabsList className={`grid w-full ${gridCols}`}>
 				<TabsTrigger value={"edit"}>
 					<EditIcon className="h-4 w-4" />
 					Edit Schema
 				</TabsTrigger>
-				<TabsTrigger value={"import"}>
-					<FileTextIcon className="h-4 w-4" />
-					Import Schema
-				</TabsTrigger>
+				{newImportAllowed && (
+					<TabsTrigger value={"import"}>
+						<FileTextIcon className="h-4 w-4" />
+						Import Schema
+					</TabsTrigger>
+				)}
 			</TabsList>
 			<TabsContent value={"edit"}>
 				<>

@@ -7,7 +7,12 @@ export async function POST(request: Request) {
 
 		const response = await fetch(`${env.API_SERVER}/policy`, {
 			method: "POST",
-			body: JSON.stringify({ name, text, tests, schema }),
+			body: JSON.stringify({
+				name,
+				rule: text,
+				tests,
+				data_model: schema,
+			}),
 			cache: "no-store",
 		});
 
