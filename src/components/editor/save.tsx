@@ -53,8 +53,10 @@ export function SavePolicy() {
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		setIsLoading(true);
 		try {
-			setPolicyName(data.policyName);
-			const result = await savePolicy();
+			if (!id) {
+				setPolicyName(data.policyName);
+			}
+			const result = await savePolicy()
 			if (result.success) {
 				toast("Policy Saved!");
 				setFormOpen(false);
@@ -74,6 +76,14 @@ export function SavePolicy() {
 			setFormOpen(false);
 		}
 	};
+
+	if (id) {
+		return <Button disabled={isLoading} onClick={() => {
+			onSubmit({policyName: name}).then()
+		}}>
+			{isLoading ? "Saving..." : id ? "Update Draft" : "Save Policy"}
+		</Button>
+	}
 
 	return (
 		<Dialog open={formOpen} onOpenChange={setFormOpen}>

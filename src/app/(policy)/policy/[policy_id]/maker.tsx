@@ -7,6 +7,7 @@ import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
 import { Button } from "~/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
 import { usePolicyStore } from "~/lib/state/maker";
 import {SavePolicy} from "~/components/editor/save";
 
@@ -29,19 +30,19 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		getPolicy,
 	} = usePolicyStore();
 
+	// Check if all tests have been run and passed
+	const createdTests = tests.filter(test => test.created);
+	const allTestsPassed = createdTests.length > 0 && 
+		createdTests.every(test => 
+			test.outcome.ran && 
+			test.outcome.status === 'passed'
+		);
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		setPolicyId(policy_id);
 		getPolicy();
 	}, []);
-
-	const createdTests = tests.filter(test => test.created);
-	const allTestsPassed = createdTests.length > 0 &&
-		createdTests.every(test =>
-			test.outcome.ran &&
-			test.outcome.status === 'passed'
-		);
-
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
@@ -49,7 +50,27 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 				<h1 className="font-bold text-xl">Policy Maker</h1>
 				<div className={"ml-auto flex items-center gap-1"}>
 					<SavePolicy />
-					<Button>Publish Policy</Button>
+					{!allTestsPassed ? (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<span>
+									<Button 
+										disabled={!allTestsPassed}
+										className={!allTestsPassed ? "opacity-50 cursor-not-allowed" : ""}
+									>
+										Publish Policy
+									</Button>
+								</span>
+							</TooltipTrigger>
+							<TooltipContent>
+								<p>All tests must be run and passed before publishing</p>
+							</TooltipContent>
+						</Tooltip>
+					) : (
+						<Button>
+							Publish Policy
+						</Button>
+					)}
 				</div>
 			</header>
 

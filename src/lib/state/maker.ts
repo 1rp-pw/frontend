@@ -81,6 +81,7 @@ interface PolicyStore {
 	tests: Test[];
 	currentTest: Test | null;
 
+
 	// Schema stuff
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	setSchema: (schema: any) => void;
@@ -291,7 +292,7 @@ const defaultSchema = {
 	},
 };
 
-export const usePolicyStore = create<PolicyStore>((set, get) => ({
+export const  usePolicyStore = create<PolicyStore>((set, get) => ({
 	tests: defaultTests.map((test) => ({
 		...test,
 		schemaVersion: generateSchemaHash(defaultSchema),
@@ -456,7 +457,51 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 		set({ tests: updatedTests });
 	},
 
-	getPolicy: async () => {},
+	getPolicy: async() => {
+		const {id} = get();
+
+		try {
+			const response = await fetch(`/api/policy?id=${id}`, {
+				method: "GET",
+				headers: { "Content-Type": "application/json" },
+				body: null,
+			});
+
+			if (!response.ok) {
+				const errorData = await response.json().catch(() => ({}));
+				return {
+					success: false,
+					error: errorData.message || `Server error: ${response.status}`,
+				};
+			}
+
+			const result = await response.json();
+			set({
+				id: result.id,
+				name: result.name,
+				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				tests: result.tests.map((test: any) => ({
+					...test,
+					schemaVersion: result.schemaVersion,
+				})),
+				text: result.text,
+				schema: result.schema,
+				schemaVersion: result.schemaVersion,
+			})
+			console.info("result", result)
+
+			return {
+				success: true,
+			}
+		} catch (error) {
+			console.error("Error getting policy", error)
+
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : "Failed to get policy",
+			};
+		}
+	},
 
 	savePolicy: async (): Promise<{
 		success: boolean;
@@ -489,11 +534,14 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 			const result = await response.json();
 			if (result.id) {
 				set({ id: result.id });
+				return {
+					success: true,
+					returnId: result.id,
+				}
 			}
 
 			return {
 				success: true,
-				returnId: result.id,
 			};
 		} catch (error) {
 			return {
