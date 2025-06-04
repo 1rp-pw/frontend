@@ -69,7 +69,7 @@ export default function IDEPage() {
 						Schema Builder
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<SchemaBuilder schema={schema} setSchema={setSchema} />
+						<SchemaBuilder schema={schema} setSchema={setSchema} newImportAllowed={true} />
 					</div>
 				</div>
 

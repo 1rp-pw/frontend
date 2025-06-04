@@ -62,22 +62,7 @@ export interface Test {
 }
 
 interface PolicyStore {
-	tests: Test[];
-	currentTest: Test | null;
-	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
-	schema: any;
-	text: string;
-	schemaVersion: string;
-	name: string;
-	id: string | null;
-
-	// Actions
-	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
-	setSchema: (schema: any) => void;
-	setPolicyText: (text: string) => void;
-	setPolicyName: (name: string) => void;
-	setPolicyId: (id: string) => void;
-
+	// Test stuff
 	createTest: () => void;
 	saveTest: (
 		// biome-ignore lint/suspicious/noExplicitAny: test data can be anything
@@ -93,11 +78,30 @@ interface PolicyStore {
 	validateTestAgainstSchema: (test: Test) => boolean;
 	markInvalidTests: () => void;
 	repairTest: (testId: string) => void;
+	tests: Test[];
+	currentTest: Test | null;
+
+
+	// Schema stuff
+	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
+	setSchema: (schema: any) => void;
+	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
+	schema: any;
+	schemaVersion: string;
+
+	// Policy stuff
+	text: string;
+	name: string;
+	id: string | null;
+	setPolicyText: (text: string) => void;
+	setPolicyName: (name: string) => void;
+	setPolicyId: (id: string) => void;
 	savePolicy: () => Promise<{
 		success: boolean;
 		returnId?: string;
 		error?: string;
 	}>;
+	getPolicy: () => void;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: schema can be anything
@@ -288,7 +292,7 @@ const defaultSchema = {
 	},
 };
 
-export const usePolicyStore = create<PolicyStore>((set, get) => ({
+export const  usePolicyStore = create<PolicyStore>((set, get) => ({
 	tests: defaultTests.map((test) => ({
 		...test,
 		schemaVersion: generateSchemaHash(defaultSchema),
@@ -451,6 +455,10 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 			return test;
 		});
 		set({ tests: updatedTests });
+	},
+
+	getPolicy: async() => {
+
 	},
 
 	savePolicy: async (): Promise<{
