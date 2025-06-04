@@ -8,6 +8,7 @@ import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
 import { Button } from "~/components/ui/button";
 import { usePolicyStore } from "~/lib/state/maker";
+import {SavePolicy} from "~/components/editor/save";
 
 export default function Maker({ policy_id }: { policy_id: string }) {
 	const {
@@ -34,12 +35,20 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		getPolicy();
 	}, []);
 
+	const createdTests = tests.filter(test => test.created);
+	const allTestsPassed = createdTests.length > 0 &&
+		createdTests.every(test =>
+			test.outcome.ran &&
+			test.outcome.status === 'passed'
+		);
+
+
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
 				<h1 className="font-bold text-xl">Policy Maker</h1>
 				<div className={"ml-auto flex items-center gap-1"}>
-					<Button>Update Draft</Button>
+					<SavePolicy />
 					<Button>Publish Policy</Button>
 				</div>
 			</header>
