@@ -27,19 +27,12 @@ import {
 import { Input } from "~/components/ui/input";
 import { type Test, usePolicyStore } from "~/lib/state/maker";
 
-interface policy {
-	name: string;
-	tests: Test[];
-	text: string;
-	schema: string;
-}
-
 export function SavePolicy() {
 	const [formOpen, setFormOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
-	const { id, setPolicyName, savePolicy } = usePolicyStore();
+	const { id, name, setPolicyName, savePolicy } = usePolicyStore();
 
 	const formSchema = z.object({
 		policyName: z.string().min(2, "Policy name needs to be more than 2 chars"),
@@ -55,7 +48,9 @@ export function SavePolicy() {
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		setIsLoading(true);
 		try {
-			setPolicyName(data.policyName);
+			if (!id) {
+				setPolicyName(data.policyName);
+			}
 			const result = await savePolicy();
 			if (result.success) {
 				toast("Policy Saved!");
@@ -77,14 +72,27 @@ export function SavePolicy() {
 		}
 	};
 
+	if (id) {
+		return (
+			<Button
+				disabled={isLoading}
+				onClick={() => {
+					onSubmit({ policyName: name }).then();
+				}}
+			>
+				{isLoading ? "Saving..." : id ? "Update Draft" : "Save Policy"}
+			</Button>
+		);
+	}
+
 	return (
 		<Dialog open={formOpen} onOpenChange={setFormOpen}>
 			<DialogTrigger asChild>
-				<Button className={"rounded text-sm"}>Save Policy</Button>
+				<Button className={"rounded text-sm"}>{id ? "Update" : "Save"}</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Save Policy</DialogTitle>
+					<DialogTitle>{id ? `Update ${name}` : "Save Policy"}</DialogTitle>
 					<DialogDescription>Save the draft policy</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
@@ -109,7 +117,7 @@ export function SavePolicy() {
 								</Button>
 							</DialogClose>
 							<Button type="submit" disabled={isLoading}>
-								{isLoading ? "Saving..." : "Save Policy"}
+								{isLoading ? "Saving..." : id ? "Update Draft" : "Save Policy"}
 							</Button>
 						</div>
 					</form>
