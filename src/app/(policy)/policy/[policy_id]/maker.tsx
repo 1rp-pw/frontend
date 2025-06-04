@@ -17,6 +17,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		tests,
 		currentTest,
 		text,
+		name,
 		setSchema,
 		setPolicyText,
 		createTest,
@@ -47,7 +48,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
-				<h1 className="font-bold text-xl">Policy Maker</h1>
+				<h1 className="font-bold text-xl">{name}</h1>
 				<div className={"ml-auto flex items-center gap-1"}>
 					<SavePolicy />
 					{!allTestsPassed ? (

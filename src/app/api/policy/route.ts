@@ -47,6 +47,7 @@ export async function PUT(request: Request) {
 
 		return NextResponse.json({}, { status: 200 });
 	} catch (error) {
+
 		return NextResponse.json({ error: error }, { status: 500 });
 	}
 }
@@ -72,10 +73,12 @@ export async function GET(request: NextRequest) {
 			)
 		}
 
+		console.info("No policy found", resp);
+
 		return NextResponse.json({error: "failed request"}, { status: 500 });
 	} catch (error) {
+		console.error("Error while creating route", error, request);
+
 		return NextResponse.json({ error: error }, { status: 500 });
 	}
-
-
 }

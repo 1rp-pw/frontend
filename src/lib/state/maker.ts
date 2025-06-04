@@ -482,13 +482,13 @@ export const  usePolicyStore = create<PolicyStore>((set, get) => ({
 				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 				tests: result.tests.map((test: any) => ({
 					...test,
-					schemaVersion: result.schemaVersion,
+					createdAt: new Date(test.createdAt), // Convert string to Date object
+					schemaVersion: test.schemaVersion,
 				})),
-				text: result.text,
+				text: result.rule,
 				schema: result.schema,
 				schemaVersion: result.schemaVersion,
 			})
-			console.info("result", result)
 
 			return {
 				success: true,
