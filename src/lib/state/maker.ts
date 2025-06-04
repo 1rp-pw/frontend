@@ -81,7 +81,6 @@ interface PolicyStore {
 	tests: Test[];
 	currentTest: Test | null;
 
-
 	// Schema stuff
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	setSchema: (schema: any) => void;
@@ -292,7 +291,7 @@ const defaultSchema = {
 	},
 };
 
-export const  usePolicyStore = create<PolicyStore>((set, get) => ({
+export const usePolicyStore = create<PolicyStore>((set, get) => ({
 	tests: defaultTests.map((test) => ({
 		...test,
 		schemaVersion: generateSchemaHash(defaultSchema),
@@ -457,8 +456,8 @@ export const  usePolicyStore = create<PolicyStore>((set, get) => ({
 		set({ tests: updatedTests });
 	},
 
-	getPolicy: async() => {
-		const {id} = get();
+	getPolicy: async () => {
+		const { id } = get();
 
 		try {
 			const response = await fetch(`/api/policy?id=${id}`, {
@@ -488,13 +487,13 @@ export const  usePolicyStore = create<PolicyStore>((set, get) => ({
 				text: result.rule,
 				schema: result.schema,
 				schemaVersion: result.schemaVersion,
-			})
+			});
 
 			return {
 				success: true,
-			}
+			};
 		} catch (error) {
-			console.error("Error getting policy", error)
+			console.error("Error getting policy", error);
 
 			return {
 				success: false,
@@ -537,7 +536,7 @@ export const  usePolicyStore = create<PolicyStore>((set, get) => ({
 				return {
 					success: true,
 					returnId: result.id,
-				}
+				};
 			}
 
 			return {

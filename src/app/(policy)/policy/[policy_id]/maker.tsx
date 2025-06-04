@@ -3,13 +3,17 @@
 import { FilePlusIcon, PlayIcon } from "lucide-react";
 import { useEffect } from "react";
 import { Editor } from "~/components/editor/editor";
+import { SavePolicy } from "~/components/editor/save";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
 import { Button } from "~/components/ui/button";
-import { Tooltip, TooltipContent, TooltipTrigger } from "~/components/ui/tooltip";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "~/components/ui/tooltip";
 import { usePolicyStore } from "~/lib/state/maker";
-import {SavePolicy} from "~/components/editor/save";
 
 export default function Maker({ policy_id }: { policy_id: string }) {
 	const {
@@ -32,11 +36,11 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 	} = usePolicyStore();
 
 	// Check if all tests have been run and passed
-	const createdTests = tests.filter(test => test.created);
-	const allTestsPassed = createdTests.length > 0 && 
-		createdTests.every(test => 
-			test.outcome.ran && 
-			test.outcome.status === 'passed'
+	const createdTests = tests.filter((test) => test.created);
+	const allTestsPassed =
+		createdTests.length > 0 &&
+		createdTests.every(
+			(test) => test.outcome.ran && test.outcome.status === "passed",
 		);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -55,9 +59,11 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<span>
-									<Button 
+									<Button
 										disabled={!allTestsPassed}
-										className={!allTestsPassed ? "opacity-50 cursor-not-allowed" : ""}
+										className={
+											!allTestsPassed ? "cursor-not-allowed opacity-50" : ""
+										}
 									>
 										Publish Policy
 									</Button>
@@ -68,9 +74,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 							</TooltipContent>
 						</Tooltip>
 					) : (
-						<Button>
-							Publish Policy
-						</Button>
+						<Button>Publish Policy</Button>
 					)}
 				</div>
 			</header>

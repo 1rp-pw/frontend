@@ -32,12 +32,7 @@ export function SavePolicy() {
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
-	const {
-		id,
-		name,
-		setPolicyName,
-		savePolicy,
-	} = usePolicyStore();
+	const { id, name, setPolicyName, savePolicy } = usePolicyStore();
 
 	const formSchema = z.object({
 		policyName: z.string().min(2, "Policy name needs to be more than 2 chars"),
@@ -56,7 +51,7 @@ export function SavePolicy() {
 			if (!id) {
 				setPolicyName(data.policyName);
 			}
-			const result = await savePolicy()
+			const result = await savePolicy();
 			if (result.success) {
 				toast("Policy Saved!");
 				setFormOpen(false);
@@ -78,11 +73,16 @@ export function SavePolicy() {
 	};
 
 	if (id) {
-		return <Button disabled={isLoading} onClick={() => {
-			onSubmit({policyName: name}).then()
-		}}>
-			{isLoading ? "Saving..." : id ? "Update Draft" : "Save Policy"}
-		</Button>
+		return (
+			<Button
+				disabled={isLoading}
+				onClick={() => {
+					onSubmit({ policyName: name }).then();
+				}}
+			>
+				{isLoading ? "Saving..." : id ? "Update Draft" : "Save Policy"}
+			</Button>
+		);
 	}
 
 	return (

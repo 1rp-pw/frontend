@@ -1,4 +1,4 @@
-import {NextRequest, NextResponse} from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { env } from "~/env";
 
 export async function POST(request: Request) {
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
 	try {
-		const {id, text, tests, schema, name} = await request.json();
+		const { id, text, tests, schema, name } = await request.json();
 
 		await fetch(`${env.API_SERVER}/policy/${id}`, {
 			method: "PUT",
@@ -47,7 +47,6 @@ export async function PUT(request: Request) {
 
 		return NextResponse.json({}, { status: 200 });
 	} catch (error) {
-
 		return NextResponse.json({ error: error }, { status: 500 });
 	}
 }
@@ -70,12 +69,12 @@ export async function GET(request: NextRequest) {
 					schema: resp.data_model,
 				},
 				{ status: 200 },
-			)
+			);
 		}
 
 		console.info("No policy found", resp);
 
-		return NextResponse.json({error: "failed request"}, { status: 500 });
+		return NextResponse.json({ error: "failed request" }, { status: 500 });
 	} catch (error) {
 		console.error("Error while creating route", error, request);
 
