@@ -58,7 +58,11 @@ const DEFAULT_SCHEMA = {
 	},
 };
 
-export function SchemaBuilder({ schema, setSchema, newImportAllowed }: SchemaBuilderProps) {
+export function SchemaBuilder({
+	schema,
+	setSchema,
+	newImportAllowed,
+}: SchemaBuilderProps) {
 	// Initialize with default schema if schema is empty or minimal
 	const initializeSchema = () => {
 		if (

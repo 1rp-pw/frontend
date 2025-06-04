@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 				name,
 				rule: text,
 				tests,
-				data_model: schema
+				data_model: schema,
 			}),
 			cache: "no-store",
 		});
