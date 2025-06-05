@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import type { PolicySpec } from "~/lib/types";
 
 export type TestStatus =
 	| "not-run"
@@ -53,8 +54,8 @@ export interface Test {
 	id: string;
 	name: string;
 	data: object;
-	expectPass: boolean; // Added expectPass property
-	created: boolean; // Added to track if test has been saved
+	expectPass: boolean;
+	created: boolean;
 	createdAt: Date;
 	outcome: Outcome;
 	resultSet: TestResultSet | null;
@@ -62,6 +63,14 @@ export interface Test {
 }
 
 interface PolicyStore {
+	policySpec: PolicySpec | null;
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	schema: any;
+	schemaVersion: string;
+	rule: string;
+	name: string;
+	id: string | null;
+	
 	// Test stuff
 	createTest: () => void;
 	saveTest: (
@@ -69,7 +78,7 @@ interface PolicyStore {
 		testData: any,
 		name?: string,
 		expectPass?: boolean,
-	) => void; // Updated to include expectPass
+	) => void;
 	selectTest: (test: Test) => void;
 	deleteTest: (testId: string) => void;
 	runTest: (testId: string) => Promise<void>;
@@ -81,26 +90,21 @@ interface PolicyStore {
 	tests: Test[];
 	currentTest: Test | null;
 
-	// Schema stuff
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	setSchema: (schema: any) => void;
-	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
-	schema: any;
-	schemaVersion: string;
 
 	// Policy stuff
-	rule: string;
-	name: string;
-	id: string | null;
 	setPolicyRule: (rule: string) => void;
 	setPolicyName: (name: string) => void;
 	setPolicyId: (id: string) => void;
+	setPolicySpec: (spec: PolicySpec) => void;
+	updatePolicySpec: (updates: Partial<PolicySpec>) => void;
 	savePolicy: () => Promise<{
 		success: boolean;
 		returnId?: string;
 		error?: string;
 	}>;
-	getPolicy: () => void;
+	getPolicy: (policyId?: string) => void;
 
 	// Reset
 	reset: () => void;
@@ -169,7 +173,6 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 			const currentValue = obj[propName];
 
 			if (currentValue !== undefined && currentValue !== null) {
-				// Try to preserve existing value if type matches
 				if (expectedType === "string" && typeof currentValue === "string") {
 					repairedObj[propName] = currentValue;
 				} else if (
@@ -224,57 +227,7 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 	return repairObject(data, schema);
 };
 
-// Default tests
-const defaultTests: Test[] = [
-	{
-		id: "default-1",
-		name: "Passing",
-		data: {
-			person: {
-				name: "Tester",
-				drivingTestScore: 70,
-				age: 19,
-			},
-		},
-		expectPass: true, // Expects test to pass
-		created: true, // Already created
-		createdAt: new Date(),
-		outcome: {
-			passed: false,
-			ran: false,
-			status: "not-run" as TestStatus,
-		},
-		resultSet: null,
-	},
-	{
-		id: "default-2",
-		name: "Failing",
-		data: {
-			person: {
-				name: "Tester",
-				drivingTestScore: 30,
-				age: 19,
-			},
-		},
-		expectPass: false, // Expects test to fail (fail = pass)
-		created: true, // Already created
-		createdAt: new Date(),
-		outcome: {
-			passed: false,
-			ran: false,
-			status: "not-run" as TestStatus,
-		},
-		resultSet: null,
-	},
-];
-
-const defaultRule = `# Driving Test Rules
-A **Person** gets a full driving license
- if the __age__ of the **Person** is greater than or equal to 17
- and the **Person** passes the practical driving test
- and the **Person** passes the eye test.
-`;
-
+// Default schema and rule
 const defaultSchema = {
 	title: "Person Model",
 	type: "object",
@@ -301,303 +254,474 @@ const defaultSchema = {
 	},
 };
 
-export const usePolicyStore = create<PolicyStore>((set, get) => ({
-	tests: defaultTests.map((test) => ({
-		...test,
-		schemaVersion: generateSchemaHash(defaultSchema),
-	})),
-	currentTest: null,
+const defaultRule = `# Driving Test Rules
+A **Person** gets a full driving license
+ if the __age__ of the **Person** is greater than or equal to 17
+ and the **Person** passes the practical driving test
+ and the **Person** passes the eye test.
+ 
+A **Person** passes the practical driving test
+  if the __drivingTestScore__ of the **Person** is greater than or equal to 70.
+`;
+
+const createDefaultPolicySpec = (): PolicySpec => ({
+	id: "",
+	name: "Test Policy",
+	rule: defaultRule,
 	schema: defaultSchema,
 	schemaVersion: generateSchemaHash(defaultSchema),
-	rule: defaultRule,
-	id: null,
-	name: "Test Policy",
+	version: 1,
+	createdAt: new Date(),
+	updatedAt: new Date(),
+	description: "Default test policy",
+	tags: ["test"],
+});
 
-	setSchema: (schema) => {
-		const newSchemaVersion = generateSchemaHash(schema);
-		set({
-			schema,
-			schemaVersion: newSchemaVersion,
-		});
-		get().markInvalidTests();
-	},
-
-	setPolicyRule: (rule) => set({ rule: rule }),
-	setPolicyId: (id) => set({ id: id }),
-	setPolicyName: (name) => set({ name: name }),
-
-	createTest: () => {
-		const { tests, schema, schemaVersion } = get();
-		const newTest: Test = {
-			id: `temp-${Date.now()}`, // Generate temporary ID
-			name: `Test ${tests.length + 1}`,
-			data: {},
-			expectPass: true, // Default to expecting pass for new tests
-			created: false, // Mark as not yet created/saved
-			createdAt: new Date(),
-			outcome: {
-				passed: false,
-				ran: false,
-				status: "not-run",
+const defaultTests: Test[] = [
+	{
+		id: "default-1",
+		name: "Passing",
+		data: {
+			person: {
+				name: "Tester",
+				drivingTestScore: 70,
+				age: 19,
 			},
-			resultSet: null,
-			schemaVersion,
-		};
-		set({ currentTest: newTest });
+		},
+		expectPass: true,
+		created: true,
+		createdAt: new Date(),
+		outcome: {
+			passed: false,
+			ran: false,
+			status: "not-run" as TestStatus,
+		},
+		resultSet: null,
 	},
+	{
+		id: "default-2",
+		name: "Failing",
+		data: {
+			person: {
+				name: "Tester",
+				drivingTestScore: 30,
+				age: 19,
+			},
+		},
+		expectPass: false,
+		created: true,
+		createdAt: new Date(),
+		outcome: {
+			passed: false,
+			ran: false,
+			status: "not-run" as TestStatus,
+		},
+		resultSet: null,
+	},
+];
 
-	saveTest: (TestData, name, expectPass = true) => {
-		// Updated to accept expectPass parameter
-		const { currentTest, tests, schemaVersion } = get();
-		if (!currentTest) return;
+export const usePolicyStore = create<PolicyStore>((set, get) => {
+	const defaultSpec = createDefaultPolicySpec();
+	
+	return {
+		policySpec: defaultSpec,
+		schema: defaultSpec.schema,
+		schemaVersion: defaultSpec.schemaVersion,
+		rule: defaultSpec.rule,
+		name: defaultSpec.name,
+		id: defaultSpec.id || null,
+		
+		tests: defaultTests.map((test) => ({
+			...test,
+			schemaVersion: generateSchemaHash(defaultSchema),
+		})),
+		currentTest: null,
 
-		let updatedTest: Test;
-		const testName = name || currentTest.name;
-
-		if (currentTest.created) {
-			// Update existing test
-			updatedTest = {
-				...currentTest,
-				data: TestData,
-				name: testName,
-				expectPass, // Update expectPass
-				schemaVersion,
-				outcome: {
-					...currentTest.outcome,
-					status: "not-run" as TestStatus,
-				},
-			};
-			const existingIndex = tests.findIndex((t) => t.id === currentTest.id);
-			const updatedTests = [...tests];
-			updatedTests[existingIndex] = updatedTest;
-			set({ tests: updatedTests, currentTest: updatedTest });
-		} else {
-			// Create new test
-			updatedTest = {
-				...currentTest,
-				id: `test-${Date.now()}`, // Generate proper ID for saved test
-				data: TestData,
-				name: testName,
-				expectPass, // Set expectPass
-				created: true, // Mark as created/saved
-				schemaVersion,
-				outcome: {
-					...currentTest.outcome,
-					status: "not-run" as TestStatus,
-				},
-			};
-			set({
-				tests: [...tests, updatedTest],
-				currentTest: updatedTest,
+		// Policy spec management
+		setPolicySpec: (spec) => {
+			set({ 
+				policySpec: spec,
+				schema: spec.schema,
+				schemaVersion: spec.schemaVersion,
+				rule: spec.rule,
+				name: spec.name,
+				id: spec.id || null,
 			});
-		}
-	},
+			get().markInvalidTests();
+		},
 
-	selectTest: (test) => set({ currentTest: test }),
+		updatePolicySpec: (updates) => {
+			const current = get().policySpec;
+			if (!current) return;
+			
+			const updatedSpec: PolicySpec = {
+				...current,
+				...updates,
+				updatedAt: new Date(),
+			};
 
-	deleteTest: (testId) => {
-		const { tests, currentTest } = get();
-		set({
-			tests: tests.filter((t) => t.id !== testId),
-			currentTest: currentTest?.id === testId ? null : currentTest,
-		});
-	},
-
-	updateTestStatus: (testId, status) => {
-		const { tests } = get();
-		const updatedTests = tests.map((test) => {
-			if (test.id === testId) {
-				return {
-					...test,
-					outcome: {
-						...test.outcome,
-						status: status as TestStatus,
-					},
-				};
+			if (updates.schema) {
+				updatedSpec.schemaVersion = generateSchemaHash(updates.schema);
 			}
-			return test;
-		});
-		set({ tests: updatedTests });
-	},
+			
+			set({ 
+				policySpec: updatedSpec,
+				schema: updatedSpec.schema,
+				schemaVersion: updatedSpec.schemaVersion,
+				rule: updatedSpec.rule,
+				name: updatedSpec.name,
+				id: updatedSpec.id || null,
+			});
+			get().markInvalidTests();
+		},
 
-	validateTestAgainstSchema: (test) => {
-		const { schema } = get();
-		return validateDataAgainstSchema(test.data, schema);
-	},
+		setSchema: (schema) => {
+			get().updatePolicySpec({ schema });
+		},
 
-	markInvalidTests: () => {
-		const { tests, schema, schemaVersion } = get();
-		const updatedTests = tests.map((test) => {
-			// If test was created with different schema version, check if it's still valid
-			if (test.schemaVersion !== schemaVersion) {
-				const isValid = validateDataAgainstSchema(test.data, schema);
-				return {
-					...test,
-					outcome: {
-						...test.outcome,
-						status: isValid
-							? ("not-run" as TestStatus)
-							: ("invalid" as TestStatus),
-					},
-				};
-			}
-			return test;
-		});
-		set({ tests: updatedTests });
-	},
+		setPolicyRule: (rule) => {
+			get().updatePolicySpec({ rule: rule });
+		},
 
-	repairTest: (testId) => {
-		const { tests, schema, schemaVersion } = get();
-		const updatedTests = tests.map((test) => {
-			if (test.id === testId && test.outcome.status === "invalid") {
-				const repairedData = repairDataToMatchSchema(test.data, schema);
-				return {
-					...test,
-					data: repairedData,
+		setPolicyId: (id) => {
+			get().updatePolicySpec({ id });
+		},
+
+		setPolicyName: (name) => {
+			get().updatePolicySpec({ name });
+		},
+
+		createTest: () => {
+			const { tests, schemaVersion } = get();
+			const newTest: Test = {
+				id: `temp-${Date.now()}`,
+				name: `Test ${tests.length + 1}`,
+				data: {},
+				expectPass: true,
+				created: false,
+				createdAt: new Date(),
+				outcome: {
+					passed: false,
+					ran: false,
+					status: "not-run",
+				},
+				resultSet: null,
+				schemaVersion,
+			};
+			set({ currentTest: newTest });
+		},
+
+		saveTest: (TestData, name, expectPass = true) => {
+			const { currentTest, tests, schemaVersion } = get();
+			if (!currentTest) return;
+
+			let updatedTest: Test;
+			const testName = name || currentTest.name;
+
+			if (currentTest.created) {
+				updatedTest = {
+					...currentTest,
+					data: TestData,
+					name: testName,
+					expectPass,
 					schemaVersion,
 					outcome: {
-						...test.outcome,
+						...currentTest.outcome,
 						status: "not-run" as TestStatus,
 					},
 				};
-			}
-			return test;
-		});
-		set({ tests: updatedTests });
-	},
-
-	getPolicy: async () => {
-		const { id } = get();
-
-		try {
-			const response = await fetch(`/api/policy?id=${id}`, {
-				method: "GET",
-				headers: { "Content-Type": "application/json" },
-				body: null,
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				return {
-					success: false,
-					error: errorData.message || `Server error: ${response.status}`,
+				const existingIndex = tests.findIndex((t) => t.id === currentTest.id);
+				const updatedTests = [...tests];
+				updatedTests[existingIndex] = updatedTest;
+				set({ tests: updatedTests, currentTest: updatedTest });
+			} else {
+				updatedTest = {
+					...currentTest,
+					id: `test-${Date.now()}`,
+					data: TestData,
+					name: testName,
+					expectPass,
+					created: true,
+					schemaVersion,
+					outcome: {
+						...currentTest.outcome,
+						status: "not-run" as TestStatus,
+					},
 				};
+				set({
+					tests: [...tests, updatedTest],
+					currentTest: updatedTest,
+				});
 			}
+		},
 
-			const result = await response.json();
+		selectTest: (test) => set({ currentTest: test }),
+
+		deleteTest: (testId) => {
+			const { tests, currentTest } = get();
 			set({
-				id: result.id,
-				name: result.name,
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-				tests: result.tests.map((test: any) => ({
-					...test,
-					createdAt: new Date(test.createdAt), // Convert string to Date object
-					schemaVersion: test.schemaVersion,
-				})),
-				rule: result.rule,
-				schema: result.schema,
-				schemaVersion: result.schemaVersion,
+				tests: tests.filter((t) => t.id !== testId),
+				currentTest: currentTest?.id === testId ? null : currentTest,
 			});
+		},
 
-			return {
-				success: true,
-			};
-		} catch (error) {
-			console.error("Error getting policy", error);
-
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : "Failed to get policy",
-			};
-		}
-	},
-
-	savePolicy: async (): Promise<{
-		success: boolean;
-		returnId?: string;
-		error?: string;
-	}> => {
-		const { tests, rule, schema, name, id } = get();
-
-		try {
-			const response = await fetch("/api/policy", {
-				method: id ? "PUT" : "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({
-					name,
-					tests,
-					rule,
-					schema,
-					id,
-				}),
-			});
-
-			if (!response.ok) {
-				const errorData = await response.json().catch(() => ({}));
-				return {
-					success: false,
-					error: errorData.message || `Server error: ${response.status}`,
-				};
-			}
-
-			const result = await response.json();
-			if (result.id) {
-				set({ id: result.id });
-				return {
-					success: true,
-					returnId: result.id,
-				};
-			}
-
-			return {
-				success: true,
-			};
-		} catch (error) {
-			return {
-				success: false,
-				error: error instanceof Error ? error.message : "Failed to save policy",
-			};
-		}
-	},
-
-	runTest: async (testId) => {
-		const { tests, schema, rule } = get();
-		const test = tests.find((t) => t.id === testId);
-		if (!test) return;
-
-		// Set status to running with complete state update
-		const updateTestState = (updates: Partial<Test>) => {
-			const currentTests = get().tests;
-			const updatedTests = currentTests.map((t) => {
-				if (t.id === testId) {
-					return { ...t, ...updates };
+		updateTestStatus: (testId, status) => {
+			const { tests } = get();
+			const updatedTests = tests.map((test) => {
+				if (test.id === testId) {
+					return {
+						...test,
+						outcome: {
+							...test.outcome,
+							status: status as TestStatus,
+						},
+					};
 				}
-				return t;
+				return test;
 			});
 			set({ tests: updatedTests });
-		};
+		},
 
-		// Set initial running state
-		updateTestState({
-			outcome: {
-				...test.outcome,
-				status: "running" as TestStatus,
-			},
-		});
+		validateTestAgainstSchema: (test) => {
+			const { schema } = get();
+			return validateDataAgainstSchema(test.data, schema);
+		},
 
-		try {
-			const dataSet = {
-				data: test.data,
-				rule,
+		markInvalidTests: () => {
+			const { tests, schema, schemaVersion } = get();
+			const updatedTests = tests.map((test) => {
+				if (test.schemaVersion !== schemaVersion) {
+					const isValid = validateDataAgainstSchema(test.data, schema);
+					return {
+						...test,
+						outcome: {
+							...test.outcome,
+							status: isValid
+								? ("not-run" as TestStatus)
+								: ("invalid" as TestStatus),
+						},
+					};
+				}
+				return test;
+			});
+			set({ tests: updatedTests });
+		},
+
+		repairTest: (testId) => {
+			const { tests, schema, schemaVersion } = get();
+			const updatedTests = tests.map((test) => {
+				if (test.id === testId && test.outcome.status === "invalid") {
+					const repairedData = repairDataToMatchSchema(test.data, schema);
+					return {
+						...test,
+						data: repairedData,
+						schemaVersion,
+						outcome: {
+							...test.outcome,
+							status: "not-run" as TestStatus,
+						},
+					};
+				}
+				return test;
+			});
+			set({ tests: updatedTests });
+		},
+
+		getPolicy: async (policyId?: string) => {
+			const currentId = policyId || get().id;
+
+			if (!currentId) {
+				console.warn("No policy ID set, skipping getPolicy call");
+				return {
+					success: false,
+					error: "No policy ID provided",
+				};
+			}
+
+			try {
+				const response = await fetch(`/api/policy?id=${currentId}`, {
+					method: "GET",
+					headers: { "Content-Type": "application/json" },
+					body: null,
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({}));
+					return {
+						success: false,
+						error: errorData.message || `Server error: ${response.status}`,
+					};
+				}
+
+				const result = await response.json();
+				
+				// Convert API response to PolicySpec
+				const policySpec: PolicySpec = {
+					id: result.id,
+					name: result.name,
+					rule: result.rule,
+					schema: result.schema,
+					schemaVersion: result.schemaVersion,
+					version: result.version || 1,
+					createdAt: new Date(result.createdAt || Date.now()),
+					updatedAt: new Date(result.updatedAt || Date.now()),
+					description: result.description,
+					tags: result.tags,
+				};
+
+				set({
+					policySpec: policySpec,
+					schema: policySpec.schema,
+					schemaVersion: policySpec.schemaVersion,
+					rule: policySpec.rule,
+					name: policySpec.name,
+					id: policySpec.id,
+					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+					tests: result.tests.map((test: any) => ({
+						...test,
+						createdAt: new Date(test.createdAt),
+						schemaVersion: test.schemaVersion,
+					})),
+				});
+
+				return {
+					success: true,
+				};
+			} catch (error) {
+				console.error("Error getting policy", error);
+
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : "Failed to get policy",
+				};
+			}
+		},
+
+		savePolicy: async (): Promise<{
+			success: boolean;
+			returnId?: string;
+			error?: string;
+		}> => {
+			const { tests, policySpec } = get();
+			
+			if (!policySpec) {
+				return {
+					success: false,
+					error: "No policy spec available",
+				};
+			}
+
+			try {
+				const apiData = {
+					name: policySpec.name,
+					tests,
+					rule: policySpec.rule,
+					schema: policySpec.schema,
+					id: policySpec.id || undefined,
+					version: policySpec.version,
+					description: policySpec.description,
+					tags: policySpec.tags,
+				};
+
+				const response = await fetch("/api/policy", {
+					method: policySpec.id ? "PUT" : "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(apiData),
+				});
+
+				if (!response.ok) {
+					const errorData = await response.json().catch(() => ({}));
+					return {
+						success: false,
+						error: errorData.message || `Server error: ${response.status}`,
+					};
+				}
+
+				const result = await response.json();
+				if (result.id) {
+					get().updatePolicySpec({ id: result.id });
+					return {
+						success: true,
+						returnId: result.id,
+					};
+				}
+
+				return {
+					success: true,
+				};
+			} catch (error) {
+				return {
+					success: false,
+					error: error instanceof Error ? error.message : "Failed to save policy",
+				};
+			}
+		},
+
+		runTest: async (testId) => {
+			const { tests, rule } = get();
+			const test = tests.find((t) => t.id === testId);
+			if (!test) return;
+
+			const updateTestState = (updates: Partial<Test>) => {
+				const currentTests = get().tests;
+				const updatedTests = currentTests.map((t) => {
+					if (t.id === testId) {
+						return { ...t, ...updates };
+					}
+					return t;
+				});
+				set({ tests: updatedTests });
 			};
 
-			const response = await fetch("/api/test", {
-				method: "POST",
-				body: JSON.stringify(dataSet),
+			updateTestState({
+				outcome: {
+					...test.outcome,
+					status: "running" as TestStatus,
+				},
 			});
 
-			if (!response.ok) {
-				// Complete failure state update
+			try {
+				const dataSet = {
+					data: test.data,
+					rule,
+				};
+
+				const response = await fetch("/api/test", {
+					method: "POST",
+					body: JSON.stringify(dataSet),
+				});
+
+				if (!response.ok) {
+					updateTestState({
+						outcome: {
+							passed: false,
+							ran: true,
+							status: "failed" as TestStatus,
+						},
+					});
+					return;
+				}
+
+				const resp = await response.json();
+				const testPassed = resp.result === true;
+				const actuallyPassed = test.expectPass ? testPassed : !testPassed;
+
+				updateTestState({
+					outcome: {
+						passed: actuallyPassed,
+						ran: true,
+						status: actuallyPassed ? "passed" : ("failed" as TestStatus),
+					},
+					resultSet: {
+						trace: resp.trace,
+						data: resp.data,
+						rule: resp.rule,
+						errors: resp.errors,
+						result: resp.result,
+					},
+				});
+			} catch (e) {
+				console.error("Error running test:", e);
 				updateTestState({
 					outcome: {
 						passed: false,
@@ -605,59 +729,30 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 						status: "failed" as TestStatus,
 					},
 				});
-				return;
 			}
+		},
 
-			const resp = await response.json();
-			const testPassed = resp.result === true;
+		runAllTests: async () => {
+			const { tests, runTest } = get();
+			const runnableTests = tests.filter((t) => t.created);
+			await Promise.all(runnableTests.map((test) => runTest(test.id)));
+		},
 
-			// Apply expectPass logic: if expectPass is false, invert the result
-			const actuallyPassed = test.expectPass ? testPassed : !testPassed;
-
-			// Complete success state update
-			updateTestState({
-				outcome: {
-					passed: actuallyPassed,
-					ran: true,
-					status: actuallyPassed ? "passed" : ("failed" as TestStatus),
-				},
-				resultSet: {
-					trace: resp.trace,
-					data: resp.data,
-					rule: resp.rule,
-					errors: resp.errors,
-					result: resp.result,
-				},
+		reset: () => {
+			const defaultSpec = createDefaultPolicySpec();
+			set({
+				policySpec: defaultSpec,
+				schema: defaultSpec.schema,
+				schemaVersion: defaultSpec.schemaVersion,
+				rule: defaultSpec.rule,
+				name: defaultSpec.name,
+				id: defaultSpec.id || null,
+				tests: defaultTests.map((test) => ({
+					...test,
+					schemaVersion: defaultSpec.schemaVersion,
+				})),
+				currentTest: null,
 			});
-		} catch (e) {
-			console.error("Error running test:", e);
-			// Complete error state update
-			updateTestState({
-				outcome: {
-					passed: false,
-					ran: true,
-					status: "failed" as TestStatus,
-				},
-			});
-		}
-	},
-
-	runAllTests: async () => {
-		const { tests, runTest } = get();
-		const runnableTests = tests.filter((t) => t.created); // Only run created tests
-		// Run all tests concurrently
-		await Promise.all(runnableTests.map((test) => runTest(test.id)));
-	},
-
-	reset: () => {
-		set({
-			tests: defaultTests.map((test) => ({
-				...test,
-				schemaVersion: generateSchemaHash(defaultSchema),
-			})),
-			currentTest: null,
-			schema: defaultSchema,
-			rule: defaultRule,
-		});
-	},
-}));
+		},
+	};
+});

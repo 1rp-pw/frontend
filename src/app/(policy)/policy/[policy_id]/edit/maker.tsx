@@ -49,7 +49,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		setPolicyId(policy_id);
-		getPolicy()
+		getPolicy(policy_id);
 	}, [policy_id]); // Include policy_id in dependencies
 
 	return (

@@ -17,7 +17,7 @@ export interface NodeData {
 export interface PolicySpec {
 	id: string;
 	name: string;
-	text: string;
+	rule: string;
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	schema: any;
 	schemaVersion: string;
