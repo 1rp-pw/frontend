@@ -581,6 +581,12 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 						...test,
 						createdAt: new Date(test.createdAt),
 						schemaVersion: test.schemaVersion,
+						outcome: {
+							passed: false,
+							ran: false,
+							status: "not-run" as TestStatus,
+						},
+						resultSet: null,
 					})),
 				});
 
