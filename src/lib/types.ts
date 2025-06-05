@@ -13,3 +13,35 @@ export interface NodeData {
 	parentNodeId?: string;
 	condition?: "true" | "false";
 }
+
+export interface PolicySpec {
+	id: string;
+	name: string;
+	text: string;
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	schema: any;
+	schemaVersion: string;
+	version: number;
+	createdAt: Date;
+	updatedAt: Date;
+	description?: string;
+	tags?: string[];
+}
+
+export interface PolicyVersion {
+	version: number;
+	spec: PolicySpec;
+	createdAt: Date;
+	changelog?: string;
+}
+
+export interface PolicyWithVersions {
+	id: string;
+	currentVersion: number;
+	versions: PolicyVersion[];
+	metadata: {
+		totalVersions: number;
+		createdAt: Date;
+		lastModified: Date;
+	};
+}

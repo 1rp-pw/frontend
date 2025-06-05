@@ -1,7 +1,7 @@
 "use client";
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Editor } from "~/components/editor/editor";
 import { SavePolicy } from "~/components/editor/save";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
@@ -20,10 +20,10 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		schema,
 		tests,
 		currentTest,
-		text,
 		name,
+		rule,
 		setSchema,
-		setPolicyText,
+		setPolicyRule,
 		createTest,
 		saveTest,
 		selectTest,
@@ -32,8 +32,9 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		repairTest,
 		runAllTests,
 		setPolicyId,
-		getPolicy,
+		getPolicy
 	} = usePolicyStore();
+
 
 	// Check if all tests have been run and passed
 	const createdTests = tests.filter((test) => test.created);
@@ -43,11 +44,13 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 			(test) => test.outcome.ran && test.outcome.status === "passed",
 		);
 
+	// const text = currentPolicy?.text || "";
+
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		setPolicyId(policy_id);
-		getPolicy();
-	}, []);
+		getPolicy()
+	}, [policy_id]); // Include policy_id in dependencies
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
@@ -85,7 +88,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 						Policy Text
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<Editor text={text} onChange={setPolicyText} />
+						<Editor rule={rule} onChange={setPolicyRule} />
 					</div>
 				</div>
 

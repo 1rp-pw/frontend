@@ -3,13 +3,13 @@ import { env } from "~/env";
 
 export async function POST(request: Request) {
 	try {
-		const { name, text, tests, schema } = await request.json();
+		const { name, rule, tests, schema } = await request.json();
 
 		const response = await fetch(`${env.API_SERVER}/policy`, {
 			method: "POST",
 			body: JSON.stringify({
 				name,
-				rule: text,
+				rule,
 				tests,
 				data_model: schema,
 			}),
@@ -31,12 +31,12 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
 	try {
-		const { id, text, tests, schema, name } = await request.json();
+		const { id, rule, tests, schema, name } = await request.json();
 
 		await fetch(`${env.API_SERVER}/policy/${id}`, {
 			method: "PUT",
 			body: JSON.stringify({
-				rule: text,
+				rule,
 				tests,
 				data_model: schema,
 				name,

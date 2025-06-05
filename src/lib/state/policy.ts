@@ -44,7 +44,7 @@ export interface TestResultSet {
 			selector: { pos: any; value: string };
 		}>;
 	};
-	text: string[];
+	rule: string[];
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	data: any | null;
 }
@@ -89,10 +89,10 @@ interface PolicyStore {
 	schemaVersion: string;
 
 	// Policy stuff
-	text: string;
+	rule: string;
 	name: string;
 	id: string | null;
-	setPolicyText: (text: string) => void;
+	setPolicyRule: (rule: string) => void;
 	setPolicyName: (name: string) => void;
 	setPolicyId: (id: string) => void;
 	savePolicy: () => Promise<{
@@ -268,7 +268,7 @@ const defaultTests: Test[] = [
 	},
 ];
 
-const defaultText = `# Driving Test Rules
+const defaultRule = `# Driving Test Rules
 A **Person** gets a full driving license
  if the __age__ of the **Person** is greater than or equal to 17
  and the **Person** passes the practical driving test
@@ -309,7 +309,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 	currentTest: null,
 	schema: defaultSchema,
 	schemaVersion: generateSchemaHash(defaultSchema),
-	text: defaultText,
+	rule: defaultRule,
 	id: null,
 	name: "Test Policy",
 
@@ -322,7 +322,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 		get().markInvalidTests();
 	},
 
-	setPolicyText: (text) => set({ text: text }),
+	setPolicyRule: (rule) => set({ rule: rule }),
 	setPolicyId: (id) => set({ id: id }),
 	setPolicyName: (name) => set({ name: name }),
 
@@ -494,7 +494,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 					createdAt: new Date(test.createdAt), // Convert string to Date object
 					schemaVersion: test.schemaVersion,
 				})),
-				text: result.rule,
+				rule: result.rule,
 				schema: result.schema,
 				schemaVersion: result.schemaVersion,
 			});
@@ -517,7 +517,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 		returnId?: string;
 		error?: string;
 	}> => {
-		const { tests, text, schema, name, id } = get();
+		const { tests, rule, schema, name, id } = get();
 
 		try {
 			const response = await fetch("/api/policy", {
@@ -526,7 +526,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 				body: JSON.stringify({
 					name,
 					tests,
-					text,
+					rule,
 					schema,
 					id,
 				}),
@@ -561,7 +561,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 	},
 
 	runTest: async (testId) => {
-		const { tests, schema, text } = get();
+		const { tests, schema, rule } = get();
 		const test = tests.find((t) => t.id === testId);
 		if (!test) return;
 
@@ -588,7 +588,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 		try {
 			const dataSet = {
 				data: test.data,
-				rule: text,
+				rule,
 			};
 
 			const response = await fetch("/api/test", {
@@ -624,7 +624,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 				resultSet: {
 					trace: resp.trace,
 					data: resp.data,
-					text: resp.text,
+					rule: resp.rule,
 					errors: resp.errors,
 					result: resp.result,
 				},
@@ -657,7 +657,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 			})),
 			currentTest: null,
 			schema: defaultSchema,
-			text: defaultText,
+			rule: defaultRule,
 		});
 	},
 }));
