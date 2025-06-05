@@ -45,7 +45,7 @@ export default function SideBar() {
 						<SidebarMenu>
 							<SidebarMenuItem key={"policy"}>
 								<SidebarMenuButton asChild={true}>
-									<Link href={"/maker"}>
+									<Link href={"/policy"}>
 										<ChartNetwork />
 										<span>Policy</span>
 									</Link>

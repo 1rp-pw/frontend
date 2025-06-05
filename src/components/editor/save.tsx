@@ -25,7 +25,7 @@ import {
 	FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { type Test, usePolicyStore } from "~/lib/state/maker";
+import { type Test, usePolicyStore } from "~/lib/state/policy";
 
 export function SavePolicy() {
 	const [formOpen, setFormOpen] = useState(false);
