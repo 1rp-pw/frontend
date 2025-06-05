@@ -6,7 +6,7 @@ import {
 	ChevronRightIcon,
 	EditIcon,
 	FileTextIcon,
-	PlusIcon,
+	PlusIcon, Rainbow,
 	TrashIcon,
 	XIcon,
 } from "lucide-react";
@@ -24,6 +24,7 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
+import {RainbowBraces} from "~/components/ui/rainbow";
 
 interface SchemaBuilderProps {
 	// biome-ignore lint/suspicious/noExplicitAny: its dynamic
@@ -516,7 +517,7 @@ export function SchemaBuilder({
 					<div className="space-y-2">
 						<h3 className="font-medium text-sm">Schema Preview</h3>
 						<pre className="max-h-70 overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
-							{JSON.stringify(schema, null, 2)}
+							<RainbowBraces json={schema} className={"text-xs"} />
 						</pre>
 					</div>
 				</>
