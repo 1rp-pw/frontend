@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { RainbowBraces } from "~/components/ui/rainbow";
 import { Slider } from "~/components/ui/slider";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -409,13 +410,9 @@ export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 			</TabsContent>
 			<TabsContent value={"preview"}>
 				<div className="space-y-2">
-					<Label className="font-medium text-sm">Test Data Preview</Label>
-					<Textarea
-						value={JSON.stringify(formData, null, 2)}
-						readOnly
-						className="border-zinc-600 bg-zinc-700 font-mono text-xs"
-						rows={6}
-					/>
+					<pre className="max-h-70 overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
+						<RainbowBraces json={formData} className={"text-xs"} />
+					</pre>
 				</div>
 			</TabsContent>
 		</Tabs>

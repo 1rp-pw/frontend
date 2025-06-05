@@ -1,13 +1,14 @@
 "use client";
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Editor } from "~/components/editor/editor";
 import { SavePolicy } from "~/components/editor/save";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
 import { Button } from "~/components/ui/button";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
 	Tooltip,
 	TooltipContent,
@@ -20,10 +21,12 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		schema,
 		tests,
 		currentTest,
-		text,
 		name,
+		rule,
+		isLoading,
+		error,
 		setSchema,
-		setPolicyText,
+		setPolicyRule,
 		createTest,
 		saveTest,
 		selectTest,
@@ -31,7 +34,6 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		runTest,
 		repairTest,
 		runAllTests,
-		setPolicyId,
 		getPolicy,
 	} = usePolicyStore();
 
@@ -45,9 +47,31 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		setPolicyId(policy_id);
-		getPolicy();
-	}, []);
+		const loadPolicy = async () => {
+			await getPolicy(policy_id);
+		};
+		loadPolicy();
+	}, [policy_id]);
+
+	if (isLoading) {
+		return (
+			<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
+				<div className="flex flex-1 items-center justify-center">
+					<Skeleton />
+				</div>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
+				<div className="flex flex-1 items-center justify-center">
+					Something has gone wrong {error}
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
@@ -85,7 +109,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 						Policy Text
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<Editor text={text} onChange={setPolicyText} />
+						<Editor rule={rule} onChange={setPolicyRule} />
 					</div>
 				</div>
 

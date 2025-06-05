@@ -1,11 +1,11 @@
-const numberColor = "text-orange-500";
-const objectColor = "text-blue-500";
-const commentColor = "text-gray-400";
-const selectorColor = "text-green-500";
-const functionColor = "text-purple-500";
-const referenceColor = "text-teal-500"; // Color for references (e.g., "passes the practical driving test" in if clause)
-const referencedColor = "text-fuchsia-500"; // Color for definitions that ARE referenced elsewhere
-const labelColor = "text-yellow-500";
+export const numberColor = "text-orange-500";
+export const objectColor = "text-blue-500";
+export const commentColor = "text-gray-400";
+export const selectorColor = "text-green-500";
+export const functionColor = "text-purple-500";
+export const referenceColor = "text-teal-500"; // Color for references (e.g., "passes the practical driving test" in if clause)
+export const referencedColor = "text-fuchsia-500"; // Color for definitions that ARE referenced elsewhere
+export const labelColor = "text-yellow-500";
 
 export const highlightText = (text: string) => {
 	// Escape &, <, >

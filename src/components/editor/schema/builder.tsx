@@ -1,98 +1,40 @@
 "use client";
 
-import {
-	ArrowLeftIcon,
-	CheckIcon,
-	ChevronRightIcon,
-	EditIcon,
-	FileTextIcon,
-	PlusIcon,
-	TrashIcon,
-	XIcon,
-} from "lucide-react";
+import { EditIcon, FileTextIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "~/components/ui/select";
-import { Switch } from "~/components/ui/switch";
+import { RainbowBraces } from "~/components/ui/rainbow";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
+import { usePolicyStore } from "~/lib/state/policy";
+import { PropertyList } from "./list";
+import { BreadcrumbNav } from "./navigate";
+import { SchemaPreview } from "./preview";
+import { PropertyForm } from "./properties";
 
 interface SchemaBuilderProps {
-	// biome-ignore lint/suspicious/noExplicitAny: its dynamic
+	// biome-ignore lint/suspicious/noExplicitAny: schema is dynamic
 	schema: any;
 	// biome-ignore lint/suspicious/noExplicitAny: still dynamic
 	setSchema: (schema: any) => void;
 	newImportAllowed: boolean;
 }
 
-type TabType = "edit" | "import";
-
-const DEFAULT_SCHEMA = {
-	title: "Person Model",
-	type: "object",
-	required: ["person"],
-	properties: {
-		person: {
-			type: "object",
-			required: ["name", "age", "drivingTestScore"],
-			properties: {
-				age: {
-					type: "number",
-				},
-				drivingTestScore: {
-					type: "number",
-				},
-				name: {
-					type: "string",
-				},
-			},
-		},
-	},
-};
-
 export function SchemaBuilder({
 	schema,
 	setSchema,
 	newImportAllowed,
 }: SchemaBuilderProps) {
-	// Initialize with default schema if schema is empty or minimal
-	const initializeSchema = () => {
-		if (
-			!schema ||
-			Object.keys(schema).length === 0 ||
-			!schema.properties ||
-			Object.keys(schema.properties).length === 0
-		) {
-			setSchema(DEFAULT_SCHEMA);
-		}
-	};
+	const { initializeSchemaIfEmpty } = usePolicyStore();
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: on mount
 	useEffect(() => {
-		initializeSchema();
+		initializeSchemaIfEmpty();
 	}, []);
 
-	const [activeTab, setActiveTab] = useState<TabType>("edit");
-	const [newPropName, setNewPropName] = useState("");
-	const [newPropType, setNewPropType] = useState("string");
-	const [newPropRequired, setNewPropRequired] = useState(true);
 	const [editingObject, setEditingObject] = useState<string | null>(null);
 	const [schemaInput, setSchemaInput] = useState("");
 	const [importError, setImportError] = useState("");
-
-	// New state for inline editing
-	const [editingProperty, setEditingProperty] = useState<string | null>(null);
-	const [editingName, setEditingName] = useState("");
-	const [editingType, setEditingType] = useState("");
-	const [editingRequired, setEditingRequired] = useState(true);
 
 	const getCurrentSchema = () => {
 		if (!editingObject) return schema;
@@ -106,7 +48,7 @@ export function SchemaBuilder({
 		return current;
 	};
 
-	// biome-ignore lint/suspicious/noExplicitAny: stuff
+	// biome-ignore lint/suspicious/noExplicitAny: schema updates can be anything
 	const updateNestedSchema = (updatedSchema: any) => {
 		if (!editingObject) {
 			setSchema(updatedSchema);
@@ -133,37 +75,32 @@ export function SchemaBuilder({
 		setSchema(newSchema);
 	};
 
-	const addProperty = () => {
-		if (!newPropName.trim()) return;
-
+	const handleAddProperty = (name: string, type: string, required: boolean) => {
 		const currentSchema = getCurrentSchema();
 		const updatedSchema = { ...currentSchema };
 
-		// biome-ignore lint/suspicious/noExplicitAny: stuff
-		const newProperty: any = { type: newPropType };
+		// biome-ignore lint/suspicious/noExplicitAny: new property can be anything
+		const newProperty: any = { type };
 
 		// If it's an object type, initialize with empty properties
-		if (newPropType === "object") {
+		if (type === "object") {
 			newProperty.properties = {};
 			newProperty.required = [];
 		}
 
 		updatedSchema.properties = {
 			...updatedSchema.properties,
-			[newPropName]: { ...newProperty },
+			[name]: { ...newProperty },
 		};
 
-		if (newPropRequired) {
-			updatedSchema.required = [...(updatedSchema.required || []), newPropName];
+		if (required) {
+			updatedSchema.required = [...(updatedSchema.required || []), name];
 		}
 
 		updateNestedSchema(updatedSchema);
-		setNewPropName("");
-		setNewPropType("string");
-		setNewPropRequired(true);
 	};
 
-	const removeProperty = (propName: string) => {
+	const handleRemoveProperty = (propName: string) => {
 		const currentSchema = getCurrentSchema();
 		const updatedSchema = { ...currentSchema };
 		const { [propName]: _, ...restProperties } = updatedSchema.properties;
@@ -178,85 +115,70 @@ export function SchemaBuilder({
 		updateNestedSchema(updatedSchema);
 	};
 
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	const startEditing = (propName: string, propDetails: any) => {
-		setEditingProperty(propName);
-		setEditingName(propName);
-		setEditingType(propDetails.type);
-		const currentSchema = getCurrentSchema();
-		setEditingRequired(currentSchema.required?.includes(propName) || false);
-	};
-
-	const cancelEditing = () => {
-		setEditingProperty(null);
-		setEditingName("");
-		setEditingType("");
-		setEditingRequired(false);
-	};
-
-	const saveEdit = () => {
-		if (!editingProperty || !editingName.trim()) return;
-
+	const handleEditProperty = (
+		oldName: string,
+		newName: string,
+		type: string,
+		required: boolean,
+	) => {
 		const currentSchema = getCurrentSchema();
 		const updatedSchema = { ...currentSchema };
-		const oldProperty = updatedSchema.properties[editingProperty];
+		const oldProperty = updatedSchema.properties[oldName];
 
 		// Create the updated property
 		const newProperty = {
 			...oldProperty,
-			type: editingType,
+			type,
 		};
 
 		// If changing to object type and it wasn't before, initialize structure
-		if (editingType === "object" && oldProperty.type !== "object") {
+		if (type === "object" && oldProperty.type !== "object") {
 			newProperty.properties = {};
 			newProperty.required = [];
 		}
 
 		// If the name changed, we need to rename the property
-		if (editingProperty !== editingName) {
+		if (oldName !== newName) {
 			// Remove old property
-			const { [editingProperty]: _, ...restProperties } =
-				updatedSchema.properties;
+			const { [oldName]: _, ...restProperties } = updatedSchema.properties;
 			// Add new property
 			updatedSchema.properties = {
 				...restProperties,
-				[editingName]: newProperty,
+				[newName]: newProperty,
 			};
 
 			// Update required array
 			if (updatedSchema.required) {
 				updatedSchema.required = updatedSchema.required.map((name: string) =>
-					name === editingProperty ? editingName : name,
+					name === oldName ? newName : name,
 				);
 			}
 		} else {
 			// Just update the existing property
-			updatedSchema.properties[editingProperty] = newProperty;
+			updatedSchema.properties[oldName] = newProperty;
 		}
 
 		// Handle required status
 		const currentRequired = updatedSchema.required || [];
-		const finalPropName = editingName;
+		const finalPropName = newName;
 
-		if (editingRequired && !currentRequired.includes(finalPropName)) {
+		if (required && !currentRequired.includes(finalPropName)) {
 			updatedSchema.required = [...currentRequired, finalPropName];
-		} else if (!editingRequired && currentRequired.includes(finalPropName)) {
+		} else if (!required && currentRequired.includes(finalPropName)) {
 			updatedSchema.required = currentRequired.filter(
 				(name: string) => name !== finalPropName,
 			);
 		}
 
 		updateNestedSchema(updatedSchema);
-		cancelEditing();
 	};
 
-	const editObject = (propName: string) => {
+	const handleEditObject = (propName: string) => {
 		const newPath = editingObject ? `${editingObject}.${propName}` : propName;
 		setEditingObject(newPath);
 	};
 
-	const goBack = () => {
+	const handleGoBack = () => {
 		if (!editingObject) return;
 
 		const path = editingObject.split(".");
@@ -289,7 +211,6 @@ export function SchemaBuilder({
 
 			setSchema(parsed);
 			setImportError("");
-			setActiveTab("edit");
 			setEditingObject(null); // Reset to root level
 		} catch (error) {
 			setImportError(error instanceof Error ? error.message : "Invalid JSON");
@@ -302,8 +223,6 @@ export function SchemaBuilder({
 	};
 
 	const currentSchema = getCurrentSchema();
-	const breadcrumb = editingObject ? editingObject.split(".") : [];
-
 	const gridCols = newImportAllowed ? "grid-cols-2" : "grid-cols-1";
 
 	return (
@@ -320,207 +239,29 @@ export function SchemaBuilder({
 					</TabsTrigger>
 				)}
 			</TabsList>
+
 			<TabsContent value={"edit"}>
-				<>
-					{/* Breadcrumb Navigation */}
-					{editingObject && (
-						<div className="flex items-center gap-2 rounded bg-zinc-700/30 p-2">
-							<Button variant="ghost" size="sm" onClick={goBack}>
-								<ArrowLeftIcon className="h-4 w-4" />
-							</Button>
-							<span className="text-sm text-zinc-400">
-								Editing:{" "}
-								<span className="text-zinc-200">{breadcrumb.join(" → ")}</span>
-							</span>
-						</div>
-					)}
+				<div className="space-y-4">
+					<BreadcrumbNav
+						editingObject={editingObject}
+						onGoBack={handleGoBack}
+					/>
 
-					<div className="space-y-2">
-						<h3 className="font-medium text-sm">Add Property</h3>
-						<div className="grid grid-cols-3 gap-2">
-							<Input
-								placeholder="Property name"
-								value={newPropName}
-								onChange={(e) => setNewPropName(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter") {
-										addProperty();
-									}
-								}}
-							/>
-							<Select value={newPropType} onValueChange={setNewPropType}>
-								<SelectTrigger>
-									<SelectValue placeholder="Type" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="string">String</SelectItem>
-									<SelectItem value="number">Number</SelectItem>
-									<SelectItem value="boolean">Boolean</SelectItem>
-									<SelectItem value="object">Object</SelectItem>
-									<SelectItem value="array">Array</SelectItem>
-								</SelectContent>
-							</Select>
-							<div className="flex items-center justify-between">
-								<div className="flex items-center space-x-2">
-									<Switch
-										id="required"
-										checked={newPropRequired}
-										onCheckedChange={setNewPropRequired}
-									/>
-									<Label htmlFor="required" className="text-xs">
-										Required
-									</Label>
-								</div>
-								<Button size="sm" onClick={addProperty}>
-									<PlusIcon className="h-4 w-4" />
-								</Button>
-							</div>
-						</div>
-					</div>
+					<PropertyForm onAddProperty={handleAddProperty} />
 
-					<div className="space-y-2">
-						<h3 className="font-medium text-sm">
-							{editingObject
-								? `Properties of ${breadcrumb[breadcrumb.length - 1]}`
-								: "Schema Properties"}
-						</h3>
-						<div className="space-y-1">
-							{Object.keys(currentSchema.properties || {}).length === 0 ? (
-								<p className="text-xs text-zinc-500 italic">
-									No properties defined yet
-								</p>
-							) : (
-								Object.entries(currentSchema.properties || {}).map(
-									// biome-ignore lint/suspicious/noExplicitAny: hmm
-									([propName, propDetails]: [string, any]) => (
-										<div
-											key={propName}
-											className="flex items-center justify-between rounded bg-zinc-700/50 p-2"
-										>
-											{editingProperty === propName ? (
-												// Editing mode
-												<div className="flex flex-auto items-center gap-2">
-													<Input
-														value={editingName}
-														onChange={(e) => setEditingName(e.target.value)}
-														className="h-8 text-sm"
-														onKeyDown={(e) => {
-															if (e.key === "Enter") {
-																saveEdit();
-															} else if (e.key === "Escape") {
-																cancelEditing();
-															}
-														}}
-													/>
-													<Select
-														value={editingType}
-														onValueChange={setEditingType}
-													>
-														<SelectTrigger className="flex h-8 w-24 flex-auto">
-															<SelectValue />
-														</SelectTrigger>
-														<SelectContent>
-															<SelectItem value="string">String</SelectItem>
-															<SelectItem value="number">Number</SelectItem>
-															<SelectItem value="boolean">Boolean</SelectItem>
-															<SelectItem value="object">Object</SelectItem>
-															<SelectItem value="array">Array</SelectItem>
-														</SelectContent>
-													</Select>
-													<div className="flex items-center space-x-1">
-														<Switch
-															checked={editingRequired}
-															onCheckedChange={setEditingRequired}
-															className="scale-75"
-														/>
-														<span className="text-xs text-zinc-400">Req</span>
-													</div>
-													<div className="flex gap-1">
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={saveEdit}
-															className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
-														>
-															<CheckIcon className="h-4 w-4" />
-														</Button>
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={cancelEditing}
-															className="h-6 w-6 p-0 text-zinc-400 hover:text-zinc-300"
-														>
-															<XIcon className="h-4 w-4" />
-														</Button>
-													</div>
-												</div>
-											) : (
-												// Display mode
-												<>
-													<div className="flex items-center gap-2">
-														<div>
-															<span className="font-medium text-sm">
-																{propName}
-															</span>
-															<span className="ml-2 text-xs text-zinc-400">
-																({propDetails.type})
-															</span>
-															{currentSchema.required?.includes(propName) && (
-																<span className="ml-2 text-amber-400 text-xs">
-																	required
-																</span>
-															)}
-														</div>
-														{propDetails.type === "object" && (
-															<Button
-																variant="ghost"
-																size="sm"
-																onClick={() => editObject(propName)}
-																className="h-6 px-2 text-zinc-400 hover:text-zinc-100"
-															>
-																<ChevronRightIcon className="h-4 w-4" />
-																<span className="ml-1 text-xs">Edit</span>
-															</Button>
-														)}
-													</div>
-													<div className="flex gap-1">
-														<Button
-															variant="ghost"
-															size="icon"
-															onClick={() =>
-																startEditing(propName, propDetails)
-															}
-															className="h-6 w-6 text-zinc-400 hover:text-zinc-100"
-														>
-															<EditIcon className="h-3 w-3" />
-														</Button>
-														<Button
-															variant="ghost"
-															size="icon"
-															onClick={() => removeProperty(propName)}
-															className="h-6 w-6 text-zinc-400 hover:text-red-400"
-														>
-															<TrashIcon className="h-4 w-4" />
-														</Button>
-													</div>
-												</>
-											)}
-										</div>
-									),
-								)
-							)}
-						</div>
-					</div>
+					<PropertyList
+						properties={currentSchema.properties}
+						required={currentSchema.required}
+						editingObject={editingObject}
+						onEditProperty={handleEditProperty}
+						onRemoveProperty={handleRemoveProperty}
+						onEditObject={handleEditObject}
+					/>
 
-					{/* Schema Preview */}
-					<div className="space-y-2">
-						<h3 className="font-medium text-sm">Schema Preview</h3>
-						<pre className="max-h-70 overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
-							{JSON.stringify(schema, null, 2)}
-						</pre>
-					</div>
-				</>
+					<SchemaPreview schema={schema} />
+				</div>
 			</TabsContent>
+
 			<TabsContent value={"import"}>
 				<div className="space-y-4">
 					<div className="space-y-2">
@@ -558,12 +299,12 @@ export function SchemaBuilder({
 						</div>
 					</div>
 
-					{/* Current Schema Preview in Import Tab */}
+					{/* Current Schema Preview in Import Tab with Rainbow Braces */}
 					<div className="space-y-2">
 						<h3 className="font-medium text-sm">Current Schema</h3>
-						<pre className="max-h-48 overflow-auto rounded bg-zinc-700/30 p-3 text-xs">
-							{JSON.stringify(schema, null, 2)}
-						</pre>
+						<div className="max-h-48 overflow-auto rounded bg-zinc-700/30 p-3">
+							<RainbowBraces json={schema} className="text-xs" />
+						</div>
 					</div>
 				</div>
 			</TabsContent>

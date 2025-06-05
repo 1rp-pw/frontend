@@ -1,14 +1,14 @@
 "use client";
 import { useRef } from "react";
 import type React from "react";
-import { highlightText } from "~/components/editor/highlight";
+import { highlightText } from "~/components/ui/highlight";
 
 interface EditorProps {
-	text: string;
-	onChange: (text: string) => void;
+	rule: string;
+	onChange: (rule: string) => void;
 }
 
-export function Editor({ text, onChange }: EditorProps) {
+export function Editor({ rule, onChange }: EditorProps) {
 	const editorRef = useRef<HTMLPreElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -29,8 +29,8 @@ export function Editor({ text, onChange }: EditorProps) {
 			const end = target.selectionEnd;
 
 			// Insert tab at cursor position
-			const newText = `${text.substring(0, start)}  ${text.substring(end)}`;
-			onChange(newText);
+			const newRule = `${rule.substring(0, start)}  ${rule.substring(end)}`;
+			onChange(newRule);
 
 			// Move cursor after the inserted tab
 			setTimeout(() => {
@@ -46,7 +46,7 @@ export function Editor({ text, onChange }: EditorProps) {
 		<div className="relative h-full w-full font-mono text-sm">
 			<textarea
 				ref={textareaRef}
-				value={text}
+				value={rule}
 				onChange={(e) => onChange(e.target.value)}
 				onScroll={syncScroll}
 				onKeyDown={handleKeyDown}
@@ -58,7 +58,7 @@ export function Editor({ text, onChange }: EditorProps) {
 				ref={editorRef}
 				className="pointer-events-none absolute inset-0 h-full w-full overflow-auto whitespace-pre-wrap bg-zinc-900 p-4 text-zinc-300"
 				// biome-ignore lint/security/noDangerouslySetInnerHtml: its free text
-				dangerouslySetInnerHTML={{ __html: highlightText(text) }}
+				dangerouslySetInnerHTML={{ __html: highlightText(rule) }}
 			/>
 		</div>
 	);
