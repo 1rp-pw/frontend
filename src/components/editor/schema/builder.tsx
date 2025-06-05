@@ -6,7 +6,8 @@ import {
 	ChevronRightIcon,
 	EditIcon,
 	FileTextIcon,
-	PlusIcon, Rainbow,
+	PlusIcon,
+	Rainbow,
 	TrashIcon,
 	XIcon,
 } from "lucide-react";
@@ -14,6 +15,7 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { RainbowBraces } from "~/components/ui/rainbow";
 import {
 	Select,
 	SelectContent,
@@ -24,7 +26,6 @@ import {
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
-import {RainbowBraces} from "~/components/ui/rainbow";
 
 interface SchemaBuilderProps {
 	// biome-ignore lint/suspicious/noExplicitAny: its dynamic
