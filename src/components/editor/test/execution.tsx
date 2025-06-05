@@ -17,6 +17,8 @@ import {
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
 import type { TestResultSet } from "~/lib/state/policy";
+import {RainbowBraces} from "~/components/ui/rainbow";
+import {Separator} from "~/components/ui/separator";
 
 interface PolicyExecutionModalProps {
 	open: boolean;
@@ -146,13 +148,6 @@ export function PolicyExecutionModal({
 					<TabsContent value="ast" className="mt-4">
 						<ScrollArea className="h-[60vh] min-h-[400px] w-full">
 							<div className="space-y-4">
-								<div className="mb-4">
-									<h3 className="mb-2 font-semibold text-lg">Input Data</h3>
-									<pre className="overflow-x-auto rounded bg-muted p-3 text-sm">
-										{JSON.stringify(executionData.data, null, 2)}
-									</pre>
-								</div>
-
 								{executionData.trace.execution.map((execution, execIndex) => (
 									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 									<div key={execIndex} className="rounded-lg border p-4">
@@ -186,11 +181,18 @@ export function PolicyExecutionModal({
 									</div>
 								))}
 							</div>
+							<Separator className={"mt-4 mb-4"} />
+							<div>
+								<h3 className="mb-2 font-semibold text-lg">Input Data</h3>
+								<pre className="overflow-x-auto rounded bg-muted p-3 text-sm">
+										<RainbowBraces json={executionData.data} className={"text-sm"} />
+									</pre>
+							</div>
 						</ScrollArea>
 					</TabsContent>
 
 					<TabsContent value="text" className="mt-4">
-						<ScrollArea className="h-[60vh] min-h-[400px] w-full bg-muted">
+						<ScrollArea className="w-full rounded bg-muted p-2">
 							<div className="space-y-2 text-sm leading-relaxed">
 								{executionData.rule.map((line, index) => {
 									// Process and render the line with tooltips
@@ -308,7 +310,7 @@ export function PolicyExecutionModal({
 																		<strong>Value:</strong>
 																	</div>
 																	<pre className="mt-1 max-w-xs overflow-auto rounded p-2 text-xs">
-																		{JSON.stringify(foundValue, null, 2)}
+																		<RainbowBraces json={foundValue} className={"text-xs"} />
 																	</pre>
 																</div>
 															</TooltipContent>
@@ -373,7 +375,7 @@ export function PolicyExecutionModal({
 																		<strong>Value:</strong>
 																	</div>
 																	<pre className="mt-1 max-w-xs overflow-auto rounded p-2 text-xs">
-																		{JSON.stringify(foundValue, null, 2)}
+																		<RainbowBraces json={foundValue} className={"text-xs"} />
 																	</pre>
 																</div>
 															</TooltipContent>
@@ -403,7 +405,7 @@ export function PolicyExecutionModal({
 										<div
 											// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
 											key={index}
-											className="mb-2 rounded p-2 transition-colors hover:bg-muted/50"
+											className="mb-0 whitespace-pre-wrap p-1 transition-colors hover:bg-muted/50"
 										>
 											{renderLineWithTooltips(line)}
 										</div>

@@ -26,7 +26,7 @@ export async function POST(request: Request) {
 				errors: resp.errors,
 				result: resp.result,
 				trace: resp.trace,
-				text: resp.text,
+				rule: resp.rule,
 				data: resp.data,
 			},
 			{ status: 200 },
