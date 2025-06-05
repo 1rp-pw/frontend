@@ -32,22 +32,23 @@ const BRACE_COLORS = [
 	"text-fuchsia-400",
 	"text-pink-400",
 	"text-rose-400",
-	"text-slate-400",
-	"text-gray-400",
-	"text-zinc-400",
-	"text-neutral-400",
-	"text-stone-400",
 ];
+
+// Simple seeded random number generator for consistent results
+const createSeededRandom = (seed: number) => {
+	let state = seed;
+	return () => {
+		state = (state * 1664525 + 1013904223) % 4294967281;
+		return state / 4294967281;
+	};
+};
 
 const formatJsonWithRainbowBraces = (
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	obj: any,
 	indent = 0,
+	braceCounter = { count: 0, random: createSeededRandom(12345) }, // Seeded for consistency
 ): React.ReactNode[] => {
-	const colorIndex = indent % BRACE_COLORS.length;
-	const color = BRACE_COLORS[colorIndex];
-	const nextColor = BRACE_COLORS[(indent + 1) % BRACE_COLORS.length];
-
 	if (typeof obj === "string") {
 		return [
 			<span key="string" className={`${objectColor}`}>
@@ -81,12 +82,16 @@ const formatJsonWithRainbowBraces = (
 	}
 
 	if (Array.isArray(obj)) {
+		// Get a random color for this brace pair
+		const randomIndex = Math.floor(braceCounter.random() * BRACE_COLORS.length);
+		const currentColor = BRACE_COLORS[randomIndex];
+
 		if (obj.length === 0) {
 			return [
-				<span key="open" className={color}>
+				<span key="open" className={currentColor}>
 					[
 				</span>,
-				<span key="close" className={color}>
+				<span key="close" className={currentColor}>
 					]
 				</span>,
 			];
@@ -94,7 +99,7 @@ const formatJsonWithRainbowBraces = (
 
 		const elements: React.ReactNode[] = [];
 		elements.push(
-			<span key="open" className={color}>
+			<span key="open" className={currentColor}>
 				[
 			</span>,
 		);
@@ -104,7 +109,9 @@ const formatJsonWithRainbowBraces = (
 			const indentStr = "  ".repeat(indent + 1);
 			const idx = index;
 			elements.push(<span key={`indent-${idx}`}>{indentStr}</span>);
-			elements.push(...formatJsonWithRainbowBraces(item, indent + 1));
+			elements.push(
+				...formatJsonWithRainbowBraces(item, indent + 1, braceCounter),
+			);
 
 			if (index < obj.length - 1) {
 				elements.push(
@@ -119,7 +126,7 @@ const formatJsonWithRainbowBraces = (
 		const indentStr = "  ".repeat(indent);
 		elements.push(<span key="close-indent">{indentStr}</span>);
 		elements.push(
-			<span key="close" className={color}>
+			<span key="close" className={currentColor}>
 				]
 			</span>,
 		);
@@ -130,12 +137,16 @@ const formatJsonWithRainbowBraces = (
 	if (typeof obj === "object") {
 		const keys = Object.keys(obj);
 
+		// Get a random color for this brace pair
+		const randomIndex = Math.floor(braceCounter.random() * BRACE_COLORS.length);
+		const currentColor = BRACE_COLORS[randomIndex];
+
 		if (keys.length === 0) {
 			return [
-				<span key="open" className={color}>
+				<span key="open" className={currentColor}>
 					{"{"}
 				</span>,
-				<span key="close" className={color}>
+				<span key="close" className={currentColor}>
 					{"}"}
 				</span>,
 			];
@@ -143,7 +154,7 @@ const formatJsonWithRainbowBraces = (
 
 		const elements: React.ReactNode[] = [];
 		elements.push(
-			<span key="open" className={color}>
+			<span key="open" className={currentColor}>
 				{"{"}
 			</span>,
 		);
@@ -163,7 +174,9 @@ const formatJsonWithRainbowBraces = (
 					:{" "}
 				</span>,
 			);
-			elements.push(...formatJsonWithRainbowBraces(obj[key], indent + 1));
+			elements.push(
+				...formatJsonWithRainbowBraces(obj[key], indent + 1, braceCounter),
+			);
 
 			if (index < keys.length - 1) {
 				elements.push(
@@ -178,7 +191,7 @@ const formatJsonWithRainbowBraces = (
 		const indentStr = "  ".repeat(indent);
 		elements.push(<span key="close-indent">{indentStr}</span>);
 		elements.push(
-			<span key="close" className={color}>
+			<span key="close" className={currentColor}>
 				{"}"}
 			</span>,
 		);
