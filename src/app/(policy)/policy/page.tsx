@@ -1,13 +1,14 @@
 "use client";
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
+import { useEffect } from "react";
 import { Editor } from "~/components/editor/editor";
 import { SavePolicy } from "~/components/editor/save";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
 import { Button } from "~/components/ui/button";
-import { usePolicyStore } from "~/lib/state/maker";
+import { usePolicyStore } from "~/lib/state/policy";
 
 export default function IDEPage() {
 	const {
@@ -24,7 +25,13 @@ export default function IDEPage() {
 		runTest,
 		repairTest,
 		runAllTests,
+		reset,
 	} = usePolicyStore();
+
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	useEffect(() => {
+		reset();
+	}, []);
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">

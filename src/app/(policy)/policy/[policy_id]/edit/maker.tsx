@@ -13,7 +13,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { usePolicyStore } from "~/lib/state/maker";
+import { usePolicyStore } from "~/lib/state/policy";
 
 export default function Maker({ policy_id }: { policy_id: string }) {
 	const {

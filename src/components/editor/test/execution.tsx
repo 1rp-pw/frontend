@@ -16,7 +16,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
-import type { TestResultSet } from "~/lib/state/maker";
+import type { TestResultSet } from "~/lib/state/policy";
 
 interface PolicyExecutionModalProps {
 	open: boolean;

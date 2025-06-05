@@ -101,6 +101,9 @@ interface PolicyStore {
 		error?: string;
 	}>;
 	getPolicy: () => void;
+
+	// Reset
+	reset: () => void;
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: schema can be anything
@@ -265,6 +268,13 @@ const defaultTests: Test[] = [
 	},
 ];
 
+const defaultText = `# Driving Test Rules
+A **Person** gets a full driving license
+ if the __age__ of the **Person** is greater than or equal to 17
+ and the **Person** passes the practical driving test
+ and the **Person** passes the eye test.
+`;
+
 const defaultSchema = {
 	title: "Person Model",
 	type: "object",
@@ -299,7 +309,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 	currentTest: null,
 	schema: defaultSchema,
 	schemaVersion: generateSchemaHash(defaultSchema),
-	text: "# Driving Test Rules\nA **Person** gets a full driving license\n if the __age__ of the **Person** is greater than or equal to 17\n and the **Person** passes the practical driving test\n and the **Person** passes the eye test.\n\nA **Person** passes the practical driving test\n if the __driving test score__ of the **Person** is greater than or equal to 60.",
+	text: defaultText,
 	id: null,
 	name: "Test Policy",
 
@@ -637,5 +647,17 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 		const runnableTests = tests.filter((t) => t.created); // Only run created tests
 		// Run all tests concurrently
 		await Promise.all(runnableTests.map((test) => runTest(test.id)));
+	},
+
+	reset: () => {
+		set({
+			tests: defaultTests.map((test) => ({
+				...test,
+				schemaVersion: generateSchemaHash(defaultSchema),
+			})),
+			currentTest: null,
+			schema: defaultSchema,
+			text: defaultText,
+		});
 	},
 }));
