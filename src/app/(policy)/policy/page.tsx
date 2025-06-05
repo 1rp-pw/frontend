@@ -15,9 +15,9 @@ export default function IDEPage() {
 		schema,
 		tests,
 		currentTest,
-		text,
+		rule,
 		setSchema,
-		setPolicyText,
+		setPolicyRule,
 		createTest,
 		saveTest,
 		selectTest,
@@ -48,7 +48,7 @@ export default function IDEPage() {
 						Policy Text
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<Editor text={text} onChange={setPolicyText} />
+						<Editor rule={rule} onChange={setPolicyRule} />
 					</div>
 				</div>
 

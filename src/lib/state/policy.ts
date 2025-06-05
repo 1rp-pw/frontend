@@ -70,7 +70,7 @@ interface PolicyStore {
 	rule: string;
 	name: string;
 	id: string | null;
-	
+
 	// Test stuff
 	createTest: () => void;
 	saveTest: (
@@ -105,8 +105,8 @@ interface PolicyStore {
 		error?: string;
 	}>;
 	getPolicy: (policyId?: string) => Promise<{
-		success: boolean,
-		error?: string
+		success: boolean;
+		error?: string;
 	}>;
 
 	// loading states
@@ -331,7 +331,7 @@ const defaultTests: Test[] = [
 
 export const usePolicyStore = create<PolicyStore>((set, get) => {
 	const defaultSpec = createDefaultPolicySpec();
-	
+
 	return {
 		policySpec: defaultSpec,
 		schema: defaultSpec.schema,
@@ -339,7 +339,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 		rule: defaultSpec.rule,
 		name: defaultSpec.name,
 		id: defaultSpec.id || null,
-		
+
 		tests: defaultTests.map((test) => ({
 			...test,
 			schemaVersion: generateSchemaHash(defaultSchema),
@@ -348,7 +348,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 
 		// Policy spec management
 		setPolicySpec: (spec) => {
-			set({ 
+			set({
 				policySpec: spec,
 				schema: spec.schema,
 				schemaVersion: spec.schemaVersion,
@@ -362,7 +362,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 		updatePolicySpec: (updates) => {
 			const current = get().policySpec;
 			if (!current) return;
-			
+
 			const updatedSpec: PolicySpec = {
 				...current,
 				...updates,
@@ -372,8 +372,8 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			if (updates.schema) {
 				updatedSpec.schemaVersion = generateSchemaHash(updates.schema);
 			}
-			
-			set({ 
+
+			set({
 				policySpec: updatedSpec,
 				schema: updatedSpec.schema,
 				schemaVersion: updatedSpec.schemaVersion,
@@ -538,15 +538,15 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 
 		isLoading: false,
 		error: null,
-		setLoading: (loading) => set({isLoading: loading}),
-		setError: (error) => set({error}),
+		setLoading: (loading) => set({ isLoading: loading }),
+		setError: (error) => set({ error }),
 
 		getPolicy: async (policyId?: string) => {
 			const currentId = policyId || get().id;
 
 			if (!currentId) {
-				const error = "No Policy ID"
-				set({error})
+				const error = "No Policy ID";
+				set({ error });
 				return {
 					success: false,
 					error: "No policy ID provided",
@@ -555,7 +555,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			set({
 				isLoading: true,
 				error: null,
-			})
+			});
 
 			try {
 				const response = await fetch(`/api/policy?id=${currentId}`, {
@@ -570,7 +570,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					set({
 						isLoading: false,
 						error,
-					})
+					});
 					return {
 						success: false,
 						error: errorData.message || `Server error: ${response.status}`,
@@ -578,7 +578,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 				}
 
 				const result = await response.json();
-				
+
 				// Convert API response to PolicySpec
 				const policySpec: PolicySpec = {
 					id: result.id,
@@ -620,14 +620,16 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					success: true,
 				};
 			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : "Failed to get policy";
+				const errorMessage =
+					error instanceof Error ? error.message : "Failed to get policy";
 				set({
 					isLoading: false,
 					error: errorMessage,
-				})
+				});
 				return {
 					success: false,
-					error: error instanceof Error ? error.message : "Failed to get policy",
+					error:
+						error instanceof Error ? error.message : "Failed to get policy",
 				};
 			}
 		},
@@ -638,7 +640,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			error?: string;
 		}> => {
 			const { tests, policySpec } = get();
-			
+
 			if (!policySpec) {
 				return {
 					success: false,
@@ -687,7 +689,8 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			} catch (error) {
 				return {
 					success: false,
-					error: error instanceof Error ? error.message : "Failed to save policy",
+					error:
+						error instanceof Error ? error.message : "Failed to save policy",
 				};
 			}
 		},
