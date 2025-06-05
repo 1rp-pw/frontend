@@ -273,7 +273,7 @@ A **Person** gets a full driving license
  if the __age__ of the **Person** is greater than or equal to 17
  and the **Person** passes the practical driving test
  and the **Person** passes the eye test.
-`
+`;
 
 const defaultSchema = {
 	title: "Person Model",
@@ -658,6 +658,6 @@ export const usePolicyStore = create<PolicyStore>((set, get) => ({
 			currentTest: null,
 			schema: defaultSchema,
 			text: defaultText,
-		})
-	}
+		});
+	},
 }));

@@ -1,3 +1,3 @@
 export default function PolicyInfo() {
-  return <div>PolicyInfo</div>;
+	return <div>PolicyInfo</div>;
 }
