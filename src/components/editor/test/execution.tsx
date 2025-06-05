@@ -192,7 +192,7 @@ export function PolicyExecutionModal({
 					<TabsContent value="text" className="mt-4">
 						<ScrollArea className="h-[60vh] min-h-[400px] w-full bg-muted">
 							<div className="space-y-2 text-sm leading-relaxed">
-								{executionData.text.map((line, index) => {
+								{executionData.rule.map((line, index) => {
 									// Process and render the line with tooltips
 									const renderLineWithTooltips = (text: string) => {
 										const parts: (string | JSX.Element)[] = [];
