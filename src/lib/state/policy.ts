@@ -104,7 +104,16 @@ interface PolicyStore {
 		returnId?: string;
 		error?: string;
 	}>;
-	getPolicy: (policyId?: string) => void;
+	getPolicy: (policyId?: string) => Promise<{
+		success: boolean,
+		error?: string
+	}>;
+
+	// loading states
+	isLoading: boolean;
+	error: string | null;
+	setLoading: (loading: boolean) => void;
+	setError: (error: string | null) => void;
 
 	// Reset
 	reset: () => void;
@@ -527,16 +536,26 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			set({ tests: updatedTests });
 		},
 
+		isLoading: false,
+		error: null,
+		setLoading: (loading) => set({isLoading: loading}),
+		setError: (error) => set({error}),
+
 		getPolicy: async (policyId?: string) => {
 			const currentId = policyId || get().id;
 
 			if (!currentId) {
-				console.warn("No policy ID set, skipping getPolicy call");
+				const error = "No Policy ID"
+				set({error})
 				return {
 					success: false,
 					error: "No policy ID provided",
 				};
 			}
+			set({
+				isLoading: true,
+				error: null,
+			})
 
 			try {
 				const response = await fetch(`/api/policy?id=${currentId}`, {
@@ -547,6 +566,11 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 
 				if (!response.ok) {
 					const errorData = await response.json().catch(() => ({}));
+					const error = errorData.message || `Server error: ${response.status}`;
+					set({
+						isLoading: false,
+						error,
+					})
 					return {
 						success: false,
 						error: errorData.message || `Server error: ${response.status}`,
@@ -588,14 +612,19 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 						},
 						resultSet: null,
 					})),
+					isLoading: false,
+					error: null,
 				});
 
 				return {
 					success: true,
 				};
 			} catch (error) {
-				console.error("Error getting policy", error);
-
+				const errorMessage = error instanceof Error ? error.message : "Failed to get policy";
+				set({
+					isLoading: false,
+					error: errorMessage,
+				})
 				return {
 					success: false,
 					error: error instanceof Error ? error.message : "Failed to get policy",

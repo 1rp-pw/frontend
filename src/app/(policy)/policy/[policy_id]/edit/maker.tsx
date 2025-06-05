@@ -14,6 +14,7 @@ import {
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { usePolicyStore } from "~/lib/state/policy";
+import {Skeleton} from "~/components/ui/skeleton";
 
 export default function Maker({ policy_id }: { policy_id: string }) {
 	const {
@@ -22,6 +23,8 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		currentTest,
 		name,
 		rule,
+		isLoading,
+		error,
 		setSchema,
 		setPolicyRule,
 		createTest,
@@ -31,7 +34,6 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		runTest,
 		repairTest,
 		runAllTests,
-		setPolicyId,
 		getPolicy
 	} = usePolicyStore();
 
@@ -44,13 +46,29 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 			(test) => test.outcome.ran && test.outcome.status === "passed",
 		);
 
-	// const text = currentPolicy?.text || "";
-
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		setPolicyId(policy_id);
-		getPolicy(policy_id);
-	}, [policy_id]); // Include policy_id in dependencies
+		const loadPolicy = async() => {
+			await getPolicy(policy_id);
+		}
+		loadPolicy();
+	}, [policy_id]);
+
+	if (isLoading) {
+		return <div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
+			<div className="flex flex-1 items-center justify-center">
+				<Skeleton />
+			</div>
+		</div>
+	}
+
+	if (error) {
+		return <div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
+			<div className="flex flex-1 items-center justify-center">
+				Something has gone wrong {error}
+			</div>
+		</div>
+	}
 
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
