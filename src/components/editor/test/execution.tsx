@@ -9,7 +9,9 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "~/components/ui/dialog";
+import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
 	Tooltip,
@@ -17,8 +19,6 @@ import {
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
 import type { TestResultSet } from "~/lib/state/policy";
-import {RainbowBraces} from "~/components/ui/rainbow";
-import {Separator} from "~/components/ui/separator";
 
 interface PolicyExecutionModalProps {
 	open: boolean;
@@ -185,8 +185,11 @@ export function PolicyExecutionModal({
 							<div>
 								<h3 className="mb-2 font-semibold text-lg">Input Data</h3>
 								<pre className="overflow-x-auto rounded bg-muted p-3 text-sm">
-										<RainbowBraces json={executionData.data} className={"text-sm"} />
-									</pre>
+									<RainbowBraces
+										json={executionData.data}
+										className={"text-sm"}
+									/>
+								</pre>
 							</div>
 						</ScrollArea>
 					</TabsContent>
@@ -310,7 +313,10 @@ export function PolicyExecutionModal({
 																		<strong>Value:</strong>
 																	</div>
 																	<pre className="mt-1 max-w-xs overflow-auto rounded p-2 text-xs">
-																		<RainbowBraces json={foundValue} className={"text-xs"} />
+																		<RainbowBraces
+																			json={foundValue}
+																			className={"text-xs"}
+																		/>
 																	</pre>
 																</div>
 															</TooltipContent>
@@ -375,7 +381,10 @@ export function PolicyExecutionModal({
 																		<strong>Value:</strong>
 																	</div>
 																	<pre className="mt-1 max-w-xs overflow-auto rounded p-2 text-xs">
-																		<RainbowBraces json={foundValue} className={"text-xs"} />
+																		<RainbowBraces
+																			json={foundValue}
+																			className={"text-xs"}
+																		/>
 																	</pre>
 																</div>
 															</TooltipContent>
