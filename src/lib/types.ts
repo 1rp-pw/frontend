@@ -45,3 +45,13 @@ export interface PolicyWithVersions {
 		lastModified: Date;
 	};
 }
+
+export const PROPERTY_TYPES = [
+	{ value: "string", label: "String" },
+	{ value: "number", label: "Number" },
+	{ value: "boolean", label: "Boolean" },
+	{ value: "object", label: "Object" },
+	{ value: "array", label: "Array" },
+] as const;
+
+export type PropertyType = (typeof PROPERTY_TYPES)[number]["value"];

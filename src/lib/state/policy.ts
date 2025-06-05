@@ -63,14 +63,6 @@ export interface Test {
 }
 
 interface PolicyStore {
-	policySpec: PolicySpec | null;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-	schema: any;
-	schemaVersion: string;
-	rule: string;
-	name: string;
-	id: string | null;
-
 	// Test stuff
 	createTest: () => void;
 	saveTest: (
@@ -90,10 +82,21 @@ interface PolicyStore {
 	tests: Test[];
 	currentTest: Test | null;
 
+	// Schema
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	setSchema: (schema: any) => void;
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	schema: any;
+	schemaVersion: string;
+	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	getDefaultSchema: () => any;
+	initializeSchemaIfEmpty: () => void;
 
 	// Policy stuff
+	policySpec: PolicySpec | null;
+	rule: string;
+	name: string;
+	id: string | null;
 	setPolicyRule: (rule: string) => void;
 	setPolicyName: (name: string) => void;
 	setPolicyId: (id: string) => void;
@@ -237,7 +240,7 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 };
 
 // Default schema and rule
-const defaultSchema = {
+export const defaultSchema = {
 	title: "Person Model",
 	type: "object",
 	required: ["person"],
@@ -345,6 +348,20 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			schemaVersion: generateSchemaHash(defaultSchema),
 		})),
 		currentTest: null,
+
+		// Schema
+		getDefaultSchema: () => defaultSchema,
+		initializeSchemaIfEmpty: () => {
+			const { schema, setSchema } = get();
+			if (
+				!schema ||
+				Object.keys(schema).length === 0 ||
+				!schema.properties ||
+				Object.keys(schema.properties).length === 0
+			) {
+				setSchema(defaultSchema);
+			}
+		},
 
 		// Policy spec management
 		setPolicySpec: (spec) => {
