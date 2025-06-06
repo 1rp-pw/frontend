@@ -43,7 +43,7 @@
 		"reactflow": "^11.11.4",
 		"sonner": "^2.0.3",
 		"tailwind-merge": "^3.3.0",
-		"zod": "^3.25.50",
+		"zod": "^3.25.53",
 		"zustand": "^5.0.5"
 	},
 	"devDependencies": {
