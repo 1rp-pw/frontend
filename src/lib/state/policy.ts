@@ -241,92 +241,71 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 
 // Default schema and rule
 export const defaultSchema = {
-	"properties": {
-		"drivingTest": {
-			"properties": {
-				"person": {
-					"properties": {
-						"dateOfBirth": {
-							"type": "string"
+	properties: {
+		drivingTest: {
+			properties: {
+				person: {
+					properties: {
+						dateOfBirth: {
+							type: "string",
 						},
-						"name": {
-							"type": "string"
-						}
+						name: {
+							type: "string",
+						},
 					},
-					"required": [
-						"name",
-						"dateOfBirth"
-					],
-					"type": "object"
+					required: ["name", "dateOfBirth"],
+					type: "object",
 				},
-				"scores": {
-					"properties": {
-						"practical": {
-							"properties": {
-								"major": {
-									"type": "boolean"
+				scores: {
+					properties: {
+						practical: {
+							properties: {
+								major: {
+									type: "boolean",
 								},
-								"minor": {
-									"type": "number"
-								}
+								minor: {
+									type: "number",
+								},
 							},
-							"required": [
-								"minor",
-								"major"
-							],
-							"type": "object"
+							required: ["minor", "major"],
+							type: "object",
 						},
-						"theory": {
-							"properties": {
-								"hazardPerception": {
-									"type": "number"
+						theory: {
+							properties: {
+								hazardPerception: {
+									type: "number",
 								},
-								"multipleChoice": {
-									"type": "number"
-								}
+								multipleChoice: {
+									type: "number",
+								},
 							},
-							"required": [
-								"multipleChoice",
-								"hazardPerception"
-							],
-							"type": "object"
-						}
+							required: ["multipleChoice", "hazardPerception"],
+							type: "object",
+						},
 					},
-					"required": [
-						"practical",
-						"theory"
-					],
-					"type": "object"
+					required: ["practical", "theory"],
+					type: "object",
 				},
-				"testDates": {
-					"properties": {
-						"practical": {
-							"type": "string"
+				testDates: {
+					properties: {
+						practical: {
+							type: "string",
 						},
-						"theory": {
-							"type": "string"
-						}
+						theory: {
+							type: "string",
+						},
 					},
-					"required": [
-						"theory",
-						"practical"
-					],
-					"type": "object"
-				}
+					required: ["theory", "practical"],
+					type: "object",
+				},
 			},
-			"required": [
-				"person",
-				"scores",
-				"testDates"
-			],
-			"type": "object"
-		}
+			required: ["person", "scores", "testDates"],
+			type: "object",
+		},
 	},
-	"required": [
-		"drivingTest"
-	],
-	"title": "Person Model",
-	"type": "object"
+	required: ["drivingTest"],
+	title: "Person Model",
+	type: "object",
 };
 
 const defaultRule = `A **driver** gets a driving licence
@@ -375,23 +354,23 @@ const defaultTests: Test[] = [
 			drivingTest: {
 				person: {
 					dateOfBirth: "1990-01-01",
-					name: "Bob"
+					name: "Bob",
 				},
 				scores: {
 					practical: {
 						major: false,
-						minor: 13
+						minor: 13,
 					},
 					theory: {
 						hazardPerception: 75,
-						multipleChoice: 45
-					}
+						multipleChoice: 45,
+					},
 				},
 				testDates: {
 					practical: "2025-06-01",
-					theory: "2024-12-12"
-				}
-			}
+					theory: "2024-12-12",
+				},
+			},
 		},
 		expectPass: true,
 		created: true,
@@ -410,22 +389,22 @@ const defaultTests: Test[] = [
 			drivingTest: {
 				person: {
 					dateOfBirth: "1990-01-01",
-					name: "Bob"
+					name: "Bob",
 				},
 				scores: {
 					practical: {
-						minor: 24
+						minor: 24,
 					},
 					theory: {
 						hazardPerception: 42,
-						multipleChoice: 60
-					}
+						multipleChoice: 60,
+					},
 				},
 				testDates: {
 					practical: "2025-01-01",
-					theory: "2025-06-01"
-				}
-			}
+					theory: "2025-06-01",
+				},
+			},
 		},
 		expectPass: false,
 		created: true,
