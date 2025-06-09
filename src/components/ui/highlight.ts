@@ -195,6 +195,7 @@ export const highlightText = (text: string) => {
 		"is less than or equal to",
 		"is no more than",
 		"is equal to",
+		"is exactly equal to",
 		"is the same as",
 		"is not equal to",
 		"is not the same as",
@@ -204,6 +205,7 @@ export const highlightText = (text: string) => {
 		"is less than",
 		"is in",
 		"is not in",
+		"is within",
 		"contains",
 	];
 	const escapedPhrases = comparisonPhrases.map((phrase) =>
