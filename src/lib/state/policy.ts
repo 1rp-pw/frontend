@@ -241,39 +241,96 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 
 // Default schema and rule
 export const defaultSchema = {
-	title: "Person Model",
-	type: "object",
-	required: ["person"],
 	properties: {
-		person: {
-			type: "object",
-			required: ["name", "age", "drivingTestScore"],
+		drivingTest: {
 			properties: {
-				name: {
-					type: "string",
-					title: "Name",
+				person: {
+					properties: {
+						dateOfBirth: {
+							type: "string",
+						},
+						name: {
+							type: "string",
+						},
+					},
+					required: ["name", "dateOfBirth"],
+					type: "object",
 				},
-				age: {
-					type: "number",
-					title: "Age",
+				scores: {
+					properties: {
+						practical: {
+							properties: {
+								major: {
+									type: "boolean",
+								},
+								minor: {
+									type: "number",
+								},
+							},
+							required: ["minor", "major"],
+							type: "object",
+						},
+						theory: {
+							properties: {
+								hazardPerception: {
+									type: "number",
+								},
+								multipleChoice: {
+									type: "number",
+								},
+							},
+							required: ["multipleChoice", "hazardPerception"],
+							type: "object",
+						},
+					},
+					required: ["practical", "theory"],
+					type: "object",
 				},
-				drivingTestScore: {
-					type: "number",
-					title: "Driving Test Score",
+				testDates: {
+					properties: {
+						practical: {
+							type: "string",
+						},
+						theory: {
+							type: "string",
+						},
+					},
+					required: ["theory", "practical"],
+					type: "object",
 				},
 			},
+			required: ["person", "scores", "testDates"],
+			type: "object",
 		},
 	},
+	required: ["drivingTest"],
+	title: "Person Model",
+	type: "object",
 };
 
-const defaultRule = `# Driving Test Rules
-A **Person** gets a full driving license
- if the __age__ of the **Person** is greater than or equal to 17
- and the **Person** passes the practical driving test
- and the **Person** passes the eye test.
- 
-A **Person** passes the practical driving test
-  if the __drivingTestScore__ of the **Person** is greater than or equal to 70.
+const defaultRule = `A **driver** gets a driving licence
+  if the **driver** passes the age test
+  and the **driver** passes the test requirements
+  and the **driver** has taken the test in the time period.
+
+A **driver** passes the age test
+  if the __date of birth__ of the **person** in the **driving test** is earlier than 2008-12-12.
+
+A **driver** passes the test requirements
+  if **driver** passes the theory test
+  and the **driver** passes the practical test.
+
+A **driver** passes the theory test
+  if the __multiple choice__ of the **theory** of the **scores** in the **driving test** is at least 43
+  and the __hazard perception__ of the **theory** of the **scores** in the **driving test** is at least 44.
+
+A **driver** passes the practical test
+  if the __minor__ in the **practical** of the **scores** in the **driving test** is no more than 15
+  and the __major__ in the **practical** of the **scores** in the **driving test** is equal to false.
+
+A **driver** has taken the test in the time period
+  if the __theory__ of the **testDates** in the **driving test** is within 2 years
+  and the __practical__ of the **testDates** in the **driving test** is within 30 days.
 `;
 
 const createDefaultPolicySpec = (): PolicySpec => ({
@@ -294,10 +351,25 @@ const defaultTests: Test[] = [
 		id: "default-1",
 		name: "Passing",
 		data: {
-			person: {
-				name: "Tester",
-				drivingTestScore: 70,
-				age: 19,
+			drivingTest: {
+				person: {
+					dateOfBirth: "1990-01-01",
+					name: "Bob",
+				},
+				scores: {
+					practical: {
+						major: false,
+						minor: 13,
+					},
+					theory: {
+						hazardPerception: 75,
+						multipleChoice: 45,
+					},
+				},
+				testDates: {
+					practical: "2025-06-01",
+					theory: "2024-12-12",
+				},
 			},
 		},
 		expectPass: true,
@@ -314,10 +386,24 @@ const defaultTests: Test[] = [
 		id: "default-2",
 		name: "Failing",
 		data: {
-			person: {
-				name: "Tester",
-				drivingTestScore: 30,
-				age: 19,
+			drivingTest: {
+				person: {
+					dateOfBirth: "1990-01-01",
+					name: "Bob",
+				},
+				scores: {
+					practical: {
+						minor: 24,
+					},
+					theory: {
+						hazardPerception: 42,
+						multipleChoice: 60,
+					},
+				},
+				testDates: {
+					practical: "2025-01-01",
+					theory: "2025-06-01",
+				},
 			},
 		},
 		expectPass: false,
