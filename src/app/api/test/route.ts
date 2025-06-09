@@ -23,7 +23,7 @@ export async function POST(request: Request) {
 
 		return NextResponse.json(
 			{
-				errors: resp.errors,
+				errors: resp.error,
 				result: resp.result,
 				trace: resp.trace,
 				rule: resp.rule,
