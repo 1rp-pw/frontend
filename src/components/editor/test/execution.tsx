@@ -416,7 +416,8 @@ export function PolicyExecutionModal({
 											key={index}
 											className="mb-0 whitespace-pre-wrap p-1 transition-colors hover:bg-muted/50"
 										>
-											<span className={"text-red-700 pr-2"}>{index+1}.</span> {renderLineWithTooltips(line)}
+											<span className={"pr-2 text-red-700"}>{index + 1}.</span>{" "}
+											{renderLineWithTooltips(line)}
 										</div>
 									);
 								})}
