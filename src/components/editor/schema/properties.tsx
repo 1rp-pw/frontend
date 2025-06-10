@@ -24,35 +24,35 @@ export function PropertyForm({ onAddProperty }: PropertyFormProps) {
 	const [newPropRequired, setNewPropRequired] = useState(true);
 
 	// subtypes
-	const [stringSubtype, setStringSubtype] = useState("default")
-	const [numberMin, setNumberMin] = useState("")
-	const [numberMax, setNumberMax] = useState("")
-	const [arrayItemType, setArrayItemType] = useState("string")
+	const [stringSubtype, setStringSubtype] = useState("default");
+	const [numberMin, setNumberMin] = useState("");
+	const [numberMax, setNumberMax] = useState("");
+	const [arrayItemType, setArrayItemType] = useState("string");
 
 	const handleAddProperty = () => {
 		if (!newPropName.trim()) return;
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		const propertyOptions: any = {}
+		const propertyOptions: any = {};
 		switch (newPropType) {
 			case "string":
 				if (stringSubtype === "date") {
-					propertyOptions.format = "date-time"
+					propertyOptions.format = "date-time";
 				}
 				break;
 
 			case "number":
 				if (numberMin !== "") {
-					propertyOptions.minimum = Number.parseFloat(numberMin)
+					propertyOptions.minimum = Number.parseFloat(numberMin);
 				}
 				if (numberMax !== "") {
-					propertyOptions.maximum = Number.parseFloat(numberMax)
+					propertyOptions.maximum = Number.parseFloat(numberMax);
 				}
 				break;
 
 			case "array":
 				propertyOptions.items = {
-					type: arrayItemType
-				}
+					type: arrayItemType,
+				};
 				break;
 		}
 
@@ -60,10 +60,10 @@ export function PropertyForm({ onAddProperty }: PropertyFormProps) {
 		setNewPropName("");
 		setNewPropType("string");
 		setNewPropRequired(true);
-		setStringSubtype("default")
-		setNumberMin("")
-		setNumberMax("")
-		setArrayItemType("string")
+		setStringSubtype("default");
+		setNumberMin("");
+		setNumberMax("");
+		setArrayItemType("string");
 	};
 
 	const renderTypeSpecificOptions = () => {
@@ -118,9 +118,8 @@ export function PropertyForm({ onAddProperty }: PropertyFormProps) {
 
 			default:
 				return null;
-
 		}
-	}
+	};
 
 	return (
 		<div className="space-y-2">
@@ -167,5 +166,5 @@ export function PropertyForm({ onAddProperty }: PropertyFormProps) {
 				</div>
 			</div>
 		</div>
-	)
+	);
 }

@@ -29,6 +29,7 @@ interface PropertyListProps {
 		newName: string,
 		type: string,
 		required: boolean,
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		options?: any,
 	) => void;
 	onRemoveProperty: (name: string) => void;
@@ -48,10 +49,10 @@ export function PropertyList({
 	const [editingType, setEditingType] = useState("");
 	const [editingRequired, setEditingRequired] = useState(true);
 
-	const [editingStringSubtype, setEditingStringSubtype] = useState("default")
-	const [editingNumberMin, setEditingNumberMin] = useState("")
-	const [editingNumberMax, setEditingNumberMax] = useState("")
-	const [editingArrayItemType, setEditingArrayItemType] = useState("string")
+	const [editingStringSubtype, setEditingStringSubtype] = useState("default");
+	const [editingNumberMin, setEditingNumberMin] = useState("");
+	const [editingNumberMax, setEditingNumberMax] = useState("");
+	const [editingArrayItemType, setEditingArrayItemType] = useState("string");
 
 	// biome-ignore lint/suspicious/noExplicitAny: property details can be anything
 	const startEditing = (propName: string, propDetails: any) => {
@@ -61,12 +62,14 @@ export function PropertyList({
 		setEditingRequired(required?.includes(propName) || false);
 
 		if (propDetails.type === "string") {
-			setEditingStringSubtype(propDetails.format === "date-format" ? "date-time" : "default")
+			setEditingStringSubtype(
+				propDetails.format === "date-format" ? "date-time" : "default",
+			);
 		} else if (propDetails.type === "number") {
-			setEditingNumberMin(propDetails.minimum?.toString() || "")
-			setEditingNumberMax(propDetails.maximum?.toString() || "")
+			setEditingNumberMin(propDetails.minimum?.toString() || "");
+			setEditingNumberMax(propDetails.maximum?.toString() || "");
 		} else if (propDetails.type === "array" && propDetails.items) {
-			setEditingArrayItemType(propDetails.items.type || "string")
+			setEditingArrayItemType(propDetails.items.type || "string");
 		}
 	};
 
@@ -75,44 +78,50 @@ export function PropertyList({
 		setEditingName("");
 		setEditingType("");
 		setEditingRequired(false);
-		setEditingArrayItemType("default")
-		setEditingNumberMax("")
-		setEditingNumberMin("")
-		setEditingStringSubtype("string")
+		setEditingArrayItemType("default");
+		setEditingNumberMax("");
+		setEditingNumberMin("");
+		setEditingStringSubtype("string");
 	};
 
 	const saveEdit = () => {
 		if (!editingProperty || !editingName.trim()) return;
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		const propertyOptions: any = {}
+		const propertyOptions: any = {};
 
 		switch (editingType) {
 			case "string":
 				if (editingStringSubtype === "date-time") {
-					propertyOptions.format = "date-time"
+					propertyOptions.format = "date-time";
 				}
-				break
+				break;
 			case "number":
 				if (editingNumberMin !== "") {
-					propertyOptions.minimum = Number.parseFloat(editingNumberMin)
+					propertyOptions.minimum = Number.parseFloat(editingNumberMin);
 				}
 				if (editingNumberMax !== "") {
-					propertyOptions.maximum = Number.parseFloat(editingNumberMax)
+					propertyOptions.maximum = Number.parseFloat(editingNumberMax);
 				}
-				break
+				break;
 			case "array":
 				propertyOptions.items = {
-					type: editingArrayItemType
-				}
-				break
+					type: editingArrayItemType,
+				};
+				break;
 		}
 
-		onEditProperty(editingProperty, editingName, editingType, editingRequired, propertyOptions);
+		onEditProperty(
+			editingProperty,
+			editingName,
+			editingType,
+			editingRequired,
+			propertyOptions,
+		);
 		cancelEditing();
 	};
 
 	const renderNumberConstraintsEdit = () => {
-		if (editingType !== "number") return null
+		if (editingType !== "number") return null;
 
 		return (
 			<div className="grid grid-cols-2 gap-2">
@@ -136,36 +145,36 @@ export function PropertyList({
 				</div>
 			</div>
 		);
-	}
+	};
 
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const getPropertyDisplayInfo = (propDetails: any) => {
-		console.info("propDetails", propDetails)
+		console.info("propDetails", propDetails);
 
-		let displayInfo = `(${propDetails.type})`
+		let displayInfo = `(${propDetails.type})`;
 		if (propDetails.type === "string") {
 			if (propDetails.format === "date-time") {
-				displayInfo = "Date"
+				displayInfo = "Date";
 			}
 		} else if (propDetails.type === "number") {
-			const contraints = []
+			const contraints = [];
 			if (propDetails.minimum !== undefined) {
-				contraints.push(`Min: ${propDetails.minimum}`)
+				contraints.push(`Min: ${propDetails.minimum}`);
 			}
 			if (propDetails.maximum !== undefined) {
-				contraints.push(`Max: ${propDetails.maximum}`)
+				contraints.push(`Max: ${propDetails.maximum}`);
 			}
 			if (contraints.length > 0) {
-				displayInfo = `(number: ${contraints.join(", ")})`
+				displayInfo = `(number: ${contraints.join(", ")})`;
 			}
 		} else if (propDetails.type === "array") {
 			if (propDetails.items) {
-				displayInfo = `(array: ${propDetails.items.type})`
+				displayInfo = `(array: ${propDetails.items.type})`;
 			}
 		}
 
-		return displayInfo
-	}
+		return displayInfo;
+	};
 
 	const breadcrumb = editingObject ? editingObject.split(".") : [];
 
@@ -218,7 +227,10 @@ export function PropertyList({
 											</SelectContent>
 										</Select>
 										{editingType === "string" && (
-											<Select value={editingStringSubtype} onValueChange={setEditingStringSubtype}>
+											<Select
+												value={editingStringSubtype}
+												onValueChange={setEditingStringSubtype}
+											>
 												<SelectTrigger className="flex h-8 w-24 flex-auto">
 													<SelectValue />
 												</SelectTrigger>
@@ -230,7 +242,10 @@ export function PropertyList({
 										)}
 										{editingType === "number" && renderNumberConstraintsEdit()}
 										{editingType === "array" && (
-											<Select value={editingArrayItemType} onValueChange={setEditingArrayItemType}>
+											<Select
+												value={editingArrayItemType}
+												onValueChange={setEditingArrayItemType}
+											>
 												<SelectTrigger className="flex h-8 w-26 flex-auto">
 													<SelectValue />
 												</SelectTrigger>

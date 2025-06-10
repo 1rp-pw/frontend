@@ -80,7 +80,8 @@ export function SchemaBuilder({
 		type: string,
 		required: boolean,
 		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		options?: any) => {
+		options?: any,
+	) => {
 		const currentSchema = getCurrentSchema();
 		const updatedSchema = { ...currentSchema };
 
@@ -135,7 +136,7 @@ export function SchemaBuilder({
 		// Create the updated property
 		const newProperty = {
 			type,
-			...options
+			...options,
 		};
 
 		// If changing to object type and it wasn't before, initialize structure
