@@ -16,6 +16,7 @@ import { Slider } from "~/components/ui/slider";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
+import {InputTags} from "~/components/ui/inputtags";
 
 interface Test {
 	id: string;
@@ -267,6 +268,23 @@ export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 							onCheckedChange={(checked) =>
 								setFormData(setNestedValue(formData, path, checked))
 							}
+						/>
+					</div>
+				);
+
+			case "array":
+				return (
+					<div key={path} className="space-y-1">
+						<Label htmlFor={path} className="text-sm">
+							{name} {isRequired && <span className="text-red-500">*</span>}
+						</Label>
+						<InputTags
+							value={getNestedValue(formData, path) || []}
+							onChange={(newTags) =>
+								setFormData(setNestedValue(formData, path, newTags))
+							}
+							placeholder="Type and press Enter to add tags..."
+							className="border-zinc-600 bg-zinc-700"
 						/>
 					</div>
 				);

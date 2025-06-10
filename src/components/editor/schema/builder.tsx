@@ -75,12 +75,17 @@ export function SchemaBuilder({
 		setSchema(newSchema);
 	};
 
-	const handleAddProperty = (name: string, type: string, required: boolean) => {
+	const handleAddProperty = (
+		name: string,
+		type: string,
+		required: boolean,
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		options?: any) => {
 		const currentSchema = getCurrentSchema();
 		const updatedSchema = { ...currentSchema };
 
 		// biome-ignore lint/suspicious/noExplicitAny: new property can be anything
-		const newProperty: any = { type };
+		const newProperty: any = { type, ...options };
 
 		// If it's an object type, initialize with empty properties
 		if (type === "object") {
@@ -120,19 +125,21 @@ export function SchemaBuilder({
 		newName: string,
 		type: string,
 		required: boolean,
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		options?: any,
 	) => {
 		const currentSchema = getCurrentSchema();
 		const updatedSchema = { ...currentSchema };
-		const oldProperty = updatedSchema.properties[oldName];
+		//const oldProperty = updatedSchema.properties[oldName];
 
 		// Create the updated property
 		const newProperty = {
-			...oldProperty,
 			type,
+			...options
 		};
 
 		// If changing to object type and it wasn't before, initialize structure
-		if (type === "object" && oldProperty.type !== "object") {
+		if (type === "object") {
 			newProperty.properties = {};
 			newProperty.required = [];
 		}
