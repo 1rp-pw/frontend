@@ -9,13 +9,14 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
+import { DateTimeInput } from "~/components/ui/date-time-input";
 import { Input } from "~/components/ui/input";
+import { InputTags } from "~/components/ui/inputtags";
 import { Label } from "~/components/ui/label";
 import { RainbowBraces } from "~/components/ui/rainbow";
 import { Slider } from "~/components/ui/slider";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { Textarea } from "~/components/ui/textarea";
 
 interface Test {
 	id: string;
@@ -205,8 +206,25 @@ export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 			);
 		}
 
+		console.info("details", details);
 		switch (details.type) {
 			case "string":
+				if (details.format === "date-time") {
+					return (
+						<div key={path} className={"space-y-1"}>
+							<Label htmlFor={path} className="text-sm">
+								{name} {isRequired && <span className="text-red-500">*</span>}
+							</Label>
+							<DateTimeInput
+								id={path}
+								value={getNestedValue(formData, path) || ""}
+								onChange={(e) => setFormData(setNestedValue(formData, path, e))}
+								className="border-zinc-600 "
+							/>
+						</div>
+					);
+				}
+
 				return (
 					<div key={path} className="space-y-1">
 						<Label htmlFor={path} className="text-sm">
@@ -267,6 +285,23 @@ export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 							onCheckedChange={(checked) =>
 								setFormData(setNestedValue(formData, path, checked))
 							}
+						/>
+					</div>
+				);
+
+			case "array":
+				return (
+					<div key={path} className="space-y-1">
+						<Label htmlFor={path} className="text-sm">
+							{name} {isRequired && <span className="text-red-500">*</span>}
+						</Label>
+						<InputTags
+							value={getNestedValue(formData, path) || []}
+							onChange={(newTags) =>
+								setFormData(setNestedValue(formData, path, newTags))
+							}
+							placeholder="Type and press Enter to add tags..."
+							className="border-zinc-600 bg-zinc-700"
 						/>
 					</div>
 				);

@@ -1,6 +1,7 @@
 "use client";
 import { CheckCircle, XCircle } from "lucide-react";
 import type { JSX } from "react";
+import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
 import {
 	Dialog,
@@ -33,6 +34,8 @@ export function PolicyExecutionModal({
 	executionData,
 	testName,
 }: PolicyExecutionModalProps) {
+	const [selectedExecutionIndex, setSelectedExecutionIndex] = useState(0);
+
 	if (!executionData) return null;
 
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -61,6 +64,8 @@ export function PolicyExecutionModal({
 	};
 
 	const propertyPaths = getPropertyPathsFromTrace();
+	const selectedExecution =
+		executionData.trace.execution[selectedExecutionIndex];
 
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const renderCondition = (condition: any, index: number) => {
@@ -92,7 +97,9 @@ export function PolicyExecutionModal({
 					<div className="mb-2">
 						<strong>Condition:</strong> {condition.property.path}{" "}
 						{condition.operator.replace(/([A-Z])/g, " $1")}{" "}
-						{condition.value?.value}
+						{Array.isArray(condition.value?.value)
+							? `[${condition.value.value.join(", ")}]`
+							: condition.value?.value}
 					</div>
 				)}
 
@@ -102,13 +109,18 @@ export function PolicyExecutionModal({
 							<strong>Evaluation:</strong>
 						</div>
 						<div>
-							User Data (Left): {condition.evaluation_details.left_value.value}{" "}
+							User Data (Left):{" "}
+							{Array.isArray(condition.evaluation_details.left_value.value)
+								? `[${condition.evaluation_details.left_value.value.join(", ")}]`
+								: condition.evaluation_details.left_value.value}{" "}
 							({condition.evaluation_details.left_value.type})
 						</div>
 						<div>
 							Control Text (Right):{" "}
-							{condition.evaluation_details.right_value.value} (
-							{condition.evaluation_details.right_value.type})
+							{Array.isArray(condition.evaluation_details.right_value.value)
+								? `[${condition.evaluation_details.right_value.value.join(", ")}]`
+								: condition.evaluation_details.right_value.value}{" "}
+							({condition.evaluation_details.right_value.type})
 						</div>
 						<div>
 							Result:{" "}
@@ -125,7 +137,7 @@ export function PolicyExecutionModal({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			{/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
-			<DialogContent className="max-w-none w-[90vw] max-h-[80vh] min-w-[600px] min-h-[500px] sm:max-w-none md:max-w-none lg:max-w-none xl:max-w-6xl">
+			<DialogContent className="max-w-none w-[90vw] max-h-[80vh] min-w-[800px] min-h-[600px] sm:max-w-none md:max-w-none lg:max-w-none xl:max-w-7xl">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						{testName && <span>{testName} - </span>}
@@ -135,296 +147,368 @@ export function PolicyExecutionModal({
 						</Badge>
 					</DialogTitle>
 					<DialogDescription className="flex items-center gap-2">
-						Summary of the execution
+						Select a rule execution to view details
 					</DialogDescription>
 				</DialogHeader>
 
-				<Tabs defaultValue="ast" className="w-full">
-					<TabsList className="grid w-full grid-cols-2">
-						<TabsTrigger value="ast">Execution Trace (AST)</TabsTrigger>
-						<TabsTrigger value="text">Policy Text</TabsTrigger>
-					</TabsList>
-
-					<TabsContent value="ast" className="mt-4">
-						<ScrollArea className="h-[60vh] min-h-[400px] w-full">
-							<div className="space-y-4">
-								{executionData.trace.execution.map((execution, execIndex) => (
-									// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-									<div key={execIndex} className="rounded-lg border p-4">
-										<div className="mb-3 flex items-center gap-2">
-											<h3 className="font-semibold text-lg">
-												Rule Execution {execIndex + 1}
-											</h3>
+				<div className="flex h-[65vh] min-h-[500px] gap-4">
+					{/* Execution List - Left Panel */}
+					<div className="w-1/3 min-w-[300px] border-r pr-4">
+						<h3 className="mb-3 font-semibold">Rule Executions</h3>
+						<ScrollArea className="h-full">
+							<div className="space-y-2">
+								{executionData.trace.execution.map((execution, index) => (
+									<button
+										// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+										key={index}
+										type="button"
+										onClick={() => setSelectedExecutionIndex(index)}
+										className={`w-full rounded-lg border p-3 text-left transition-colors hover:bg-muted/50 ${
+											selectedExecutionIndex === index
+												? "border-primary bg-muted"
+												: "border-border"
+										}`}
+									>
+										<div className="mb-2 flex items-center gap-2">
 											{execution.result ? (
-												<CheckCircle className="h-5 w-5 text-green-500" />
+												<CheckCircle className="h-4 w-4 flex-shrink-0 text-green-500" />
 											) : (
-												<XCircle className="h-5 w-5 text-red-500" />
+												<XCircle className="h-4 w-4 flex-shrink-0 text-red-500" />
 											)}
+											<span className="font-medium">Rule {index + 1}</span>
 										</div>
-
-										<div className="mb-3">
-											<strong>Outcome:</strong> {execution.outcome.value}
-										</div>
-
-										<div className="mb-3">
-											<strong>Selector:</strong> {execution.selector.value}
-										</div>
-
-										<div>
-											<strong>Conditions:</strong>
-											<div className="mt-2 space-y-2">
-												{execution.conditions.map((condition, condIndex) =>
-													renderCondition(condition, condIndex),
-												)}
+										<div className="text-muted-foreground text-sm">
+											<div className="truncate">
+												<strong>Selector:</strong> {execution.selector.value}
+											</div>
+											<div className="truncate">
+												<strong>Outcome:</strong> {execution.outcome.value}
+											</div>
+											<div className="mt-1 text-xs">
+												{execution.conditions.length} condition
+												{execution.conditions.length !== 1 ? "s" : ""}
 											</div>
 										</div>
-									</div>
+									</button>
 								))}
 							</div>
-							<Separator className={"mt-4 mb-4"} />
-							<div>
-								<h3 className="mb-2 font-semibold text-lg">Input Data</h3>
-								<pre className="overflow-x-auto rounded bg-muted p-3 text-sm">
-									<RainbowBraces
-										json={executionData.data}
-										className={"text-sm"}
-									/>
-								</pre>
-							</div>
 						</ScrollArea>
-					</TabsContent>
+					</div>
 
-					<TabsContent value="text" className="mt-4">
-						<ScrollArea className="w-full rounded bg-muted p-2">
-							<div className="space-y-2 text-sm leading-relaxed">
-								{executionData.rule.map((line, index) => {
-									// Process and render the line with tooltips
-									const renderLineWithTooltips = (text: string) => {
-										const parts: (string | JSX.Element)[] = [];
-										let lastIndex = 0;
+					{/* Execution Detail - Right Panel */}
+					<div className="flex-1">
+						<Tabs defaultValue="conditions" className="h-full">
+							<TabsList className="grid w-full grid-cols-3">
+								<TabsTrigger value="conditions">Conditions</TabsTrigger>
+								<TabsTrigger value="data">Input Data</TabsTrigger>
+								<TabsTrigger value="text">Policy Text</TabsTrigger>
+							</TabsList>
 
-										// First pass: handle **Entity** patterns
-										const entityRegex = /\*\*(.*?)\*\*/g;
-										// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
-										let entityMatch;
-										const entityMatches: Array<{
-											match: string;
-											captured: string;
-											start: number;
-											end: number;
-										}> = [];
+							<TabsContent
+								value="conditions"
+								className="mt-4 h-[calc(100%-3rem)]"
+							>
+								{selectedExecution && (
+									<ScrollArea className="h-full">
+										<div className="space-y-4">
+											<div className="rounded-lg border p-4">
+												<div className="mb-3 flex items-center gap-2">
+													<h3 className="font-semibold text-lg">
+														Rule Execution {selectedExecutionIndex + 1}
+													</h3>
+													{selectedExecution.result ? (
+														<CheckCircle className="h-5 w-5 text-green-500" />
+													) : (
+														<XCircle className="h-5 w-5 text-red-500" />
+													)}
+												</div>
 
-										// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-										while ((entityMatch = entityRegex.exec(text)) !== null) {
-											entityMatches.push({
-												match: entityMatch[0],
-												captured: entityMatch[1] || "",
-												start: entityMatch.index,
-												end: entityMatch.index + entityMatch[0].length,
-											});
-										}
+												<div className="mb-3">
+													<strong>Outcome:</strong>{" "}
+													{selectedExecution.outcome.value}
+												</div>
 
-										// Second pass: handle __property__ patterns
-										const propertyRegex = /__(.*?)__/g;
-										// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
-										let propertyMatch;
-										const propertyMatches: Array<{
-											match: string;
-											captured: string;
-											start: number;
-											end: number;
-										}> = [];
+												<div className="mb-3">
+													<strong>Selector:</strong>{" "}
+													{selectedExecution.selector.value}
+												</div>
 
-										while (
-											// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
-											(propertyMatch = propertyRegex.exec(text)) !== null
-										) {
-											propertyMatches.push({
-												match: propertyMatch[0],
-												captured: propertyMatch[1] || "",
-												start: propertyMatch.index,
-												end: propertyMatch.index + propertyMatch[0].length,
-											});
-										}
+												<div>
+													<strong>Conditions:</strong>
+													<div className="mt-2 space-y-2">
+														{selectedExecution.conditions.map(
+															(condition, condIndex) =>
+																renderCondition(condition, condIndex),
+														)}
+													</div>
+												</div>
+											</div>
+										</div>
+									</ScrollArea>
+								)}
+							</TabsContent>
 
-										// Combine and sort all matches by position
-										const allMatches = [
-											...entityMatches.map((m) => ({
-												...m,
-												type: "entity" as const,
-											})),
-											...propertyMatches.map((m) => ({
-												...m,
-												type: "property" as const,
-											})),
-										].sort((a, b) => a.start - b.start);
+							<TabsContent value="data" className="mt-4 h-[calc(100%-3rem)]">
+								<ScrollArea className="h-full">
+									<div>
+										<h3 className="mb-2 font-semibold text-lg">Input Data</h3>
+										<pre className="overflow-x-auto rounded bg-muted p-3 text-sm">
+											<RainbowBraces
+												json={executionData.data}
+												className={"text-sm"}
+											/>
+										</pre>
+									</div>
+								</ScrollArea>
+							</TabsContent>
 
-										// Build the parts array
-										allMatches.forEach((match, idx) => {
-											const idb = idx;
-											// Add text before this match
-											if (lastIndex < match.start) {
-												parts.push(text.slice(lastIndex, match.start));
-											}
+							<TabsContent value="text" className="mt-4 h-[calc(100%-3rem)]">
+								<ScrollArea className="h-full rounded bg-muted p-2">
+									<div className="space-y-2 text-sm leading-relaxed">
+										{executionData.rule.map((line, index) => {
+											// Process and render the line with tooltips
+											const renderLineWithTooltips = (text: string) => {
+												const parts: (string | JSX.Element)[] = [];
+												let lastIndex = 0;
 
-											if (match.type === "entity") {
-												// Handle **Entity** pattern
-												let foundPath = null;
-												let foundValue = null;
+												// First pass: handle **Entity** patterns
+												const entityRegex = /\*\*(.*?)\*\*/g;
+												// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+												let entityMatch;
+												const entityMatches: Array<{
+													match: string;
+													captured: string;
+													start: number;
+													end: number;
+												}> = [];
 
-												for (const execution of executionData.trace.execution) {
-													if (
-														execution.selector.value.toLowerCase() ===
-														match.captured.toLowerCase()
-													) {
-														const entityPath = `$.${match.captured.toLowerCase()}`;
-														foundValue = getValueFromPath(
-															entityPath,
-															executionData.data,
-														);
+												while (
+													// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+													(entityMatch = entityRegex.exec(text)) !== null
+												) {
+													entityMatches.push({
+														match: entityMatch[0],
+														captured: entityMatch[1] || "",
+														start: entityMatch.index,
+														end: entityMatch.index + entityMatch[0].length,
+													});
+												}
+
+												// Second pass: handle __property__ patterns
+												const propertyRegex = /__(.*?)__/g;
+												// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+												let propertyMatch;
+												const propertyMatches: Array<{
+													match: string;
+													captured: string;
+													start: number;
+													end: number;
+												}> = [];
+
+												while (
+													// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+													(propertyMatch = propertyRegex.exec(text)) !== null
+												) {
+													propertyMatches.push({
+														match: propertyMatch[0],
+														captured: propertyMatch[1] || "",
+														start: propertyMatch.index,
+														end: propertyMatch.index + propertyMatch[0].length,
+													});
+												}
+
+												// Combine and sort all matches by position
+												const allMatches = [
+													...entityMatches.map((m) => ({
+														...m,
+														type: "entity" as const,
+													})),
+													...propertyMatches.map((m) => ({
+														...m,
+														type: "property" as const,
+													})),
+												].sort((a, b) => a.start - b.start);
+
+												// Build the parts array
+												allMatches.forEach((match, idx) => {
+													const idb = idx;
+													// Add text before this match
+													if (lastIndex < match.start) {
+														parts.push(text.slice(lastIndex, match.start));
+													}
+
+													if (match.type === "entity") {
+														// Handle **Entity** pattern
+														let foundPath = null;
+														let foundValue = null;
+
+														for (const execution of executionData.trace
+															.execution) {
+															if (
+																execution.selector.value.toLowerCase() ===
+																match.captured.toLowerCase()
+															) {
+																const entityPath = `$.${match.captured.toLowerCase()}`;
+																foundValue = getValueFromPath(
+																	entityPath,
+																	executionData.data,
+																);
+																if (
+																	foundValue !== null &&
+																	foundValue !== undefined
+																) {
+																	foundPath = entityPath;
+																	break;
+																}
+															}
+														}
+
 														if (
+															foundPath &&
 															foundValue !== null &&
 															foundValue !== undefined
 														) {
-															foundPath = entityPath;
-															break;
-														}
-													}
-												}
-
-												if (
-													foundPath &&
-													foundValue !== null &&
-													foundValue !== undefined
-												) {
-													parts.push(
-														<Tooltip key={`entity-${idb}`}>
-															<TooltipTrigger asChild>
-																<span className="cursor-help font-bold text-blue-600 underline decoration-dotted hover:text-blue-800">
+															parts.push(
+																<Tooltip key={`entity-${idb}`}>
+																	<TooltipTrigger asChild>
+																		<span className="cursor-help font-bold text-blue-600 underline decoration-dotted hover:text-blue-800">
+																			{match.match}
+																		</span>
+																	</TooltipTrigger>
+																	<TooltipContent>
+																		<div className="text-sm">
+																			<div>
+																				<strong>Path:</strong> {foundPath}
+																			</div>
+																			<div>
+																				<strong>Value:</strong>
+																			</div>
+																			<pre className="mt-1 max-w-xs overflow-auto rounded p-2 text-xs">
+																				<RainbowBraces
+																					json={foundValue}
+																					className={"text-xs"}
+																				/>
+																			</pre>
+																		</div>
+																	</TooltipContent>
+																</Tooltip>,
+															);
+														} else {
+															parts.push(
+																<span
+																	key={`entity-${idb}`}
+																	className="font-bold"
+																>
 																	{match.match}
-																</span>
-															</TooltipTrigger>
-															<TooltipContent>
-																<div className="text-sm">
-																	<div>
-																		<strong>Path:</strong> {foundPath}
-																	</div>
-																	<div>
-																		<strong>Value:</strong>
-																	</div>
-																	<pre className="mt-1 max-w-xs overflow-auto rounded p-2 text-xs">
-																		<RainbowBraces
-																			json={foundValue}
-																			className={"text-xs"}
-																		/>
-																	</pre>
-																</div>
-															</TooltipContent>
-														</Tooltip>,
-													);
-												} else {
-													parts.push(
-														<span key={`entity-${idb}`} className="font-bold">
-															{match.match}
-														</span>,
-													);
-												}
-											} else {
-												// Handle __property__ pattern
-												const normalized = match.captured
-													.toLowerCase()
-													.replace(/\s+/g, "");
-												let foundPath = null;
-												let foundValue = null;
+																</span>,
+															);
+														}
+													} else {
+														// Handle __property__ pattern
+														const normalized = match.captured
+															.toLowerCase()
+															.replace(/\s+/g, "");
+														let foundPath = null;
+														let foundValue = null;
 
-												if (propertyPaths.has(normalized)) {
-													foundPath = propertyPaths.get(normalized);
-													foundValue = getValueFromPath(
-														// biome-ignore lint/style/noNonNullAssertion: <explanation>
-														foundPath!,
-														executionData.data,
-													);
-												} else {
-													for (const [key, path] of propertyPaths.entries()) {
-														if (
-															key.includes(normalized) ||
-															normalized.includes(key)
-														) {
-															foundPath = path;
+														if (propertyPaths.has(normalized)) {
+															foundPath = propertyPaths.get(normalized);
 															foundValue = getValueFromPath(
-																path,
+																// biome-ignore lint/style/noNonNullAssertion: <explanation>
+																foundPath!,
 																executionData.data,
 															);
-															break;
+														} else {
+															for (const [
+																key,
+																path,
+															] of propertyPaths.entries()) {
+																if (
+																	key.includes(normalized) ||
+																	normalized.includes(key)
+																) {
+																	foundPath = path;
+																	foundValue = getValueFromPath(
+																		path,
+																		executionData.data,
+																	);
+																	break;
+																}
+															}
+														}
+
+														if (
+															foundPath &&
+															foundValue !== null &&
+															foundValue !== undefined
+														) {
+															parts.push(
+																<Tooltip key={`property-${idb}`}>
+																	<TooltipTrigger asChild>
+																		<span className="cursor-help text-purple-600 italic underline decoration-dotted hover:text-purple-800">
+																			{match.match}
+																		</span>
+																	</TooltipTrigger>
+																	<TooltipContent>
+																		<div className="text-sm">
+																			<div>
+																				<strong>Path:</strong> {foundPath}
+																			</div>
+																			<div>
+																				<strong>Value:</strong>
+																			</div>
+																			<pre className="mt-1 max-w-xs overflow-auto rounded p-2 text-xs">
+																				<RainbowBraces
+																					json={foundValue}
+																					className={"text-xs"}
+																				/>
+																			</pre>
+																		</div>
+																	</TooltipContent>
+																</Tooltip>,
+															);
+														} else {
+															parts.push(
+																<span
+																	key={`property-${idb}`}
+																	className="italic"
+																>
+																	{match.match}
+																</span>,
+															);
 														}
 													}
+
+													lastIndex = match.end;
+												});
+
+												// Add remaining text
+												if (lastIndex < text.length) {
+													parts.push(text.slice(lastIndex));
 												}
 
-												if (
-													foundPath &&
-													foundValue !== null &&
-													foundValue !== undefined
-												) {
-													parts.push(
-														<Tooltip key={`property-${idb}`}>
-															<TooltipTrigger asChild>
-																<span className="cursor-help text-purple-600 italic underline decoration-dotted hover:text-purple-800">
-																	{match.match}
-																</span>
-															</TooltipTrigger>
-															<TooltipContent>
-																<div className="text-sm">
-																	<div>
-																		<strong>Path:</strong> {foundPath}
-																	</div>
-																	<div>
-																		<strong>Value:</strong>
-																	</div>
-																	<pre className="mt-1 max-w-xs overflow-auto rounded p-2 text-xs">
-																		<RainbowBraces
-																			json={foundValue}
-																			className={"text-xs"}
-																		/>
-																	</pre>
-																</div>
-															</TooltipContent>
-														</Tooltip>,
-													);
-												} else {
-													parts.push(
-														<span key={`property-${idb}`} className="italic">
-															{match.match}
-														</span>,
-													);
-												}
-											}
+												return parts.length > 0 ? parts : [text];
+											};
 
-											lastIndex = match.end;
-										});
-
-										// Add remaining text
-										if (lastIndex < text.length) {
-											parts.push(text.slice(lastIndex));
-										}
-
-										return parts.length > 0 ? parts : [text];
-									};
-
-									return (
-										<div
-											// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-											key={index}
-											className="mb-0 whitespace-pre-wrap p-1 transition-colors hover:bg-muted/50"
-										>
-											<span className={"pr-2 text-red-700"}>{index + 1}.</span>{" "}
-											{renderLineWithTooltips(line)}
-										</div>
-									);
-								})}
-							</div>
-						</ScrollArea>
-					</TabsContent>
-				</Tabs>
+											return (
+												<div
+													// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+													key={index}
+													className="mb-0 whitespace-pre-wrap p-1 transition-colors hover:bg-muted/50"
+												>
+													<span className={"pr-2 text-red-700"}>
+														{index + 1}.
+													</span>{" "}
+													{renderLineWithTooltips(line)}
+												</div>
+											);
+										})}
+									</div>
+								</ScrollArea>
+							</TabsContent>
+						</Tabs>
+					</div>
+				</div>
 			</DialogContent>
 		</Dialog>
 	);

@@ -79,6 +79,7 @@ interface PolicyStore {
 	validateTestAgainstSchema: (test: Test) => boolean;
 	markInvalidTests: () => void;
 	repairTest: (testId: string) => void;
+	autoRepairInvalidTests: () => void;
 	tests: Test[];
 	currentTest: Test | null;
 
@@ -150,12 +151,21 @@ const validateDataAgainstSchema = (data: any, schema: any): boolean => {
 					return false;
 				if (expectedType === "boolean" && typeof propValue !== "boolean")
 					return false;
-				if (propValue === "number" && typeof propValue !== "number")
+				if (expectedType === "number" && typeof propValue !== "number")
 					return false;
+				if (expectedType === "array" && !Array.isArray(propValue)) return false;
 				if (
-					propValue !== "object" &&
-					typeof propValue !== "object" &&
-					propValue !== null
+					expectedType === "object" &&
+					(typeof propValue !== "object" ||
+						propValue === null ||
+						Array.isArray(propValue))
+				) {
+					return false;
+				}
+				if (
+					expectedType === "object" &&
+					typeof propValue === "object" &&
+					!Array.isArray(propValue)
 				) {
 					if (!validateObject(propValue, propSchema)) return false;
 				}
@@ -171,52 +181,6 @@ const validateDataAgainstSchema = (data: any, schema: any): boolean => {
 // biome-ignore lint/suspicious/noExplicitAny: data and schema can be anything
 const repairDataToMatchSchema = (data: any, schema: any): any => {
 	if (!schema || !schema.properties) return {};
-
-	// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
-	const repairObject = (obj: any, schemaObj: any): any => {
-		// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
-		const repairedObj: any = {};
-
-		if (!schemaObj.properties) return repairedObj;
-
-		for (const [propName, propSchema] of Object.entries(schemaObj.properties)) {
-			// biome-ignore lint/suspicious/noExplicitAny: prob could be anything
-			const expectedType = (propSchema as any).type;
-			const currentValue = obj[propName];
-
-			if (currentValue !== undefined && currentValue !== null) {
-				if (expectedType === "string" && typeof currentValue === "string") {
-					repairedObj[propName] = currentValue;
-				} else if (
-					expectedType === "number" &&
-					typeof currentValue === "number"
-				) {
-					repairedObj[propName] = currentValue;
-				} else if (
-					expectedType === "boolean" &&
-					typeof currentValue === "boolean"
-				) {
-					repairedObj[propName] = currentValue;
-				} else if (
-					expectedType === "object" &&
-					typeof currentValue === "object"
-				) {
-					repairedObj[propName] = repairObject(currentValue, propSchema);
-				} else {
-					// Type mismatch, use default value
-					repairedObj[propName] = getDefaultValue(expectedType);
-				}
-			} else {
-				// Missing value, use default
-				repairedObj[propName] =
-					expectedType === "object"
-						? repairObject({}, propSchema)
-						: getDefaultValue(expectedType);
-			}
-		}
-
-		return repairedObj;
-	};
 
 	// biome-ignore lint/suspicious/noExplicitAny: default value can be anything
 	const getDefaultValue = (type: string): any => {
@@ -234,6 +198,54 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 			default:
 				return null;
 		}
+	};
+
+	// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
+	const repairObject = (obj: any, schemaObj: any): any => {
+		// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
+		const repairedObj: any = {};
+
+		if (!schemaObj.properties) return repairedObj;
+
+		for (const [propName, propSchema] of Object.entries(schemaObj.properties)) {
+			// biome-ignore lint/suspicious/noExplicitAny: prob could be anything
+			const expectedType = (propSchema as any).type;
+			const currentValue = obj[propName];
+
+			if (currentValue !== undefined && currentValue !== null) {
+				// Check if the current value matches the expected type
+				const isValidType =
+					(expectedType === "string" && typeof currentValue === "string") ||
+					(expectedType === "number" && typeof currentValue === "number") ||
+					(expectedType === "boolean" && typeof currentValue === "boolean") ||
+					(expectedType === "array" && Array.isArray(currentValue)) ||
+					(expectedType === "object" &&
+						typeof currentValue === "object" &&
+						!Array.isArray(currentValue));
+
+				if (isValidType) {
+					if (expectedType === "object") {
+						repairedObj[propName] = repairObject(currentValue, propSchema);
+					} else {
+						repairedObj[propName] = currentValue;
+					}
+				} else {
+					// Type mismatch - completely remove the old data and use default
+					repairedObj[propName] =
+						expectedType === "object"
+							? repairObject({}, propSchema)
+							: getDefaultValue(expectedType);
+				}
+			} else {
+				// Missing value, use default
+				repairedObj[propName] =
+					expectedType === "object"
+						? repairObject({}, propSchema)
+						: getDefaultValue(expectedType);
+			}
+		}
+
+		return repairedObj;
 	};
 
 	return repairObject(data, schema);
@@ -289,13 +301,33 @@ export const defaultSchema = {
 				testDates: {
 					properties: {
 						practical: {
-							type: "string",
+							properties: {
+								center: {
+									type: "string",
+								},
+								date: {
+									format: "date-time",
+									type: "string",
+								},
+							},
+							required: ["date", "center"],
+							type: "object",
 						},
 						theory: {
-							type: "string",
+							properties: {
+								center: {
+									type: "string",
+								},
+								date: {
+									format: "date-time",
+									type: "string",
+								},
+							},
+							required: ["center", "date"],
+							type: "object",
 						},
 					},
-					required: ["theory", "practical"],
+					required: ["practical", "theory"],
 					type: "object",
 				},
 			},
@@ -308,10 +340,17 @@ export const defaultSchema = {
 	type: "object",
 };
 
-const defaultRule = `A **driver** gets a driving licence
+const defaultRule = `# Driving Test Example
+
+A **driver** gets a driving licence
   if the **driver** passes the age test
   and the **driver** passes the test requirements
-  and the **driver** has taken the test in the time period.
+  and the **driver** has taken the test in the time period
+  and the **driver** did their test at a valid center.
+
+A **driver** did their test at a valid center
+  if the __center__ of the **drivingTest.testDates.practical** is in ["Manchester", "Coventry"]
+  and the __center__ of the **practical** of the **test dates** in the **driving test** is in ["Manchester", "Coventry"].
 
 A **driver** passes the age test
   if the __date of birth__ of the **person** in the **driving test** is earlier than 2008-12-12.
@@ -329,8 +368,8 @@ A **driver** passes the practical test
   and the __major__ in the **practical** of the **scores** in the **driving test** is equal to false.
 
 A **driver** has taken the test in the time period
-  if the __theory__ of the **testDates** in the **driving test** is within 2 years
-  and the __practical__ of the **testDates** in the **driving test** is within 30 days.
+  if the __date__ of the __theory__ of the **testDates** in the **driving test** is within 2 years
+  and the __date__ of the __practical__ of the **testDates** in the **driving test** is within 30 days.
 `;
 
 const createDefaultPolicySpec = (): PolicySpec => ({
@@ -367,8 +406,14 @@ const defaultTests: Test[] = [
 					},
 				},
 				testDates: {
-					practical: "2025-06-01",
-					theory: "2024-12-12",
+					practical: {
+						center: "Manchester",
+						date: "2025-06-11T10:31:00.002Z",
+					},
+					theory: {
+						center: "Coventry",
+						date: "2025-06-11T10:29:00.594Z",
+					},
 				},
 			},
 		},
@@ -393,6 +438,7 @@ const defaultTests: Test[] = [
 				},
 				scores: {
 					practical: {
+						major: false,
 						minor: 24,
 					},
 					theory: {
@@ -401,8 +447,14 @@ const defaultTests: Test[] = [
 					},
 				},
 				testDates: {
-					practical: "2025-01-01",
-					theory: "2025-06-01",
+					practical: {
+						center: "Manchester",
+						date: "2025-06-11T12:14:00.895Z",
+					},
+					theory: {
+						center: "Coventry",
+						date: "2025-06-11T12:13:00.307Z",
+					},
 				},
 			},
 		},
@@ -489,6 +541,10 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 
 		setSchema: (schema) => {
 			get().updatePolicySpec({ schema });
+			// Automatically repair tests after schema changes to clean up incompatible data
+			setTimeout(() => {
+				get().autoRepairInvalidTests();
+			}, 0);
 		},
 
 		setPolicyRule: (rule) => {
@@ -602,15 +658,30 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 		markInvalidTests: () => {
 			const { tests, schema, schemaVersion } = get();
 			const updatedTests = tests.map((test) => {
-				if (test.schemaVersion !== schemaVersion) {
-					const isValid = validateDataAgainstSchema(test.data, schema);
+				// Check both schema version mismatch AND data validity
+				const hasVersionMismatch = test.schemaVersion !== schemaVersion;
+				const isDataValid = validateDataAgainstSchema(test.data, schema);
+
+				// A test is invalid if it has a version mismatch OR if the data doesn't match the current schema
+				const shouldBeInvalid = hasVersionMismatch || !isDataValid;
+
+				if (shouldBeInvalid && test.outcome.status !== "invalid") {
 					return {
 						...test,
 						outcome: {
 							...test.outcome,
-							status: isValid
-								? ("not-run" as TestStatus)
-								: ("invalid" as TestStatus),
+							status: "invalid" as TestStatus,
+						},
+					};
+				}
+				if (!shouldBeInvalid && test.outcome.status === "invalid") {
+					// If test was invalid but is now valid, mark as not-run
+					return {
+						...test,
+						schemaVersion, // Update to current version
+						outcome: {
+							...test.outcome,
+							status: "not-run" as TestStatus,
 						},
 					};
 				}
@@ -623,6 +694,26 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			const { tests, schema, schemaVersion } = get();
 			const updatedTests = tests.map((test) => {
 				if (test.id === testId && test.outcome.status === "invalid") {
+					const repairedData = repairDataToMatchSchema(test.data, schema);
+					return {
+						...test,
+						data: repairedData,
+						schemaVersion,
+						outcome: {
+							...test.outcome,
+							status: "not-run" as TestStatus,
+						},
+					};
+				}
+				return test;
+			});
+			set({ tests: updatedTests });
+		},
+
+		autoRepairInvalidTests: () => {
+			const { tests, schema, schemaVersion } = get();
+			const updatedTests = tests.map((test) => {
+				if (test.outcome.status === "invalid") {
 					const repairedData = repairDataToMatchSchema(test.data, schema);
 					return {
 						...test,
