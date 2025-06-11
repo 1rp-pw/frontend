@@ -79,6 +79,7 @@ interface PolicyStore {
 	validateTestAgainstSchema: (test: Test) => boolean;
 	markInvalidTests: () => void;
 	repairTest: (testId: string) => void;
+	autoRepairInvalidTests: () => void;
 	tests: Test[];
 	currentTest: Test | null;
 
@@ -150,12 +151,21 @@ const validateDataAgainstSchema = (data: any, schema: any): boolean => {
 					return false;
 				if (expectedType === "boolean" && typeof propValue !== "boolean")
 					return false;
-				if (propValue === "number" && typeof propValue !== "number")
+				if (expectedType === "number" && typeof propValue !== "number")
 					return false;
+				if (expectedType === "array" && !Array.isArray(propValue)) return false;
 				if (
-					propValue !== "object" &&
-					typeof propValue !== "object" &&
-					propValue !== null
+					expectedType === "object" &&
+					(typeof propValue !== "object" ||
+						propValue === null ||
+						Array.isArray(propValue))
+				) {
+					return false;
+				}
+				if (
+					expectedType === "object" &&
+					typeof propValue === "object" &&
+					!Array.isArray(propValue)
 				) {
 					if (!validateObject(propValue, propSchema)) return false;
 				}
@@ -171,52 +181,6 @@ const validateDataAgainstSchema = (data: any, schema: any): boolean => {
 // biome-ignore lint/suspicious/noExplicitAny: data and schema can be anything
 const repairDataToMatchSchema = (data: any, schema: any): any => {
 	if (!schema || !schema.properties) return {};
-
-	// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
-	const repairObject = (obj: any, schemaObj: any): any => {
-		// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
-		const repairedObj: any = {};
-
-		if (!schemaObj.properties) return repairedObj;
-
-		for (const [propName, propSchema] of Object.entries(schemaObj.properties)) {
-			// biome-ignore lint/suspicious/noExplicitAny: prob could be anything
-			const expectedType = (propSchema as any).type;
-			const currentValue = obj[propName];
-
-			if (currentValue !== undefined && currentValue !== null) {
-				if (expectedType === "string" && typeof currentValue === "string") {
-					repairedObj[propName] = currentValue;
-				} else if (
-					expectedType === "number" &&
-					typeof currentValue === "number"
-				) {
-					repairedObj[propName] = currentValue;
-				} else if (
-					expectedType === "boolean" &&
-					typeof currentValue === "boolean"
-				) {
-					repairedObj[propName] = currentValue;
-				} else if (
-					expectedType === "object" &&
-					typeof currentValue === "object"
-				) {
-					repairedObj[propName] = repairObject(currentValue, propSchema);
-				} else {
-					// Type mismatch, use default value
-					repairedObj[propName] = getDefaultValue(expectedType);
-				}
-			} else {
-				// Missing value, use default
-				repairedObj[propName] =
-					expectedType === "object"
-						? repairObject({}, propSchema)
-						: getDefaultValue(expectedType);
-			}
-		}
-
-		return repairedObj;
-	};
 
 	// biome-ignore lint/suspicious/noExplicitAny: default value can be anything
 	const getDefaultValue = (type: string): any => {
@@ -234,6 +198,55 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 			default:
 				return null;
 		}
+	};
+
+	// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
+	const repairObject = (obj: any, schemaObj: any): any => {
+		// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
+		const repairedObj: any = {};
+
+		if (!schemaObj.properties) return repairedObj;
+
+		for (const [propName, propSchema] of Object.entries(schemaObj.properties)) {
+			// biome-ignore lint/suspicious/noExplicitAny: prob could be anything
+			const expectedType = (propSchema as any).type;
+			const currentValue = obj[propName];
+
+			if (currentValue !== undefined && currentValue !== null) {
+				// Check if the current value matches the expected type
+				const isValidType =
+					(expectedType === "string" && typeof currentValue === "string") ||
+					(expectedType === "number" && typeof currentValue === "number") ||
+					(expectedType === "boolean" && typeof currentValue === "boolean") ||
+					(expectedType === "array" && Array.isArray(currentValue)) ||
+					(expectedType === "object" &&
+						typeof currentValue === "object" &&
+						!Array.isArray(currentValue) &&
+						currentValue !== null);
+
+				if (isValidType) {
+					if (expectedType === "object") {
+						repairedObj[propName] = repairObject(currentValue, propSchema);
+					} else {
+						repairedObj[propName] = currentValue;
+					}
+				} else {
+					// Type mismatch - completely remove the old data and use default
+					repairedObj[propName] =
+						expectedType === "object"
+							? repairObject({}, propSchema)
+							: getDefaultValue(expectedType);
+				}
+			} else {
+				// Missing value, use default
+				repairedObj[propName] =
+					expectedType === "object"
+						? repairObject({}, propSchema)
+						: getDefaultValue(expectedType);
+			}
+		}
+
+		return repairedObj;
 	};
 
 	return repairObject(data, schema);
@@ -489,6 +502,10 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 
 		setSchema: (schema) => {
 			get().updatePolicySpec({ schema });
+			// Automatically repair tests after schema changes to clean up incompatible data
+			setTimeout(() => {
+				get().autoRepairInvalidTests();
+			}, 0);
 		},
 
 		setPolicyRule: (rule) => {
@@ -602,15 +619,30 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 		markInvalidTests: () => {
 			const { tests, schema, schemaVersion } = get();
 			const updatedTests = tests.map((test) => {
-				if (test.schemaVersion !== schemaVersion) {
-					const isValid = validateDataAgainstSchema(test.data, schema);
+				// Check both schema version mismatch AND data validity
+				const hasVersionMismatch = test.schemaVersion !== schemaVersion;
+				const isDataValid = validateDataAgainstSchema(test.data, schema);
+
+				// A test is invalid if it has a version mismatch OR if the data doesn't match the current schema
+				const shouldBeInvalid = hasVersionMismatch || !isDataValid;
+
+				if (shouldBeInvalid && test.outcome.status !== "invalid") {
 					return {
 						...test,
 						outcome: {
 							...test.outcome,
-							status: isValid
-								? ("not-run" as TestStatus)
-								: ("invalid" as TestStatus),
+							status: "invalid" as TestStatus,
+						},
+					};
+				}
+				if (!shouldBeInvalid && test.outcome.status === "invalid") {
+					// If test was invalid but is now valid, mark as not-run
+					return {
+						...test,
+						schemaVersion, // Update to current version
+						outcome: {
+							...test.outcome,
+							status: "not-run" as TestStatus,
 						},
 					};
 				}
@@ -623,6 +655,26 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			const { tests, schema, schemaVersion } = get();
 			const updatedTests = tests.map((test) => {
 				if (test.id === testId && test.outcome.status === "invalid") {
+					const repairedData = repairDataToMatchSchema(test.data, schema);
+					return {
+						...test,
+						data: repairedData,
+						schemaVersion,
+						outcome: {
+							...test.outcome,
+							status: "not-run" as TestStatus,
+						},
+					};
+				}
+				return test;
+			});
+			set({ tests: updatedTests });
+		},
+
+		autoRepairInvalidTests: () => {
+			const { tests, schema, schemaVersion } = get();
+			const updatedTests = tests.map((test) => {
+				if (test.outcome.status === "invalid") {
 					const repairedData = repairDataToMatchSchema(test.data, schema);
 					return {
 						...test,
