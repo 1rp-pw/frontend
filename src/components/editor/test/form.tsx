@@ -218,9 +218,7 @@ export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 							<DateTimeInput
 								id={path}
 								value={getNestedValue(formData, path) || ""}
-								onChange={(e) =>
-									setFormData(setNestedValue(formData, path, e))
-								}
+								onChange={(e) => setFormData(setNestedValue(formData, path, e))}
 								className="border-zinc-600 "
 							/>
 						</div>

@@ -15,7 +15,13 @@ import {
 import { Switch } from "~/components/ui/switch";
 
 interface PropertyFormProps {
-	onAddProperty: (name: string, type: string, required: boolean) => void;
+	onAddProperty: (
+		name: string,
+		type: string,
+		required: boolean,
+		// biome-ignore lint/suspicious/noExplicitAny: property options can be anything
+		options?: any,
+	) => void;
 }
 
 export function PropertyForm({ onAddProperty }: PropertyFormProps) {
@@ -56,7 +62,7 @@ export function PropertyForm({ onAddProperty }: PropertyFormProps) {
 				break;
 		}
 
-		onAddProperty(newPropName, newPropType, newPropRequired);
+		onAddProperty(newPropName, newPropType, newPropRequired, propertyOptions);
 		setNewPropName("");
 		setNewPropType("string");
 		setNewPropRequired(true);
