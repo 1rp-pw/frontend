@@ -47,7 +47,7 @@ export default function IDEPage() {
 					<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
 						Policy Text
 					</div>
-					<div className="flex-1 overflow-auto p-4">
+					<div className="flex-1 overflow-hidden">
 						<Editor rule={rule} onChange={setPolicyRule} />
 					</div>
 				</div>
