@@ -92,7 +92,9 @@ export function PolicyExecutionModal({
 					<div className="mb-2">
 						<strong>Condition:</strong> {condition.property.path}{" "}
 						{condition.operator.replace(/([A-Z])/g, " $1")}{" "}
-						{condition.value?.value}
+						{Array.isArray(condition.value?.value)
+							? `[${condition.value.value.join(", ")}]`
+							: condition.value?.value}
 					</div>
 				)}
 
@@ -102,13 +104,18 @@ export function PolicyExecutionModal({
 							<strong>Evaluation:</strong>
 						</div>
 						<div>
-							User Data (Left): {condition.evaluation_details.left_value.value}{" "}
+							User Data (Left):{" "}
+							{Array.isArray(condition.evaluation_details.left_value.value)
+								? `[${condition.evaluation_details.left_value.value.join(", ")}]`
+								: condition.evaluation_details.left_value.value}{" "}
 							({condition.evaluation_details.left_value.type})
 						</div>
 						<div>
 							Control Text (Right):{" "}
-							{condition.evaluation_details.right_value.value} (
-							{condition.evaluation_details.right_value.type})
+							{Array.isArray(condition.evaluation_details.right_value.value)
+								? `[${condition.evaluation_details.right_value.value.join(", ")}]`
+								: condition.evaluation_details.right_value.value}{" "}
+							({condition.evaluation_details.right_value.type})
 						</div>
 						<div>
 							Result:{" "}

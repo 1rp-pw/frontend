@@ -221,8 +221,7 @@ const repairDataToMatchSchema = (data: any, schema: any): any => {
 					(expectedType === "array" && Array.isArray(currentValue)) ||
 					(expectedType === "object" &&
 						typeof currentValue === "object" &&
-						!Array.isArray(currentValue) &&
-						currentValue !== null);
+						!Array.isArray(currentValue));
 
 				if (isValidType) {
 					if (expectedType === "object") {
@@ -302,13 +301,33 @@ export const defaultSchema = {
 				testDates: {
 					properties: {
 						practical: {
-							type: "string",
+							properties: {
+								center: {
+									type: "string",
+								},
+								date: {
+									format: "date-time",
+									type: "string",
+								},
+							},
+							required: ["date", "center"],
+							type: "object",
 						},
 						theory: {
-							type: "string",
+							properties: {
+								center: {
+									type: "string",
+								},
+								date: {
+									format: "date-time",
+									type: "string",
+								},
+							},
+							required: ["center", "date"],
+							type: "object",
 						},
 					},
-					required: ["theory", "practical"],
+					required: ["practical", "theory"],
 					type: "object",
 				},
 			},
@@ -321,10 +340,17 @@ export const defaultSchema = {
 	type: "object",
 };
 
-const defaultRule = `A **driver** gets a driving licence
+const defaultRule = `# Driving Test Example
+
+A **driver** gets a driving licence
   if the **driver** passes the age test
   and the **driver** passes the test requirements
-  and the **driver** has taken the test in the time period.
+  and the **driver** has taken the test in the time period
+  and the **driver** did their test at a valid center.
+
+A **driver** did their test at a valid center
+  if the __center__ of the **drivingTest.testDates.practical** is in ["Manchester", "Coventry"]
+  and the __center__ of the **practical** of the **test dates** in the **driving test** is in ["Manchester", "Coventry"].
 
 A **driver** passes the age test
   if the __date of birth__ of the **person** in the **driving test** is earlier than 2008-12-12.
@@ -342,8 +368,8 @@ A **driver** passes the practical test
   and the __major__ in the **practical** of the **scores** in the **driving test** is equal to false.
 
 A **driver** has taken the test in the time period
-  if the __theory__ of the **testDates** in the **driving test** is within 2 years
-  and the __practical__ of the **testDates** in the **driving test** is within 30 days.
+  if the __date__ of the __theory__ of the **testDates** in the **driving test** is within 2 years
+  and the __date__ of the __practical__ of the **testDates** in the **driving test** is within 30 days.
 `;
 
 const createDefaultPolicySpec = (): PolicySpec => ({
@@ -380,8 +406,14 @@ const defaultTests: Test[] = [
 					},
 				},
 				testDates: {
-					practical: "2025-06-01",
-					theory: "2024-12-12",
+					practical: {
+						center: "Manchester",
+						date: "2025-06-11T10:31:00.002Z",
+					},
+					theory: {
+						center: "Coventry",
+						date: "2025-06-11T10:29:00.594Z",
+					},
 				},
 			},
 		},
@@ -406,6 +438,7 @@ const defaultTests: Test[] = [
 				},
 				scores: {
 					practical: {
+						major: false,
 						minor: 24,
 					},
 					theory: {
@@ -414,8 +447,14 @@ const defaultTests: Test[] = [
 					},
 				},
 				testDates: {
-					practical: "2025-01-01",
-					theory: "2025-06-01",
+					practical: {
+						center: "Manchester",
+						date: "2025-06-11T12:14:00.895Z",
+					},
+					theory: {
+						center: "Coventry",
+						date: "2025-06-11T12:13:00.307Z",
+					},
 				},
 			},
 		},
