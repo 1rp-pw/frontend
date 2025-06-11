@@ -37,6 +37,8 @@ export function PolicyExecutionModal({
 	const [selectedExecutionIndex, setSelectedExecutionIndex] = useState(0);
 
 	if (!executionData) return null;
+	if (!executionData.trace) return null;
+	if (!executionData.trace.execution) return null;
 
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const getValueFromPath = (path: string, obj: any): any => {
