@@ -442,7 +442,7 @@ const defaultTests: Test[] = [
 						minor: 24,
 					},
 					theory: {
-						hazardPerception: 42,
+						hazardPerception: 44,
 						multipleChoice: 60,
 					},
 				},

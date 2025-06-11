@@ -136,8 +136,7 @@ export function PolicyExecutionModal({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			{/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
-			<DialogContent className="max-w-none w-[90vw] max-h-[80vh] min-w-[800px] min-h-[600px] sm:max-w-none md:max-w-none lg:max-w-none xl:max-w-7xl">
+			<DialogContent className="max-h-[90vh] min-h-[600px] w-[90vw] min-w-[800px] max-w-none sm:max-w-none md:max-w-none lg:max-w-none xl:max-w-7xl">
 				<DialogHeader>
 					<DialogTitle className="flex items-center gap-2">
 						{testName && <span>{testName} - </span>}
@@ -155,7 +154,7 @@ export function PolicyExecutionModal({
 					{/* Execution List - Left Panel */}
 					<div className="w-1/3 min-w-[300px] border-r pr-4">
 						<h3 className="mb-3 font-semibold">Rule Executions</h3>
-						<ScrollArea className="h-full">
+						<ScrollArea className="h-full pb-5">
 							<div className="space-y-2">
 								{executionData.trace.execution.map((execution, index) => (
 									<button
