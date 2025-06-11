@@ -149,8 +149,6 @@ export function PropertyList({
 
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	const getPropertyDisplayInfo = (propDetails: any) => {
-		console.info("propDetails", propDetails);
-
 		let displayInfo = `(${propDetails.type})`;
 		if (propDetails.type === "string") {
 			if (propDetails.format === "date-time") {

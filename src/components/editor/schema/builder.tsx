@@ -1,9 +1,11 @@
 "use client";
 
-import { EditIcon, FileTextIcon } from "lucide-react";
+import { EditIcon, FileJsonIcon, FileTextIcon } from "lucide-react";
+import { onNavigationIntent } from "next/dist/client/components/links";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { RainbowBraces } from "~/components/ui/rainbow";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
 import { usePolicyStore } from "~/lib/state/policy";
@@ -186,14 +188,11 @@ export function SchemaBuilder({
 		setEditingObject(newPath);
 	};
 
-	const handleGoBack = () => {
-		if (!editingObject) return;
-
-		const path = editingObject.split(".");
-		if (path.length === 1) {
+	const handleNavigateTo = (targetPath: string | null) => {
+		if (targetPath === null) {
 			setEditingObject(null);
 		} else {
-			setEditingObject(path.slice(0, -1).join("."));
+			setEditingObject(targetPath);
 		}
 	};
 
@@ -231,7 +230,7 @@ export function SchemaBuilder({
 	};
 
 	const currentSchema = getCurrentSchema();
-	const gridCols = newImportAllowed ? "grid-cols-2" : "grid-cols-1";
+	const gridCols = newImportAllowed ? "grid-cols-3" : "grid-cols-2";
 
 	return (
 		<Tabs defaultValue={"edit"}>
@@ -246,13 +245,17 @@ export function SchemaBuilder({
 						Import Schema
 					</TabsTrigger>
 				)}
+				<TabsTrigger value={"preview"}>
+					<FileJsonIcon className="h-4 w-4" />
+					Preview Schema
+				</TabsTrigger>
 			</TabsList>
 
 			<TabsContent value={"edit"}>
 				<div className="space-y-4">
 					<BreadcrumbNav
 						editingObject={editingObject}
-						onGoBack={handleGoBack}
+						onNavigateTo={handleNavigateTo}
 					/>
 
 					<PropertyForm onAddProperty={handleAddProperty} />
@@ -265,8 +268,6 @@ export function SchemaBuilder({
 						onRemoveProperty={handleRemoveProperty}
 						onEditObject={handleEditObject}
 					/>
-
-					<SchemaPreview schema={schema} />
 				</div>
 			</TabsContent>
 
@@ -279,15 +280,17 @@ export function SchemaBuilder({
 								Load Current Schema
 							</Button>
 						</div>
-						<Textarea
-							placeholder="Paste your JSON schema here..."
-							value={schemaInput}
-							onChange={(e) => {
-								setSchemaInput(e.target.value);
-								setImportError("");
-							}}
-							className="min-h-[200px] font-mono text-sm"
-						/>
+						<ScrollArea className="h-[350px]">
+							<Textarea
+								placeholder="Paste your JSON schema here..."
+								value={schemaInput}
+								onChange={(e) => {
+									setSchemaInput(e.target.value);
+									setImportError("");
+								}}
+								className="min-h-[350px] font-mono text-sm"
+							/>
+						</ScrollArea>
 						{importError && (
 							<p className="text-red-400 text-sm">{importError}</p>
 						)}
@@ -306,15 +309,11 @@ export function SchemaBuilder({
 							</Button>
 						</div>
 					</div>
-
-					{/* Current Schema Preview in Import Tab with Rainbow Braces */}
-					<div className="space-y-2">
-						<h3 className="font-medium text-sm">Current Schema</h3>
-						<div className="max-h-48 overflow-auto rounded bg-zinc-700/30 p-3">
-							<RainbowBraces json={schema} className="text-xs" />
-						</div>
-					</div>
 				</div>
+			</TabsContent>
+
+			<TabsContent value={"preview"}>
+				<SchemaPreview schema={schema} />
 			</TabsContent>
 		</Tabs>
 	);

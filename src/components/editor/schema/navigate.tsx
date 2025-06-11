@@ -1,26 +1,65 @@
 "use client";
 
-import { ArrowLeftIcon } from "lucide-react";
-import { Button } from "~/components/ui/button";
+import {
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbLink,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb";
 
 interface BreadcrumbNavProps {
 	editingObject: string | null;
-	onGoBack: () => void;
+	onNavigateTo: (path: string | null) => void;
 }
 
-export function BreadcrumbNav({ editingObject, onGoBack }: BreadcrumbNavProps) {
+export function BreadcrumbNav({
+	editingObject,
+	onNavigateTo,
+}: BreadcrumbNavProps) {
 	if (!editingObject) return null;
 
 	const breadcrumb = editingObject.split(".");
 
 	return (
-		<div className="flex items-center gap-2 rounded bg-zinc-700/30 p-2">
-			<Button variant="ghost" size="sm" onClick={onGoBack}>
-				<ArrowLeftIcon className="h-4 w-4" />
-			</Button>
-			<span className="text-sm text-zinc-400">
-				Editing: <span className="text-zinc-200">{breadcrumb.join(" → ")}</span>
-			</span>
-		</div>
+		<Breadcrumb>
+			<BreadcrumbList>
+				<BreadcrumbItem>
+					<BreadcrumbLink asChild>
+						{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+						<span className="cursor-pointer" onClick={() => onNavigateTo(null)}>
+							$.
+						</span>
+					</BreadcrumbLink>
+				</BreadcrumbItem>
+				{breadcrumb.map((item, index) => {
+					const isLast = index === breadcrumb.length - 1;
+					const pathToHere = breadcrumb.slice(0, index + 1).join(".");
+					const i = index;
+
+					return (
+						<>
+							<BreadcrumbSeparator key={`separator-${item}-${i}`} />
+							<BreadcrumbItem key={`item-${item}-${i}`}>
+								{isLast ? (
+									<BreadcrumbPage>{item}</BreadcrumbPage>
+								) : (
+									<BreadcrumbLink asChild>
+										{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
+										<span
+											className="cursor-pointer"
+											onClick={() => onNavigateTo(pathToHere)}
+										>
+											{item}
+										</span>
+									</BreadcrumbLink>
+								)}
+							</BreadcrumbItem>
+						</>
+					);
+				})}
+			</BreadcrumbList>
+		</Breadcrumb>
 	);
 }
