@@ -282,8 +282,8 @@ export function PolicyExecutionModal({
 													end: number;
 												}> = [];
 
-												// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
 												while (
+													// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
 													(entityMatch = entityRegex.exec(text)) !== null
 												) {
 													entityMatches.push({
