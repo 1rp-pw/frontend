@@ -219,7 +219,7 @@ export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 								id={path}
 								value={getNestedValue(formData, path) || ""}
 								onChange={(e) =>
-									setFormData(setNestedValue(formData, path, e.valueOf()))
+									setFormData(setNestedValue(formData, path, e))
 								}
 								className="border-zinc-600 "
 							/>

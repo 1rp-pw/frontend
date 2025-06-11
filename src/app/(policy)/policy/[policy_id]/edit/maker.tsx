@@ -1,7 +1,7 @@
 "use client";
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Editor } from "~/components/editor/editor";
 import { SavePolicy } from "~/components/editor/save";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
