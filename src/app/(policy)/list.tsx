@@ -33,6 +33,23 @@ export default function PolicyList() {
 		});
 	}, []);
 
+	if (policies.length === 0) {
+		return (
+			<div className="flex h-screen bg-background">
+				<div className="w-1/4 border-r bg-muted/10">
+					<div className="border-b p-4">
+						<h2 className="flex items-center gap-2 text-lg text-semibold">
+							Policies
+						</h2>
+						<p className="mt-1 text-muted-foreground text-sm">
+							No policies found
+						</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<Table>
 			<TableHeader>

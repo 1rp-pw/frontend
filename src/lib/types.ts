@@ -15,6 +15,7 @@ export interface NodeData {
 }
 
 export interface PolicySpec {
+	baseId: string;
 	id: string;
 	name: string;
 	rule: string;
@@ -25,6 +26,7 @@ export interface PolicySpec {
 	draft: boolean;
 	createdAt: Date;
 	updatedAt: Date;
+	status: string;
 	description?: string;
 	tags?: string[];
 }

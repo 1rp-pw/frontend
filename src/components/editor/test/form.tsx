@@ -212,7 +212,7 @@ export function TestForm({
 			);
 		}
 
-		console.info("details", details);
+		// console.info("details", details);
 		switch (details.type) {
 			case "string":
 				if (details.format === "date-time") {

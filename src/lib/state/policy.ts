@@ -388,6 +388,8 @@ const createDefaultPolicySpec = (): PolicySpec => ({
 	description: "Default test policy",
 	tags: ["test"],
 	draft: true,
+	status: "draft",
+	baseId: "",
 });
 
 const defaultTests: Test[] = [
@@ -799,17 +801,23 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 				// Convert API response to PolicySpec
 				const policySpec: PolicySpec = {
 					id: result.id,
+					baseId: result.baseId,
 					name: result.name,
 					rule: result.rule,
-					schema: result.schema,
-					schemaVersion: result.schemaVersion,
+					schema: JSON.parse(result.schema),
+					schemaVersion: generateSchemaHash(result.schema),
 					version: result.version || 1,
 					createdAt: new Date(result.createdAt || Date.now()),
 					updatedAt: new Date(result.updatedAt || Date.now()),
 					description: result.description,
 					tags: result.tags,
-					draft: result.draft,
+					status: result.status,
+					draft: result.status === "draft",
 				};
+
+				// console.info("Policy spec", policySpec, result);
+
+				const tests = JSON.parse(result.tests);
 
 				set({
 					policySpec: policySpec,
@@ -819,7 +827,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					name: policySpec.name,
 					id: policySpec.id,
 					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-					tests: result.tests.map((test: any) => ({
+					tests: tests.map((test: any) => ({
 						...test,
 						createdAt: new Date(test.createdAt),
 						schemaVersion: test.schemaVersion,
@@ -867,6 +875,8 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 				};
 			}
 
+			// console.info("Saving policy", policySpec);
+
 			try {
 				const apiData = {
 					name: policySpec.name,
@@ -877,7 +887,11 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					version: policySpec.version,
 					description: policySpec.description,
 					tags: policySpec.tags,
+					status: policySpec.status,
+					baseId: policySpec.baseId,
 				};
+
+				// console.info("API data", apiData);
 
 				const response = await fetch("/api/policy", {
 					method: policySpec.id ? "PUT" : "POST",

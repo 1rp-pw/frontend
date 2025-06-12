@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 		const response = await fetch(`${env.API_SERVER}/policy/${id}/versions`);
 		const resp = await response.json();
 
-		if (resp[0].id) {
+		if (resp[0].baseId) {
 			return NextResponse.json(resp, { status: 200 });
 		}
 
