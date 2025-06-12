@@ -42,7 +42,7 @@ export function PublishPolicy() {
 		usePolicyStore();
 
 	const formSchema = z.object({
-		policyVersion: z.coerce
+		policyVersion: z
 			.number()
 			.min(0.1, "Policy version must be at least 0.1"),
 		policyChanges: z
@@ -53,7 +53,7 @@ export function PublishPolicy() {
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			policyVersion: 0.0,
+			policyVersion: 0.1,
 			policyChanges: "",
 		},
 	});
@@ -147,8 +147,14 @@ export function PublishPolicy() {
 									<FormControl>
 										<Input
 											type={"number"}
+											step={"0.1"}
+											min={"0.1"}
 											placeholder="Policy Version"
 											{...field}
+											onChange={(e) => {
+												const value = e.target.value;
+												field.onChange(value === "" ? 0 : Number.parseFloat(value));
+											}}
 										/>
 									</FormControl>
 									<FormMessage />

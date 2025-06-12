@@ -387,6 +387,7 @@ const createDefaultPolicySpec = (): PolicySpec => ({
 	updatedAt: new Date(),
 	description: "Default test policy",
 	tags: ["test"],
+	draft: true,
 });
 
 const defaultTests: Test[] = [
