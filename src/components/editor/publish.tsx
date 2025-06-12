@@ -42,9 +42,7 @@ export function PublishPolicy() {
 		usePolicyStore();
 
 	const formSchema = z.object({
-		policyVersion: z
-			.number()
-			.min(0.1, "Policy version must be at least 0.1"),
+		policyVersion: z.number().min(0.1, "Policy version must be at least 0.1"),
 		policyChanges: z
 			.string()
 			.min(2, "Policy changes must be more than 2 chars"),
@@ -79,13 +77,9 @@ export function PublishPolicy() {
 				form.reset();
 
 				if (result.returnId) {
-					if (result.version) {
-						router.push(
-							`/policy/${result.returnId}/edit?version=${result.version}`,
-						);
-					} else {
-						router.push(`/policy/${result.returnId}/edit`);
-					}
+					router.push(
+						`/policy/${result.returnId}/view?version=${data.policyVersion}`,
+					);
 				}
 			} else {
 				toast("Failed to Publish Policy!");
@@ -153,7 +147,9 @@ export function PublishPolicy() {
 											{...field}
 											onChange={(e) => {
 												const value = e.target.value;
-												field.onChange(value === "" ? 0 : Number.parseFloat(value));
+												field.onChange(
+													value === "" ? 0 : Number.parseFloat(value),
+												);
 											}}
 										/>
 									</FormControl>
