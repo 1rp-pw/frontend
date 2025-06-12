@@ -34,11 +34,17 @@ interface TestFormProps {
 	currentTest: Test | null;
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	onSaveTest: (data: any, name?: string, expectPass?: boolean) => void; // Updated to include expectPass
+	disabled?: boolean;
 }
 
 const FIELDS_PER_PAGE = 4;
 
-export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
+export function TestForm({
+	schema,
+	currentTest,
+	onSaveTest,
+	disabled = false,
+}: TestFormProps) {
 	// biome-ignore lint/suspicious/noExplicitAny: stuff
 	const [formData, setFormData] = useState<any>({});
 	const [testName, setTestName] = useState("");
@@ -432,15 +438,17 @@ export function TestForm({ schema, currentTest, onSaveTest }: TestFormProps) {
 						</div>
 					)}
 
-					<div className="mt-auto border-zinc-600 border-t pt-4">
-						<Button
-							className="w-full"
-							onClick={handleSave}
-							disabled={!testName.trim()}
-						>
-							{currentTest.created ? "Update Test" : "Save Test"}
-						</Button>
-					</div>
+					{!disabled && (
+						<div className="mt-auto border-zinc-600 border-t pt-4">
+							<Button
+								className="w-full"
+								onClick={handleSave}
+								disabled={!testName.trim()}
+							>
+								{currentTest.created ? "Update Test" : "Save Test"}
+							</Button>
+						</div>
+					)}
 				</div>
 			</TabsContent>
 			<TabsContent value={"preview"}>

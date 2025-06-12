@@ -16,6 +16,8 @@ export async function POST(request: Request) {
 			cache: "no-store",
 		});
 
+		console.info("hmm");
+
 		const resp = await response.json();
 
 		return NextResponse.json(
@@ -31,17 +33,23 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
 	try {
-		const { id, rule, tests, schema, name } = await request.json();
+		const { id, rule, tests, schema, name, version } = await request.json();
+
+		const dataModel = {
+			id: id,
+			rule: rule,
+			tests: tests,
+			schema: schema,
+			name: name,
+			version: "",
+		};
+		if (version) {
+			dataModel.version = `${version}`;
+		}
 
 		await fetch(`${env.API_SERVER}/policy/${id}`, {
 			method: "PUT",
-			body: JSON.stringify({
-				rule,
-				tests,
-				schema,
-				name,
-				id,
-			}),
+			body: JSON.stringify(dataModel),
 			cache: "no-store",
 		});
 

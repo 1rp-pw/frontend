@@ -1,6 +1,12 @@
 "use client";
 
-import { Clock, FilePenLine, FileText, PackageCheck } from "lucide-react";
+import {
+	Clock,
+	FilePenLine,
+	FilePlus2,
+	FileText,
+	PackageCheck,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
@@ -117,10 +123,20 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 										</Link>
 									</Button>
 								) : (
-									<Button variant={"outline"} size={"sm"}>
-										<FileText className={"mr-2 h-4 w-4"} />
-										View Details
-									</Button>
+									<div className={"flex gap-2"}>
+										<Button variant={"outline"} size={"sm"} asChild>
+											<Link href={`/policy/${policy_id}/draft`}>
+												<FilePlus2 className={"mr-2 h-4 w-4"} />
+												Create Draft
+											</Link>
+										</Button>
+										<Button variant={"outline"} size={"sm"} asChild>
+											<Link href={`/policy/${policy_id}/view`}>
+												<FileText className={"mr-2 h-4 w-4"} />
+												View Details
+											</Link>
+										</Button>
+									</div>
 								))}
 						</div>
 					</div>

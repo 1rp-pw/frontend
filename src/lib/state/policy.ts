@@ -106,6 +106,7 @@ interface PolicyStore {
 	savePolicy: () => Promise<{
 		success: boolean;
 		returnId?: string;
+		version?: number;
 		error?: string;
 	}>;
 	getPolicy: (
@@ -386,6 +387,7 @@ const createDefaultPolicySpec = (): PolicySpec => ({
 	updatedAt: new Date(),
 	description: "Default test policy",
 	tags: ["test"],
+	draft: true,
 });
 
 const defaultTests: Test[] = [
@@ -521,6 +523,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			const current = get().policySpec;
 			if (!current) return;
 
+			const schemaChanged = updates.schema && current.schema !== updates.schema;
 			const updatedSpec: PolicySpec = {
 				...current,
 				...updates,
@@ -539,7 +542,10 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 				name: updatedSpec.name,
 				id: updatedSpec.id || null,
 			});
-			get().markInvalidTests();
+
+			if (schemaChanged) {
+				get().markInvalidTests();
+			}
 		},
 
 		setSchema: (schema) => {
@@ -802,6 +808,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					updatedAt: new Date(result.updatedAt || Date.now()),
 					description: result.description,
 					tags: result.tags,
+					draft: result.draft,
 				};
 
 				set({
@@ -848,9 +855,10 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 		savePolicy: async (): Promise<{
 			success: boolean;
 			returnId?: string;
+			version?: number;
 			error?: string;
 		}> => {
-			const { tests, policySpec } = get();
+			const { tests, policySpec, id } = get();
 
 			if (!policySpec) {
 				return {
@@ -865,7 +873,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					tests,
 					rule: policySpec.rule,
 					schema: policySpec.schema,
-					id: policySpec.id || undefined,
+					id: id || undefined,
 					version: policySpec.version,
 					description: policySpec.description,
 					tags: policySpec.tags,
@@ -888,6 +896,14 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 				const result = await response.json();
 				if (result.id) {
 					get().updatePolicySpec({ id: result.id });
+					if (result.version) {
+						return {
+							success: true,
+							returnId: result.id,
+							version: result.version,
+						};
+					}
+
 					return {
 						success: true,
 						returnId: result.id,

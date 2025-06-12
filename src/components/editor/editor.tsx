@@ -6,9 +6,10 @@ import { highlightText } from "~/components/ui/highlight";
 interface EditorProps {
 	rule: string;
 	onChange: (rule: string) => void;
+	disabled?: boolean;
 }
 
-export function Editor({ rule, onChange }: EditorProps) {
+export function Editor({ rule, onChange, disabled = false }: EditorProps) {
 	const editorRef = useRef<HTMLPreElement>(null);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -53,6 +54,7 @@ export function Editor({ rule, onChange }: EditorProps) {
 				spellCheck="false"
 				className="absolute inset-0 z-10 h-full w-full resize-none bg-transparent p-4 text-transparent caret-white outline-none"
 				style={{ caretColor: "white" }}
+				disabled={disabled}
 			/>
 			<pre
 				ref={editorRef}

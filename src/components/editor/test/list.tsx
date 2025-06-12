@@ -36,6 +36,7 @@ interface TestListProps {
 	onDeleteTest: (testId: string) => void;
 	onRunTest: (testId: string) => Promise<void>;
 	onRepairTest: (testId: string) => void;
+	disabled?: boolean;
 }
 
 export function TestList({
@@ -45,6 +46,7 @@ export function TestList({
 	onDeleteTest,
 	onRunTest,
 	onRepairTest,
+	disabled = false,
 }: TestListProps) {
 	const [testInfo, setTestInfo] = useState<Test | null>();
 	const [deleteTestDialogOpen, setDeleteTestDialogOpen] = useState(false);
@@ -270,18 +272,20 @@ export function TestList({
 						</Button>
 					)}
 
-					<Button
-						variant="ghost"
-						size="icon"
-						className="h-6 w-6 text-zinc-400 hover:text-red-400"
-						onClick={(e) => {
-							e.stopPropagation();
-							handleDeleteTest(test);
-						}}
-						disabled={test.outcome.status === "running"}
-					>
-						<TrashIcon className="h-4 w-4" />
-					</Button>
+					{!disabled && (
+						<Button
+							variant="ghost"
+							size="icon"
+							className="h-6 w-6 text-zinc-400 hover:text-red-400"
+							onClick={(e) => {
+								e.stopPropagation();
+								handleDeleteTest(test);
+							}}
+							disabled={test.outcome.status === "running"}
+						>
+							<TrashIcon className="h-4 w-4" />
+						</Button>
+					)}
 				</div>
 			</div>
 		</li>
