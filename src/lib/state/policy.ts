@@ -108,7 +108,7 @@ interface PolicyStore {
 		returnId?: string;
 		error?: string;
 	}>;
-	getPolicy: (policyId?: string) => Promise<{
+	getPolicy: (policyId?: string, version?: string) => Promise<{
 		success: boolean;
 		error?: string;
 	}>;
@@ -735,7 +735,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 		setLoading: (loading) => set({ isLoading: loading }),
 		setError: (error) => set({ error }),
 
-		getPolicy: async (policyId?: string) => {
+		getPolicy: async (policyId?: string, version?: string) => {
 			const currentId = policyId || get().id;
 
 			if (!currentId) {
@@ -752,11 +752,22 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			});
 
 			try {
-				const response = await fetch(`/api/policy?id=${currentId}`, {
-					method: "GET",
-					headers: { "Content-Type": "application/json" },
-					body: null,
-				});
+				// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+				let response;
+
+				if (version) {
+					response = await fetch(`/api/policy?id=${currentId}&version=${version}`, {
+						method: "GET",
+						headers: { "Content-Type": "application/json" },
+						body: null,
+					});
+				} else {
+					response = await fetch(`/api/policy?id=${currentId}`, {
+						method: "GET",
+						headers: { "Content-Type": "application/json" },
+						body: null,
+					});
+				}
 
 				if (!response.ok) {
 					const errorData = await response.json().catch(() => ({}));

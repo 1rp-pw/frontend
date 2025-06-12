@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 				name,
 				rule,
 				tests,
-				data_model: schema,
+				schema,
 			}),
 			cache: "no-store",
 		});
@@ -38,7 +38,7 @@ export async function PUT(request: Request) {
 			body: JSON.stringify({
 				rule,
 				tests,
-				data_model: schema,
+				schema,
 				name,
 				id,
 			}),
@@ -55,8 +55,16 @@ export async function GET(request: NextRequest) {
 	try {
 		const searchParams = request.nextUrl.searchParams;
 		const id = searchParams.get("id");
+		const version = searchParams.get("version");
 
-		const response = await fetch(`${env.API_SERVER}/policy/${id}`);
+
+		// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+		let response;
+		if (version) {
+			response = await fetch(`${env.API_SERVER}/policy/${id}/${version}`);
+		} else {
+			response = await fetch(`${env.API_SERVER}/policy/${id}`);
+		}
 
 		const resp = await response.json();
 		if (resp.id) {
@@ -66,13 +74,11 @@ export async function GET(request: NextRequest) {
 					name: resp.name,
 					rule: resp.rule,
 					tests: resp.tests,
-					schema: resp.data_model,
+					schema: resp.schema,
 				},
 				{ status: 200 },
 			);
 		}
-
-		console.info("No policy found", resp);
 
 		return NextResponse.json({ error: "failed request" }, { status: 500 });
 	} catch (error) {

@@ -21,7 +21,7 @@ export interface PolicySpec {
 	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 	schema: any;
 	schemaVersion: string;
-	version: number;
+	version: number | string;
 	createdAt: Date;
 	updatedAt: Date;
 	description?: string;

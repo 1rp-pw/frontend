@@ -1,9 +1,9 @@
-"use client";
+import PolicyInfo from "./content";
 
-import { useState } from "react";
+export default async function PolicyInfoPage({
+																				params,
+																			}: { params: Promise<{ policy_id: string }> }) {
+	const { policy_id } = await params;
 
-export default function PolicyInfo() {
-	const [selectedVersion, setSelectedVersion] = useState<string | null>(null);
-
-	return <div>PolicyInfo</div>;
+	return <PolicyInfo policy_id={policy_id} />;
 }
