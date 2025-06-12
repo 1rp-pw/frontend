@@ -26,6 +26,7 @@ export interface PolicySpec {
 	draft: boolean;
 	createdAt: Date;
 	updatedAt: Date;
+	lastPublishedAt?: Date;
 	status: string;
 	description?: string;
 	tags?: string[];

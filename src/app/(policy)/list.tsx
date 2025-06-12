@@ -25,6 +25,13 @@ function formatDate(date: Date | string) {
 	return `${d.toLocaleDateString()}, ${d.toLocaleTimeString()}`;
 }
 
+function isValidPublishDate(date: Date | string | undefined): boolean {
+	if (!date) return false;
+	const dateStr = typeof date === 'string' ? date : date.toISOString();
+	return !dateStr.startsWith('0001-01-01');
+}
+
+
 export default function PolicyList() {
 	const [policies, setPolicies] = useState<PolicySpec[]>([]);
 	useEffect(() => {
@@ -57,6 +64,7 @@ export default function PolicyList() {
 					<TableHead>Name</TableHead>
 					<TableHead>Created</TableHead>
 					<TableHead>Updated</TableHead>
+					<TableHead>Last Published</TableHead>
 					<TableHead>Version</TableHead>
 				</TableRow>
 			</TableHeader>
@@ -74,6 +82,11 @@ export default function PolicyList() {
 						<TableCell>
 							<Link href={`/policy/${policy.baseId}`}>
 								{formatDate(policy.updatedAt)}
+							</Link>
+						</TableCell>
+						<TableCell>
+							<Link href={`/policy/${policy.baseId}`}>
+								{isValidPublishDate(policy.lastPublishedAt) ? formatDate(policy.lastPublishedAt) : "Not Published Yet"}
 							</Link>
 						</TableCell>
 						<TableCell>
