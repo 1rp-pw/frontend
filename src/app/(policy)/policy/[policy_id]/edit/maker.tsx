@@ -16,7 +16,10 @@ import {
 } from "~/components/ui/tooltip";
 import { usePolicyStore } from "~/lib/state/policy";
 
-export default function Maker({ policy_id }: { policy_id: string }) {
+export default function Maker({
+	policy_id,
+	version,
+}: { policy_id: string; version: string | undefined }) {
 	const {
 		schema,
 		tests,
@@ -48,10 +51,10 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		const loadPolicy = async () => {
-			await getPolicy(policy_id);
+			await getPolicy(policy_id, version);
 		};
 		loadPolicy();
-	}, [policy_id]);
+	}, [policy_id, version]);
 
 	if (isLoading) {
 		return (

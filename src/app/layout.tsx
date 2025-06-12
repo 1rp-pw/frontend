@@ -46,10 +46,10 @@ export default function RootLayout({
 						<div className={"relative flex min-h-screen flex-col bg-muted/40"}>
 							<SidebarProvider>
 								<SideBar />
-								<div className={"flex size-full flex-col sm:py-4"}>
+								<div className={"flex size-full flex-col sm:py-2"}>
 									<Headerbar />
 									<main
-										className={"size-full flex-1 p-4"}
+										className={"size-full flex-1 p-2 pb-0"}
 										suppressHydrationWarning={true}
 									>
 										{children}
