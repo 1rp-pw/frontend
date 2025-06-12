@@ -26,7 +26,6 @@ export default function Maker({
 		error,
 		setSchema,
 		setPolicyRule,
-		createTest,
 		saveTest,
 		selectTest,
 		deleteTest,
@@ -76,10 +75,6 @@ export default function Maker({
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
 				<h1 className="font-bold text-xl">{name}</h1>
-				<div className={"ml-auto flex items-center gap-1"}>
-					<SavePolicy />
-					<PublishPolicy />
-				</div>
 			</header>
 
 			<main className="grid flex-1 grid-cols-2 grid-rows-[1fr_1fr] gap-1 overflow-auto p-1">
@@ -88,7 +83,7 @@ export default function Maker({
 						Policy Text
 					</div>
 					<div className="flex-1 overflow-auto p-4">
-						<Editor rule={rule} onChange={setPolicyRule} />
+						<Editor rule={rule} onChange={setPolicyRule} disabled={true} />
 					</div>
 				</div>
 
@@ -102,6 +97,7 @@ export default function Maker({
 								schema={schema}
 								currentTest={currentTest}
 								onSaveTest={saveTest}
+								disabled={true}
 							/>
 						) : (
 							<div className={"content-around object-center text-center"}>
@@ -120,6 +116,7 @@ export default function Maker({
 							schema={schema}
 							setSchema={setSchema}
 							newImportAllowed={false}
+							disabled={true}
 						/>
 					</div>
 				</div>
@@ -136,15 +133,6 @@ export default function Maker({
 							<PlayIcon />
 							Run All
 						</Button>
-						<Button
-							variant="secondary"
-							onClick={createTest}
-							className="rounded px-2 py-1 text-xs"
-							disabled={Object.keys(schema.properties).length === 0}
-						>
-							<FilePlusIcon />
-							New Test
-						</Button>
 					</div>
 					<div className="flex-1 overflow-auto">
 						<TestList
@@ -154,6 +142,7 @@ export default function Maker({
 							onDeleteTest={deleteTest}
 							onRunTest={runTest}
 							onRepairTest={repairTest}
+							disabled={true}
 						/>
 					</div>
 				</div>

@@ -22,6 +22,7 @@ export interface PolicySpec {
 	schema: any;
 	schemaVersion: string;
 	version: number | string;
+	draft: boolean;
 	createdAt: Date;
 	updatedAt: Date;
 	description?: string;

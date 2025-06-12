@@ -20,12 +20,14 @@ interface SchemaBuilderProps {
 	// biome-ignore lint/suspicious/noExplicitAny: still dynamic
 	setSchema: (schema: any) => void;
 	newImportAllowed: boolean;
+	disabled?: boolean;
 }
 
 export function SchemaBuilder({
 	schema,
 	setSchema,
 	newImportAllowed,
+	disabled = false,
 }: SchemaBuilderProps) {
 	const { initializeSchemaIfEmpty } = usePolicyStore();
 
@@ -230,15 +232,23 @@ export function SchemaBuilder({
 	};
 
 	const currentSchema = getCurrentSchema();
-	const gridCols = newImportAllowed ? "grid-cols-3" : "grid-cols-2";
+	const gridCols = newImportAllowed
+		? "grid-cols-3"
+		: disabled
+			? "grid-cols-1"
+			: "grid-cols-2";
+
+	const defaultTab = disabled ? "preview" : "edit";
 
 	return (
-		<Tabs defaultValue={"edit"}>
+		<Tabs defaultValue={defaultTab}>
 			<TabsList className={`grid w-full ${gridCols}`}>
-				<TabsTrigger value={"edit"}>
-					<EditIcon className="h-4 w-4" />
-					Edit Schema
-				</TabsTrigger>
+				{!disabled && (
+					<TabsTrigger value={"edit"}>
+						<EditIcon className="h-4 w-4" />
+						Edit Schema
+					</TabsTrigger>
+				)}
 				{newImportAllowed && (
 					<TabsTrigger value={"import"}>
 						<FileTextIcon className="h-4 w-4" />
