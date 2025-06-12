@@ -62,22 +62,22 @@ export default function PolicyList() {
 			</TableHeader>
 			<TableBody>
 				{policies.map((policy: PolicySpec) => (
-					<TableRow key={policy.id}>
+					<TableRow key={policy.baseId}>
 						<TableCell>
-							<Link href={`/policy/${policy.id}`}>{policy.name}</Link>
+							<Link href={`/policy/${policy.baseId}`}>{policy.name}</Link>
 						</TableCell>
 						<TableCell>
-							<Link href={`/policy/${policy.id}`}>
+							<Link href={`/policy/${policy.baseId}`}>
 								{formatDate(policy.createdAt)}
 							</Link>
 						</TableCell>
 						<TableCell>
-							<Link href={`/policy/${policy.id}`}>
+							<Link href={`/policy/${policy.baseId}`}>
 								{formatDate(policy.updatedAt)}
 							</Link>
 						</TableCell>
 						<TableCell>
-							<Link href={`/policy/${policy.id}`}>{policy.version}</Link>
+							<Link href={`/policy/${policy.baseId}`}>{policy.version}</Link>
 						</TableCell>
 					</TableRow>
 				))}
