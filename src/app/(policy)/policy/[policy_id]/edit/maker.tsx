@@ -16,7 +16,10 @@ import {
 } from "~/components/ui/tooltip";
 import { usePolicyStore } from "~/lib/state/policy";
 
-export default function Maker({ policy_id, version }: { policy_id: string, version: string | undefined }) {
+export default function Maker({
+	policy_id,
+	version,
+}: { policy_id: string; version: string | undefined }) {
 	const {
 		schema,
 		tests,

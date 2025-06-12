@@ -57,7 +57,6 @@ export async function GET(request: NextRequest) {
 		const id = searchParams.get("id");
 		const version = searchParams.get("version");
 
-
 		// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 		let response;
 		if (version) {

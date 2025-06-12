@@ -108,7 +108,10 @@ interface PolicyStore {
 		returnId?: string;
 		error?: string;
 	}>;
-	getPolicy: (policyId?: string, version?: string) => Promise<{
+	getPolicy: (
+		policyId?: string,
+		version?: string,
+	) => Promise<{
 		success: boolean;
 		error?: string;
 	}>;
@@ -756,11 +759,14 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 				let response;
 
 				if (version) {
-					response = await fetch(`/api/policy?id=${currentId}&version=${version}`, {
-						method: "GET",
-						headers: { "Content-Type": "application/json" },
-						body: null,
-					});
+					response = await fetch(
+						`/api/policy?id=${currentId}&version=${version}`,
+						{
+							method: "GET",
+							headers: { "Content-Type": "application/json" },
+							body: null,
+						},
+					);
 				} else {
 					response = await fetch(`/api/policy?id=${currentId}`, {
 						method: "GET",
