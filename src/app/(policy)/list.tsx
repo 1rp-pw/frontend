@@ -27,10 +27,9 @@ function formatDate(date: Date | string) {
 
 function isValidPublishDate(date: Date | string | undefined): boolean {
 	if (!date) return false;
-	const dateStr = typeof date === 'string' ? date : date.toISOString();
-	return !dateStr.startsWith('0001-01-01');
+	const dateStr = typeof date === "string" ? date : date.toISOString();
+	return !dateStr.startsWith("0001-01-01");
 }
-
 
 export default function PolicyList() {
 	const [policies, setPolicies] = useState<PolicySpec[]>([]);
@@ -86,7 +85,9 @@ export default function PolicyList() {
 						</TableCell>
 						<TableCell>
 							<Link href={`/policy/${policy.baseId}`}>
-								{isValidPublishDate(policy.lastPublishedAt) ? formatDate(policy.lastPublishedAt) : "Not Published Yet"}
+								{isValidPublishDate(policy.lastPublishedAt)
+									? formatDate(policy.lastPublishedAt)
+									: "Not Published Yet"}
 							</Link>
 						</TableCell>
 						<TableCell>
