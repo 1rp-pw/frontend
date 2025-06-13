@@ -26,6 +26,7 @@ export interface FlowSpec {
 	version: number | string;
 	draft: boolean;
 	status: string;
+	hasDraft: boolean;
 }
 
 export interface FlowActions {
@@ -54,6 +55,7 @@ export interface PolicySpec {
 	status: string;
 	description?: string;
 	tags?: string[];
+	hasDraft: boolean;
 }
 
 export interface PolicyVersion {
