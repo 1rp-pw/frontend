@@ -46,7 +46,7 @@ export function PolicyNode({ data, id }: NodeProps) {
 	return (
 		<Card className="min-h-32 w-96 rounded-xl border border-border bg-card shadow-sm">
 			<CardHeader className="pb-3">
-				<CardTitle className="flex items-center justify-between text-sm font-medium">
+				<CardTitle className="flex items-center justify-between font-medium text-sm">
 					<div className="flex items-center gap-2">
 						<div className="h-3 w-3 rounded-full bg-blue-500" />
 						Policy Node
@@ -65,8 +65,8 @@ export function PolicyNode({ data, id }: NodeProps) {
 				{!isEditing ? (
 					<div className="space-y-2">
 						<div>
-							<Label className="text-xs font-medium">Policy:</Label>
-							<div className="text-xs text-muted-foreground">
+							<Label className="font-medium text-xs">Policy:</Label>
+							<div className="text-muted-foreground text-xs">
 								{policyName || policyId || "Not selected"}
 							</div>
 						</div>

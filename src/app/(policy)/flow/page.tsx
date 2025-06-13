@@ -1,6 +1,7 @@
 "use client";
 
 import {
+	addEdge,
 	Background,
 	type Connection,
 	Controls,
@@ -9,24 +10,18 @@ import {
 	type Node,
 	type NodeTypes,
 	ReactFlow,
-	addEdge,
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
-import { useCallback, useMemo } from "react";
-import { FlowContext } from "~/components/flow/flow-context";
-import { CustomNode } from "~/components/flow/nodes/custom-node";
-import { PolicyNode } from "~/components/flow/nodes/policy-node";
-import { ReturnNode } from "~/components/flow/nodes/return-node";
-import { StartNode } from "~/components/flow/nodes/start-node";
-import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import type {
-	CustomNodeData,
-	PolicyNodeData,
-	ReturnNodeData,
-	StartNodeData,
-} from "~/lib/types";
+import {useCallback, useMemo} from "react";
+import {FlowContext} from "~/components/flow/flow-context";
+import {CustomNode} from "~/components/flow/nodes/custom-node";
+import {PolicyNode} from "~/components/flow/nodes/policy-node";
+import {ReturnNode} from "~/components/flow/nodes/return-node";
+import {StartNode} from "~/components/flow/nodes/start-node";
+import {Button} from "~/components/ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "~/components/ui/card";
+import type {CustomNodeData, PolicyNodeData, ReturnNodeData, StartNodeData,} from "~/lib/types";
 
 import "@xyflow/react/dist/style.css";
 
@@ -208,7 +203,7 @@ export default function FlowEditor() {
 
 	const getConnectedNodes = useCallback(
 		(nodeId: string) => {
-			const connected = edges.reduce(
+			return edges.reduce(
 				(acc, edge) => {
 					if (edge.source === nodeId) {
 						if (edge.sourceHandle === "true") {
@@ -221,7 +216,6 @@ export default function FlowEditor() {
 				},
 				{} as { true?: string; false?: string },
 			);
-			return connected;
 		},
 		[edges],
 	);
@@ -249,7 +243,7 @@ export default function FlowEditor() {
 
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
-			<header className="flex border-b border-border bg-card px-6 py-4">
+			<header className="flex border-border border-b bg-card px-6 py-4">
 				<div className="flex w-full items-center justify-between">
 					<h1 className="font-bold text-xl">Flow Editor</h1>
 					<Button onClick={clearFlow} variant="secondary" size="sm">
@@ -308,12 +302,12 @@ export default function FlowEditor() {
 				</FlowContext.Provider>
 			</main>
 
-			<footer className="border-t border-border bg-card px-6 py-4">
+			<footer className="border-border border-t bg-card px-6 py-4">
 				<Card className="rounded-lg border-border bg-card shadow-sm">
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">Instructions</CardTitle>
+						<CardTitle className="font-medium text-sm">Instructions</CardTitle>
 					</CardHeader>
-					<CardContent className="space-y-2 text-xs text-muted-foreground">
+					<CardContent className="space-y-2 text-muted-foreground text-xs">
 						<p>
 							<strong className="font-medium text-foreground">Building Flows:</strong> Start with the green Start Node, then click "Add True" or "Add False" to create connected nodes
 						</p>

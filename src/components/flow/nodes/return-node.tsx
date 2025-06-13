@@ -41,7 +41,7 @@ export function ReturnNode({ data, id }: NodeProps) {
 	return (
 		<Card className="min-h-24 w-48 rounded-xl border border-border bg-card shadow-sm">
 			<CardHeader className="pb-3">
-				<CardTitle className="flex items-center justify-between text-sm font-medium">
+				<CardTitle className="flex items-center justify-between font-medium text-sm">
 					<div className="flex items-center gap-2">
 						<div className={`h-3 w-3 ${dotColor} rounded-full`} />
 						Return Node
@@ -108,8 +108,8 @@ export function ReturnNode({ data, id }: NodeProps) {
 				)}
 
 				{/* Node Type Conversion */}
-				<div className="border-t border-border pt-3">
-					<Label className="text-xs font-medium">Change to:</Label>
+				<div className="border-border border-t pt-3">
+					<Label className="font-medium text-xs">Change to:</Label>
 					<div className="mt-1 flex gap-1">
 						<Button
 							size="sm"

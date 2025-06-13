@@ -53,7 +53,7 @@ export function StartNode({ data, id }: NodeProps) {
 	return (
 		<Card className="min-h-48 w-96 rounded-xl border border-border bg-card shadow-sm">
 			<CardHeader className="pb-3">
-				<CardTitle className="flex items-center gap-2 text-sm font-medium">
+				<CardTitle className="flex items-center gap-2 font-medium text-sm">
 					<div className="h-3 w-3 rounded-full bg-green-500" />
 					Start Node
 				</CardTitle>
@@ -62,14 +62,14 @@ export function StartNode({ data, id }: NodeProps) {
 				{!isEditing ? (
 					<div className="space-y-2">
 						<div>
-							<Label className="text-xs font-medium">JSON Data:</Label>
-							<div className="max-h-20 overflow-y-auto rounded-md bg-muted p-2 text-xs text-muted-foreground">
+							<Label className="font-medium text-xs">JSON Data:</Label>
+							<div className="max-h-20 overflow-y-auto rounded-md bg-muted p-2 text-muted-foreground text-xs">
 								{jsonData || "{}"}
 							</div>
 						</div>
 						<div>
-							<Label className="text-xs font-medium">Policy:</Label>
-							<div className="text-xs text-muted-foreground">
+							<Label className="font-medium text-xs">Policy:</Label>
+							<div className="text-muted-foreground text-xs">
 								{policyName || policyId || "Not selected"}
 							</div>
 						</div>
@@ -85,7 +85,7 @@ export function StartNode({ data, id }: NodeProps) {
 				) : (
 					<div className="space-y-3">
 						<div>
-							<Label htmlFor={`json-${id}`} className="text-xs font-medium">
+							<Label htmlFor={`json-${id}`} className="font-medium text-xs">
 								JSON Data
 							</Label>
 							<Textarea
@@ -97,7 +97,7 @@ export function StartNode({ data, id }: NodeProps) {
 							/>
 						</div>
 						<div>
-							<Label className="text-xs font-medium">Policy Selection</Label>
+							<Label className="font-medium text-xs">Policy Selection</Label>
 							<div className="space-y-2">
 								<div className="flex gap-2">
 									<Input
@@ -166,7 +166,7 @@ export function StartNode({ data, id }: NodeProps) {
 				)}
 
 				{/* True/False Action Buttons */}
-				<div className="space-y-2 border-t border-border pt-3">
+				<div className="space-y-2 border-border border-t pt-3">
 					<div className="grid grid-cols-2 gap-2">
 						<Button
 							size="sm"
