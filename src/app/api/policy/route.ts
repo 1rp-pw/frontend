@@ -33,8 +33,17 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
 	try {
-		const { id, rule, tests, schema, name, version, status, baseId, description } =
-			await request.json();
+		const {
+			id,
+			rule,
+			tests,
+			schema,
+			name,
+			version,
+			status,
+			baseId,
+			description,
+		} = await request.json();
 
 		const dataModel = {
 			id,
