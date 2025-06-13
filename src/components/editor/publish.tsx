@@ -67,6 +67,9 @@ export function PublishPolicy() {
 		try {
 			updatePolicySpec({
 				version: data.policyVersion,
+				draft: false,
+				status: "published",
+				description: data.policyChanges,
 				id: id,
 			});
 

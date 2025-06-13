@@ -16,7 +16,7 @@ export async function POST(request: Request) {
 			cache: "no-store",
 		});
 
-		console.info("hmm");
+		// console.info("hmm");
 
 		const resp = await response.json();
 
@@ -33,19 +33,34 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
 	try {
-		const { id, rule, tests, schema, name, version } = await request.json();
+		const {
+			id,
+			rule,
+			tests,
+			schema,
+			name,
+			version,
+			status,
+			baseId,
+			description,
+		} = await request.json();
 
 		const dataModel = {
-			id: id,
-			rule: rule,
-			tests: tests,
-			schema: schema,
-			name: name,
+			id,
+			baseId,
+			rule,
+			tests,
+			schema,
+			name,
 			version: "",
+			status,
+			description,
 		};
 		if (version) {
 			dataModel.version = `${version}`;
 		}
+
+		// console.info("dataModel", dataModel);
 
 		await fetch(`${env.API_SERVER}/policy/${id}`, {
 			method: "PUT",
@@ -78,10 +93,12 @@ export async function GET(request: NextRequest) {
 			return NextResponse.json(
 				{
 					id: resp.id,
+					baseId: resp.baseId,
 					name: resp.name,
 					rule: resp.rule,
 					tests: resp.tests,
 					schema: resp.schema,
+					status: resp.status,
 				},
 				{ status: 200 },
 			);

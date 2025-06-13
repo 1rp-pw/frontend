@@ -25,6 +25,12 @@ function formatDate(date: Date | string) {
 	return `${d.toLocaleDateString()}, ${d.toLocaleTimeString()}`;
 }
 
+function isValidPublishDate(date: Date | string | undefined): boolean {
+	if (!date) return false;
+	const dateStr = typeof date === "string" ? date : date.toISOString();
+	return !dateStr.startsWith("0001-01-01");
+}
+
 export default function PolicyList() {
 	const [policies, setPolicies] = useState<PolicySpec[]>([]);
 	useEffect(() => {
@@ -33,6 +39,23 @@ export default function PolicyList() {
 		});
 	}, []);
 
+	if (policies.length === 0) {
+		return (
+			<div className="flex h-screen bg-background">
+				<div className="w-1/4 border-r bg-muted/10">
+					<div className="border-b p-4">
+						<h2 className="flex items-center gap-2 text-lg text-semibold">
+							Policies
+						</h2>
+						<p className="mt-1 text-muted-foreground text-sm">
+							No policies found
+						</p>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<Table>
 			<TableHeader>
@@ -40,27 +63,36 @@ export default function PolicyList() {
 					<TableHead>Name</TableHead>
 					<TableHead>Created</TableHead>
 					<TableHead>Updated</TableHead>
+					<TableHead>Last Published</TableHead>
 					<TableHead>Version</TableHead>
 				</TableRow>
 			</TableHeader>
 			<TableBody>
 				{policies.map((policy: PolicySpec) => (
-					<TableRow key={policy.id}>
+					<TableRow key={policy.baseId}>
 						<TableCell>
-							<Link href={`/policy/${policy.id}`}>{policy.name}</Link>
+							<Link href={`/policy/${policy.baseId}`}>{policy.name}</Link>
 						</TableCell>
 						<TableCell>
-							<Link href={`/policy/${policy.id}`}>
+							<Link href={`/policy/${policy.baseId}`}>
 								{formatDate(policy.createdAt)}
 							</Link>
 						</TableCell>
 						<TableCell>
-							<Link href={`/policy/${policy.id}`}>
+							<Link href={`/policy/${policy.baseId}`}>
 								{formatDate(policy.updatedAt)}
 							</Link>
 						</TableCell>
 						<TableCell>
-							<Link href={`/policy/${policy.id}`}>{policy.version}</Link>
+							<Link href={`/policy/${policy.baseId}`}>
+								{isValidPublishDate(policy.lastPublishedAt) &&
+								policy.lastPublishedAt
+									? formatDate(policy.lastPublishedAt)
+									: "Not Published Yet"}
+							</Link>
+						</TableCell>
+						<TableCell>
+							<Link href={`/policy/${policy.baseId}`}>{policy.version}</Link>
 						</TableCell>
 					</TableRow>
 				))}

@@ -9,8 +9,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "~/components/ui/card";
 import { highlightText } from "~/components/ui/highlight";
 import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea } from "~/components/ui/scroll-area";
@@ -32,11 +39,24 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 		null,
 	);
 
+	const getStatusVariant = (status: string) => {
+		switch (status) {
+			case "draft":
+				return "secondary";
+			default:
+				return "default";
+		}
+	};
+
 	useEffect(() => {
-		getPolicyVersions(policy_id).then((versions) => {
-			setVersions(versions);
+		getPolicyVersions(policy_id).then((respVersions) => {
+			// console.info("respVersions", respVersions);
+
+			setVersions(respVersions);
 		});
 	}, [policy_id]);
+
+	// console.info("versions", versions);
 
 	if (versions.length === 0) {
 		return null;
@@ -65,9 +85,18 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 									<div className={"flex items-start justify-between"}>
 										<div className={"flex-1"}>
 											<CardTitle className={"font-medium text-sm"}>
-												{version.version}
+												{version.draft ? "Draft" : version.version}
 											</CardTitle>
+											<CardDescription className={"text-xs"}>
+												{version.description}
+											</CardDescription>
 										</div>
+										<Badge
+											variant={getStatusVariant(version.status)}
+											className={"text-xs"}
+										>
+											{version.status === "draft" ? "Draft" : "Published"}
+										</Badge>
 									</div>
 								</CardHeader>
 								<CardContent className={"pt-0"}>
@@ -115,9 +144,9 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 								</div>
 							</div>
 							{selectedVersion &&
-								(selectedVersion?.version === "draft" ? (
+								(selectedVersion?.draft ? (
 									<Button variant={"outline"} size={"sm"} asChild>
-										<Link href={`/policy/${policy_id}/edit`}>
+										<Link href={`/policy/${selectedVersion.id}/edit`}>
 											<FilePenLine className={"mr-2 h-4 w-4"} />
 											Edit Draft
 										</Link>
@@ -125,13 +154,13 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 								) : (
 									<div className={"flex gap-2"}>
 										<Button variant={"outline"} size={"sm"} asChild>
-											<Link href={`/policy/${policy_id}/draft`}>
+											<Link href={`/policy/${selectedVersion.id}/draft`}>
 												<FilePlus2 className={"mr-2 h-4 w-4"} />
 												Create Draft
 											</Link>
 										</Button>
 										<Button variant={"outline"} size={"sm"} asChild>
-											<Link href={`/policy/${policy_id}/view`}>
+											<Link href={`/policy/${selectedVersion.id}/view`}>
 												<FileText className={"mr-2 h-4 w-4"} />
 												View Details
 											</Link>
