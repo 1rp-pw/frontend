@@ -14,6 +14,30 @@ export interface NodeData {
 	condition?: "true" | "false";
 }
 
+export interface FlowSpec {
+	baseId: string;
+	id: string;
+	name: string;
+	description?: string;
+	createdAt: Date;
+	updatedAt: Date;
+	lastPublishedAt?: Date;
+	actions: FlowActions[];
+	version: number | string;
+	draft: boolean;
+	status: string;
+}
+
+export interface FlowActions {
+	id: string;
+	type: "return" | "policy" | "custom";
+	outcome: string;
+	nextPolicyId?: string;
+	customOutcome?: string;
+	condition?: "true" | "false";
+	parentNodeId?: string;
+}
+
 export interface PolicySpec {
 	baseId: string;
 	id: string;

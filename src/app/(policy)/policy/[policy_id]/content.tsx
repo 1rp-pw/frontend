@@ -48,11 +48,16 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 		}
 	};
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		getPolicyVersions(policy_id).then((respVersions) => {
 			// console.info("respVersions", respVersions);
 
 			setVersions(respVersions);
+			// Auto-select the first version if available
+			if (respVersions.length > 0 && !selectedVersion) {
+				setSelectedVersion(respVersions[0]);
+			}
 		});
 	}, [policy_id]);
 
