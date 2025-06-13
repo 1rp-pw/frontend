@@ -95,7 +95,7 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 											variant={getStatusVariant(version.status)}
 											className={"text-xs"}
 										>
-											{version.status}
+											{version.status === "draft" ? "Draft" : "Published"}
 										</Badge>
 									</div>
 								</CardHeader>

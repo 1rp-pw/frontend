@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
 	try {
-		const { id, rule, tests, schema, name, version, status, baseId } =
+		const { id, rule, tests, schema, name, version, status, baseId, description } =
 			await request.json();
 
 		const dataModel = {
@@ -45,6 +45,7 @@ export async function PUT(request: Request) {
 			name,
 			version: "",
 			status,
+			description,
 		};
 		if (version) {
 			dataModel.version = `${version}`;
