@@ -390,6 +390,7 @@ const createDefaultPolicySpec = (): PolicySpec => ({
 	draft: true,
 	status: "draft",
 	baseId: "",
+	hasDraft: true,
 });
 
 const defaultTests: Test[] = [
@@ -813,6 +814,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					tags: result.tags,
 					status: result.status,
 					draft: result.status === "draft",
+					hasDraft: result.hasDraft,
 				};
 
 				// console.info("Policy spec", policySpec, result);

@@ -69,7 +69,7 @@ export default function PolicyList() {
 							<TableHead>Created</TableHead>
 							<TableHead>Updated</TableHead>
 							<TableHead>Last Published</TableHead>
-							<TableHead>Version</TableHead>
+							<TableHead>Has Draft In Progress</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -98,7 +98,7 @@ export default function PolicyList() {
 								</TableCell>
 								<TableCell>
 									<Link href={`/policy/${policy.baseId}`}>
-										{policy.version}
+										{policy.hasDraft ? "Yes" : "No"}
 									</Link>
 								</TableCell>
 							</TableRow>
@@ -122,7 +122,7 @@ export default function PolicyList() {
 							<TableHead>Created</TableHead>
 							<TableHead>Updated</TableHead>
 							<TableHead>Last Published</TableHead>
-							<TableHead>Version</TableHead>
+							<TableHead>Has Draft In Progress</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
@@ -150,7 +150,7 @@ export default function PolicyList() {
 									</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/flow/${flow.baseId}`}>{flow.version}</Link>
+									<Link href={`/flow/${flow.baseId}`}>{flow.hasDraft}</Link>
 								</TableCell>
 							</TableRow>
 						))}
