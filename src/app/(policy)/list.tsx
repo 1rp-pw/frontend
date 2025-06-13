@@ -85,7 +85,8 @@ export default function PolicyList() {
 						</TableCell>
 						<TableCell>
 							<Link href={`/policy/${policy.baseId}`}>
-								{isValidPublishDate(policy.lastPublishedAt)
+								{isValidPublishDate(policy.lastPublishedAt) &&
+								policy.lastPublishedAt
 									? formatDate(policy.lastPublishedAt)
 									: "Not Published Yet"}
 							</Link>
