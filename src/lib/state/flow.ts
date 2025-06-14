@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import type { FlowSpec, FlowNodeData, FlowEdgeData } from "~/lib/types";
+import { flowToYaml, flowToFlatYaml } from "~/lib/utils/flow-to-yaml";
+import { validateFlowTermination, type FlowValidationResult } from "~/lib/utils/flow-validation";
 
 export interface FlowTestResult {
 	nodeId: string;
@@ -51,6 +53,10 @@ interface FlowStore {
 	isTestRunning: boolean;
 	testResult: FlowTestResult | null;
 	
+	// Validation
+	validateFlow: () => FlowValidationResult;
+	validationResult: FlowValidationResult | null;
+	
 	// Loading states
 	isLoading: boolean;
 	error: string | null;
@@ -99,6 +105,9 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 		// Test execution state
 		isTestRunning: false,
 		testResult: null,
+		
+		// Validation state
+		validationResult: null,
 
 		// Flow spec management
 		setFlowSpec: (spec) => {
@@ -157,6 +166,13 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 		error: null,
 		setLoading: (loading) => set({ isLoading: loading }),
 		setError: (error) => set({ error }),
+
+		validateFlow: () => {
+			const { nodes, edges } = get();
+			const validationResult = validateFlowTermination(nodes, edges);
+			set({ validationResult });
+			return validationResult;
+		},
 
 		testFlow: async (testData: object) => {
 			const { nodes, edges } = get();
@@ -314,12 +330,21 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 			version?: number;
 			error?: string;
 		}> => {
-			const { flowSpec, nodes, edges, id } = get();
+			const { flowSpec, nodes, edges, id, validateFlow } = get();
 
 			if (!flowSpec) {
 				return {
 					success: false,
 					error: "No flow spec available",
+				};
+			}
+			
+			// Validate flow before saving
+			const validation = validateFlow();
+			if (!validation.isValid) {
+				return {
+					success: false,
+					error: `Flow validation failed: ${validation.errors.join(", ")}`,
 				};
 			}
 
@@ -332,12 +357,18 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 			};
 
 			try {
+				// Generate YAML representations
+				const yamlNested = flowToYaml(nodes, edges);
+				const yamlFlat = flowToFlatYaml(nodes, edges);
+				
 				const apiData = {
 					name: updatedFlowSpec.name,
 					description: updatedFlowSpec.description,
 					tags: updatedFlowSpec.tags,
 					nodes: updatedFlowSpec.nodes,
 					edges: updatedFlowSpec.edges,
+					yaml: yamlNested,
+					yamlFlat: yamlFlat,
 					id: id || undefined,
 					version: updatedFlowSpec.version,
 					status: updatedFlowSpec.status,
@@ -399,6 +430,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				error: null,
 				isTestRunning: false,
 				testResult: null,
+				validationResult: null,
 			});
 		},
 	};

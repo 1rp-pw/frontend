@@ -14,7 +14,7 @@ import {
 	useNodesState,
 } from "@xyflow/react";
 import {Save, FolderOpen, Play} from "lucide-react";
-import {useCallback, useEffect, useMemo} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {FlowContext} from "~/components/flow/flow-context";
 import {CustomNode} from "~/components/flow/nodes/custom-node";
 import {PolicyNode} from "~/components/flow/nodes/policy-node";
@@ -35,6 +35,7 @@ import {Tabs, TabsContent, TabsList, TabsTrigger} from "~/components/ui/tabs";
 import {useFlowSearch} from "~/hooks/use-flow-search";
 import {useFlowStore} from "~/lib/state/flow";
 import type {CustomNodeData, PolicyNodeData, ReturnNodeData, StartNodeData, FlowNodeData, FlowEdgeData} from "~/lib/types";
+import {flowToYaml} from "~/lib/utils/flow-to-yaml";
 
 import "@xyflow/react/dist/style.css";
 
@@ -73,12 +74,15 @@ export default function FlowEditor() {
 		testFlow,
 		isTestRunning,
 		testResult,
+		validateFlow,
+		validationResult,
 	} = useFlowStore();
 	
 	const { flows, searchFlows } = useFlowSearch();
 	
 	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+	const [localValidationResult, setLocalValidationResult] = useState(validationResult);
 
 	// Initialize from store only once on mount or when loading a different flow
 	useEffect(() => {
@@ -105,6 +109,26 @@ export default function FlowEditor() {
 		}
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id]); // Only re-sync when flow ID changes
+
+	// Validate flow whenever nodes or edges change
+	useEffect(() => {
+		const flowNodes: FlowNodeData[] = nodes.map(node => node.data as FlowNodeData);
+		const flowEdges: FlowEdgeData[] = edges.map(edge => ({
+			id: edge.id,
+			source: edge.source,
+			target: edge.target,
+			sourceHandle: edge.sourceHandle || undefined,
+			targetHandle: edge.targetHandle || undefined,
+			label: edge.label || undefined,
+			style: edge.style,
+			labelStyle: edge.labelStyle,
+		}));
+		
+		// Update store and validate
+		updateNodesAndEdges(flowNodes, flowEdges);
+		const validation = validateFlow();
+		setLocalValidationResult(validation);
+	}, [nodes, edges, updateNodesAndEdges, validateFlow]);
 
 	const nodeTypes: NodeTypes = useMemo(
 		() => ({
@@ -446,7 +470,11 @@ export default function FlowEditor() {
 							onClick={handleSaveFlow} 
 							variant="default" 
 							size="sm"
-							disabled={isLoading}
+							disabled={isLoading || (localValidationResult && !localValidationResult.isValid)}
+							title={localValidationResult && !localValidationResult.isValid 
+								? localValidationResult.errors.join("\n") 
+								: "Save flow"
+							}
 						>
 							<Save className="mr-2 h-4 w-4" />
 							{isLoading ? "Saving..." : "Save Flow"}
@@ -456,11 +484,25 @@ export default function FlowEditor() {
 						</Button>
 					</div>
 				</div>
-				{error && (
-					<div className="mt-2 text-sm text-destructive">
-						Error: {error}
-					</div>
-				)}
+				{/*{(error || (localValidationResult && !localValidationResult.isValid)) && (*/}
+				{/*	<div className="flex flex-col gap-1 mt-2">*/}
+				{/*		{error && (*/}
+				{/*			<div className="text-sm text-destructive">*/}
+				{/*				Error: {error}*/}
+				{/*			</div>*/}
+				{/*		)}*/}
+				{/*		{localValidationResult && !localValidationResult.isValid && (*/}
+				{/*			<div className="text-sm text-warning">*/}
+				{/*				<strong>Validation Issues:</strong>*/}
+				{/*				<ul className="list-disc list-inside mt-1">*/}
+				{/*					{localValidationResult.errors.map((err, index) => (*/}
+				{/*						<li key={index} className="text-xs">{err}</li>*/}
+				{/*					))}*/}
+				{/*				</ul>*/}
+				{/*			</div>*/}
+				{/*		)}*/}
+				{/*	</div>*/}
+				{/*)}*/}
 			</header>
 
 			<main className="relative flex-1 bg-muted/10">
@@ -468,7 +510,12 @@ export default function FlowEditor() {
 					value={{ addConnectedNode, changeNodeType, getConnectedNodes, deleteNode }}
 				>
 					<ReactFlow
-						nodes={nodes}
+						nodes={nodes.map(node => ({
+							...node,
+							className: localValidationResult?.unterminatedNodes.includes(node.id) 
+								? "ring-2 ring-destructive ring-offset-2" 
+								: "",
+						}))}
 						edges={edges}
 						onNodesChange={onNodesChange}
 						onEdgesChange={onEdgesChange}
@@ -520,9 +567,11 @@ export default function FlowEditor() {
 					</CardHeader>
 					<CardContent>
 						<Tabs defaultValue="instructions" className="w-full">
-							<TabsList className="grid w-full grid-cols-2">
+							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="instructions">Instructions</TabsTrigger>
+								<TabsTrigger value="validation">Validation</TabsTrigger>
 								<TabsTrigger value="test-results">Test Results</TabsTrigger>
+								<TabsTrigger value="yaml-preview">YAML Preview</TabsTrigger>
 							</TabsList>
 							<TabsContent value="instructions" className="space-y-2 text-muted-foreground text-xs">
 								<p>
@@ -540,6 +589,56 @@ export default function FlowEditor() {
 								<p>
 									<strong className="font-medium text-foreground">Deleting Nodes:</strong> Click the X button in the top-right corner of any node (except Start node) to remove it
 								</p>
+							</TabsContent>
+							<TabsContent value="validation" className="space-y-3">
+								{localValidationResult ? (
+									<div className="space-y-2 text-xs">
+										<div className="flex items-center gap-2">
+											<div className={`h-3 w-3 rounded-full ${localValidationResult.isValid ? "bg-green-500" : "bg-red-500"}`} />
+											<Label className="font-medium text-foreground">
+												Flow Status: {localValidationResult.isValid ? "Valid" : "Invalid"}
+											</Label>
+										</div>
+										{localValidationResult.isValid ? (
+											<div className="text-green-600">
+												✓ All paths lead to terminal nodes (return or custom)
+											</div>
+										) : (
+											<div className="space-y-2">
+												<div className="text-destructive font-medium">Issues found:</div>
+												<ul className="space-y-1">
+													{localValidationResult.errors.map((error, index) => (
+														<li key={index} className="text-destructive">
+															• {error}
+														</li>
+													))}
+												</ul>
+												{localValidationResult.unterminatedNodes.length > 0 && (
+													<div className="mt-2">
+														<div className="text-muted-foreground font-medium">Problematic nodes:</div>
+														<div className="text-xs text-muted-foreground">
+															{localValidationResult.unterminatedNodes.join(", ")}
+														</div>
+													</div>
+												)}
+											</div>
+										)}
+										<div className="border-t pt-2 mt-2 text-muted-foreground">
+											<strong>Requirements:</strong>
+											<ul className="mt-1 space-y-1">
+												<li>• Every Start and Policy node must have a Policy ID</li>
+												<li>• Every Start and Policy node must have both TRUE and FALSE paths</li>
+												<li>• All paths must end at a Return or Custom node</li>
+												<li>• No circular references allowed</li>
+												<li>• All nodes must be connected to the flow</li>
+											</ul>
+										</div>
+									</div>
+								) : (
+									<div className="text-muted-foreground text-xs">
+										Flow validation will run automatically as you edit
+									</div>
+								)}
 							</TabsContent>
 							<TabsContent value="test-results" className="space-y-3">
 								{testResult ? (
@@ -595,6 +694,29 @@ export default function FlowEditor() {
 										)}
 									</div>
 								)}
+							</TabsContent>
+							<TabsContent value="yaml-preview" className="space-y-3">
+								<div className="space-y-2">
+									<Label className="text-xs font-medium text-foreground">YAML Representation:</Label>
+									<div className="text-xs text-muted-foreground">
+										This YAML will be sent to the server alongside the flow data when saving
+									</div>
+									<pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">
+										<code>{flowToYaml(
+											nodes.map(node => node.data as FlowNodeData),
+											edges.map(edge => ({
+												id: edge.id,
+												source: edge.source,
+												target: edge.target,
+												sourceHandle: edge.sourceHandle || undefined,
+												targetHandle: edge.targetHandle || undefined,
+												label: edge.label || undefined,
+												style: edge.style,
+												labelStyle: edge.labelStyle,
+											}))
+										)}</code>
+									</pre>
+								</div>
 							</TabsContent>
 						</Tabs>
 					</CardContent>
