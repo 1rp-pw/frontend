@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	addEdge,
 	Background,
 	type Connection,
 	Controls,
@@ -10,10 +9,11 @@ import {
 	type Node,
 	type NodeTypes,
 	ReactFlow,
+	addEdge,
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { FlowContext } from "~/components/flow/flow-context";
 import { CustomNode } from "~/components/flow/nodes/custom-node";
 import { PolicyNode } from "~/components/flow/nodes/policy-node";
@@ -45,6 +45,17 @@ export function FlowEditor({
 	onEdgesChange: onEdgesChangeCallback,
 	validationResult,
 }: FlowEditorProps) {
+	const onNodesChangeRef = useRef(onNodesChangeCallback);
+	const onEdgesChangeRef = useRef(onEdgesChangeCallback);
+
+	// Update refs when callbacks change
+	useEffect(() => {
+		onNodesChangeRef.current = onNodesChangeCallback;
+	}, [onNodesChangeCallback]);
+
+	useEffect(() => {
+		onEdgesChangeRef.current = onEdgesChangeCallback;
+	}, [onEdgesChangeCallback]);
 	const [nodes, setNodes, onNodesChange] = useNodesState(
 		initialNodes.map((node, index) => ({
 			id: node.id,
@@ -54,15 +65,15 @@ export function FlowEditor({
 				y: 100 + Math.floor(index / 3) * 200,
 			},
 			data: node,
-		}))
+		})),
 	);
 
 	const [edges, setEdges, onEdgesChange] = useEdgesState(
-		initialEdges.map(edge => ({
+		initialEdges.map((edge) => ({
 			...edge,
 			style: edge.style || {},
 			labelStyle: edge.labelStyle || {},
-		}))
+		})),
 	);
 
 	const nodeTypes: NodeTypes = useMemo(
@@ -72,7 +83,7 @@ export function FlowEditor({
 			return: ReturnNode,
 			custom: CustomNode,
 		}),
-		[]
+		[],
 	);
 
 	const onConnect = useCallback(
@@ -92,14 +103,14 @@ export function FlowEditor({
 			};
 			setEdges((eds) => addEdge(edge, eds));
 		},
-		[setEdges]
+		[setEdges],
 	);
 
 	const addConnectedNode = useCallback(
 		(
 			sourceNodeId: string,
 			outputType: "true" | "false",
-			targetType: "return" | "policy" | "custom" = "return"
+			targetType: "return" | "policy" | "custom" = "return",
 		) => {
 			const targetId = `${targetType}-${Date.now()}`;
 
@@ -168,7 +179,7 @@ export function FlowEditor({
 			setNodes((nds) => nds.concat(newNode));
 			setEdges((eds) => eds.concat(newEdge));
 		},
-		[nodes, setNodes, setEdges]
+		[nodes, setNodes, setEdges],
 	);
 
 	const changeNodeType = useCallback(
@@ -189,7 +200,7 @@ export function FlowEditor({
 								policyName: "",
 							} satisfies PolicyNodeData;
 							break;
-						case "return":
+						case "return": {
 							// Preserve the return value if converting from another return node
 							const currentReturnValue =
 								node.type === "return"
@@ -202,6 +213,7 @@ export function FlowEditor({
 								returnValue: currentReturnValue,
 							} satisfies ReturnNodeData;
 							break;
+						}
 						case "custom":
 							newData = {
 								id: nodeId,
@@ -217,10 +229,10 @@ export function FlowEditor({
 						type: newType,
 						data: newData,
 					};
-				})
+				}),
 			);
 		},
-		[setNodes]
+		[setNodes],
 	);
 
 	const getConnectedNodes = useCallback(
@@ -236,10 +248,10 @@ export function FlowEditor({
 					}
 					return acc;
 				},
-				{} as { true?: string; false?: string }
+				{} as { true?: string; false?: string },
 			);
 		},
-		[edges]
+		[edges],
 	);
 
 	const deleteNode = useCallback(
@@ -252,24 +264,24 @@ export function FlowEditor({
 
 			// Remove all edges connected to this node
 			setEdges((eds) =>
-				eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId)
+				eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
 			);
 		},
-		[setNodes, setEdges]
+		[setNodes, setEdges],
 	);
 
 	// Notify parent of changes
 	useEffect(() => {
-		if (onNodesChangeCallback) {
+		if (onNodesChangeRef.current) {
 			const flowNodes: FlowNodeData[] = nodes.map(
-				(node) => node.data as FlowNodeData
+				(node) => node.data as FlowNodeData,
 			);
-			onNodesChangeCallback(flowNodes);
+			onNodesChangeRef.current(flowNodes);
 		}
-	}, [nodes, onNodesChangeCallback]);
+	}, [nodes]);
 
 	useEffect(() => {
-		if (onEdgesChangeCallback) {
+		if (onEdgesChangeRef.current) {
 			const flowEdges: FlowEdgeData[] = edges.map((edge) => ({
 				id: edge.id,
 				source: edge.source,
@@ -280,13 +292,18 @@ export function FlowEditor({
 				style: edge.style,
 				labelStyle: edge.labelStyle,
 			}));
-			onEdgesChangeCallback(flowEdges);
+			onEdgesChangeRef.current(flowEdges);
 		}
-	}, [edges, onEdgesChangeCallback]);
+	}, [edges]);
 
 	return (
 		<FlowContext.Provider
-			value={{ addConnectedNode, changeNodeType, getConnectedNodes, deleteNode }}
+			value={{
+				addConnectedNode,
+				changeNodeType,
+				getConnectedNodes,
+				deleteNode,
+			}}
 		>
 			<ReactFlow
 				nodes={nodes.map((node) => ({

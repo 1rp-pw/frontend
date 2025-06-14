@@ -3,7 +3,8 @@ import { env } from "~/env";
 
 export async function POST(request: Request) {
 	try {
-		const { name, description, tags, nodes, edges, yaml, yamlFlat } = await request.json();
+		const { name, description, tags, nodes, edges, yaml, yamlFlat } =
+			await request.json();
 
 		const response = await fetch(`${env.API_SERVER}/flow`, {
 			method: "POST",
@@ -83,6 +84,7 @@ export async function GET(request: NextRequest) {
 		const id = searchParams.get("id");
 		const version = searchParams.get("version");
 
+		// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 		let response;
 		if (version) {
 			response = await fetch(`${env.API_SERVER}/flow/${id}/${version}`);

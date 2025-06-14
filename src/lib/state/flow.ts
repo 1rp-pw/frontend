@@ -1,7 +1,10 @@
 import { create } from "zustand";
-import type { FlowSpec, FlowNodeData, FlowEdgeData } from "~/lib/types";
-import { flowToYaml, flowToFlatYaml } from "~/lib/utils/flow-to-yaml";
-import { validateFlowTermination, type FlowValidationResult } from "~/lib/utils/flow-validation";
+import type { FlowEdgeData, FlowNodeData, FlowSpec } from "~/lib/types";
+import { flowToFlatYaml, flowToYaml } from "~/lib/utils/flow-to-yaml";
+import {
+	type FlowValidationResult,
+	validateFlowTermination,
+} from "~/lib/utils/flow-validation";
 
 export interface FlowTestResult {
 	nodeId: string;
@@ -19,7 +22,7 @@ interface FlowStore {
 	edges: FlowEdgeData[];
 	name: string;
 	id: string | null;
-	
+
 	// Actions
 	setFlowSpec: (spec: FlowSpec) => void;
 	updateFlowSpec: (updates: Partial<FlowSpec>) => void;
@@ -28,7 +31,7 @@ interface FlowStore {
 	setNodes: (nodes: FlowNodeData[]) => void;
 	setEdges: (edges: FlowEdgeData[]) => void;
 	updateNodesAndEdges: (nodes: FlowNodeData[], edges: FlowEdgeData[]) => void;
-	
+
 	// API operations
 	saveFlow: () => Promise<{
 		success: boolean;
@@ -43,7 +46,7 @@ interface FlowStore {
 		success: boolean;
 		error?: string;
 	}>;
-	
+
 	// Test execution
 	testFlow: (testData: object) => Promise<{
 		success: boolean;
@@ -52,17 +55,17 @@ interface FlowStore {
 	}>;
 	isTestRunning: boolean;
 	testResult: FlowTestResult | null;
-	
+
 	// Validation
 	validateFlow: () => FlowValidationResult;
 	validationResult: FlowValidationResult | null;
-	
+
 	// Loading states
 	isLoading: boolean;
 	error: string | null;
 	setLoading: (loading: boolean) => void;
 	setError: (error: string | null) => void;
-	
+
 	// Reset
 	reset: () => void;
 }
@@ -81,7 +84,7 @@ const createDefaultFlowSpec = (): FlowSpec => ({
 			jsonData: '{"example": "data"}',
 			policyId: "",
 			policyName: "",
-		}
+		},
 	],
 	edges: [],
 	version: 1,
@@ -101,11 +104,11 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 		edges: defaultSpec.edges,
 		name: defaultSpec.name,
 		id: defaultSpec.id || null,
-		
+
 		// Test execution state
 		isTestRunning: false,
 		testResult: null,
-		
+
 		// Validation state
 		validationResult: null,
 
@@ -176,7 +179,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 
 		testFlow: async (testData: object) => {
 			const { nodes, edges } = get();
-			
+
 			set({ isTestRunning: true, testResult: null, error: null });
 
 			try {
@@ -204,7 +207,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				}
 
 				const result = await response.json();
-				
+
 				set({
 					isTestRunning: false,
 					testResult: result,
@@ -247,6 +250,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 			});
 
 			try {
+				// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
 				let response;
 
 				if (version) {
@@ -318,8 +322,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				});
 				return {
 					success: false,
-					error:
-						error instanceof Error ? error.message : "Failed to get flow",
+					error: error instanceof Error ? error.message : "Failed to get flow",
 				};
 			}
 		},
@@ -338,7 +341,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					error: "No flow spec available",
 				};
 			}
-			
+
 			// Validate flow before saving
 			const validation = validateFlow();
 			if (!validation.isValid) {
@@ -360,7 +363,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				// Generate YAML representations
 				const yamlNested = flowToYaml(nodes, edges);
 				const yamlFlat = flowToFlatYaml(nodes, edges);
-				
+
 				const apiData = {
 					name: updatedFlowSpec.name,
 					description: updatedFlowSpec.description,
@@ -412,8 +415,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 			} catch (error) {
 				return {
 					success: false,
-					error:
-						error instanceof Error ? error.message : "Failed to save flow",
+					error: error instanceof Error ? error.message : "Failed to save flow",
 				};
 			}
 		},

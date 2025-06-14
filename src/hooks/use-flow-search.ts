@@ -27,7 +27,8 @@ export function useFlowSearch() {
 			const result = await response.json();
 			setFlows(result || []);
 		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : "Failed to search flows";
+			const errorMessage =
+				err instanceof Error ? err.message : "Failed to search flows";
 			setError(errorMessage);
 			setFlows([]);
 		} finally {

@@ -1,12 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { FlowEditor } from "~/components/flow/FlowEditor";
 import { FlowFooter } from "~/components/flow/FlowFooter";
 import { FlowHeader } from "~/components/flow/FlowHeader";
 import { useFlowSearch } from "~/hooks/use-flow-search";
 import { useFlowStore } from "~/lib/state/flow";
-import type { FlowNodeData, FlowEdgeData } from "~/lib/types";
+import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
 import { flowToYaml } from "~/lib/utils/flow-to-yaml";
 
 export default function FlowPage() {
@@ -25,25 +25,24 @@ export default function FlowPage() {
 		testFlow,
 		isTestRunning,
 		testResult,
-		validateFlow,
 		validationResult,
 	} = useFlowStore();
 
 	const { flows, searchFlows } = useFlowSearch();
-	const [localValidationResult, setLocalValidationResult] = useState(validationResult);
-
 	// Handle node and edge changes from the FlowEditor
-	const handleNodesChange = useCallback((newNodes: FlowNodeData[]) => {
-		updateNodesAndEdges(newNodes, storeEdges);
-		const validation = validateFlow();
-		setLocalValidationResult(validation);
-	}, [storeEdges, updateNodesAndEdges, validateFlow]);
+	const handleNodesChange = useCallback(
+		(newNodes: FlowNodeData[]) => {
+			updateNodesAndEdges(newNodes, storeEdges);
+		},
+		[storeEdges, updateNodesAndEdges],
+	);
 
-	const handleEdgesChange = useCallback((newEdges: FlowEdgeData[]) => {
-		updateNodesAndEdges(storeNodes, newEdges);
-		const validation = validateFlow();
-		setLocalValidationResult(validation);
-	}, [storeNodes, updateNodesAndEdges, validateFlow]);
+	const handleEdgesChange = useCallback(
+		(newEdges: FlowEdgeData[]) => {
+			updateNodesAndEdges(storeNodes, newEdges);
+		},
+		[storeNodes, updateNodesAndEdges],
+	);
 
 	// Handler functions for header
 	const handleSaveFlow = useCallback(async () => {
@@ -55,26 +54,29 @@ export default function FlowPage() {
 		}
 	}, [saveFlow]);
 
-	const handleLoadFlow = useCallback(async (flowId: string) => {
-		const result = await getFlow(flowId);
-		if (result.success) {
-			console.log("Flow loaded successfully");
-		} else {
-			console.error("Failed to load flow:", result.error);
-		}
-	}, [getFlow]);
+	const handleLoadFlow = useCallback(
+		async (flowId: string) => {
+			const result = await getFlow(flowId);
+			if (result.success) {
+				console.log("Flow loaded successfully");
+			} else {
+				console.error("Failed to load flow:", result.error);
+			}
+		},
+		[getFlow],
+	);
 
 	const handleTestFlow = useCallback(async () => {
-		// Find start node and get its JSON data
-		const startNode = storeNodes.find(node => node.type === "start");
+		const startNode = storeNodes.find((node) => node.type === "start");
 		if (!startNode) {
 			console.error("No start node found");
 			return;
 		}
 
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 		const startData = startNode as any;
 		let testData: object;
-		
+
 		try {
 			testData = JSON.parse(startData.jsonData || "{}");
 		} catch (error) {
@@ -93,7 +95,8 @@ export default function FlowPage() {
 	// Generate YAML preview
 	const yamlPreview = flowToYaml(storeNodes, storeEdges);
 
-	const isSaveDisabled = isLoading || (localValidationResult && !localValidationResult.isValid);
+	const isSaveDisabled =
+		isLoading || (validationResult && !validationResult.isValid);
 
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
@@ -105,7 +108,7 @@ export default function FlowPage() {
 				isSaveDisabled={isSaveDisabled}
 				isTestRunning={isTestRunning}
 				error={error}
-				validationResult={localValidationResult}
+				validationResult={validationResult}
 				onNameChange={setFlowName}
 				onLoadFlow={handleLoadFlow}
 				onSearchFlows={searchFlows}
@@ -120,12 +123,12 @@ export default function FlowPage() {
 					edges={storeEdges}
 					onNodesChange={handleNodesChange}
 					onEdgesChange={handleEdgesChange}
-					validationResult={localValidationResult}
+					validationResult={validationResult}
 				/>
 			</main>
 
 			<FlowFooter
-				validationResult={localValidationResult}
+				validationResult={validationResult}
 				testResult={testResult}
 				isTestRunning={isTestRunning}
 				yamlPreview={yamlPreview}

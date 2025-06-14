@@ -18,7 +18,7 @@ interface FlowHeaderProps {
 	id: string | null;
 	flows: Array<{ id: string; name: string }>;
 	isLoading: boolean;
-	isSaveDisabled: boolean;
+	isSaveDisabled: boolean | null;
 	isTestRunning: boolean;
 	error: string | null;
 	validationResult: FlowValidationResult | null;
@@ -46,13 +46,15 @@ export function FlowHeader({
 	onSaveFlow,
 	onNewFlow,
 }: FlowHeaderProps) {
+	const saveDisabled = isSaveDisabled === null ? false : isSaveDisabled;
+
 	return (
 		<header className="flex border-border border-b bg-card px-6 py-4">
 			<div className="flex w-full items-center justify-between">
 				<div className="flex items-center gap-4">
 					<h1 className="font-bold text-xl">Flow Editor</h1>
 					<div className="flex items-center gap-2">
-						<Label htmlFor="flow-name" className="text-sm font-medium">
+						<Label htmlFor="flow-name" className="font-medium text-sm">
 							Name:
 						</Label>
 						<Input
@@ -63,13 +65,11 @@ export function FlowHeader({
 							className="w-48 text-sm"
 						/>
 					</div>
-					{id && (
-						<div className="text-sm text-muted-foreground">ID: {id}</div>
-					)}
+					{id && <div className="text-muted-foreground text-sm">ID: {id}</div>}
 				</div>
 				<div className="flex items-center gap-2">
 					<div className="flex items-center gap-2">
-						<Label htmlFor="load-flow" className="text-sm font-medium">
+						<Label htmlFor="load-flow" className="font-medium text-sm">
 							Load:
 						</Label>
 						<Select onValueChange={onLoadFlow}>
@@ -106,7 +106,7 @@ export function FlowHeader({
 						onClick={onSaveFlow}
 						variant="default"
 						size="sm"
-						disabled={isSaveDisabled}
+						disabled={saveDisabled}
 						title={
 							validationResult && !validationResult.isValid
 								? validationResult.errors.join("\n")
@@ -122,7 +122,10 @@ export function FlowHeader({
 				</div>
 			</div>
 			{(error || (validationResult && !validationResult.isValid)) && (
-				<FlowValidationStatus error={error} validationResult={validationResult} />
+				<FlowValidationStatus
+					error={error}
+					validationResult={validationResult}
+				/>
 			)}
 		</header>
 	);
@@ -136,19 +139,20 @@ export function FlowValidationStatus({
 	validationResult: FlowValidationResult | null;
 }) {
 	return (
-		<div className="flex flex-col gap-1 mt-2">
-			{error && (
-				<div className="text-sm text-destructive">Error: {error}</div>
-			)}
+		<div className="mt-2 flex flex-col gap-1">
+			{error && <div className="text-destructive text-sm">Error: {error}</div>}
 			{validationResult && !validationResult.isValid && (
 				<div className="text-sm text-warning">
 					<strong>Validation Issues:</strong>
-					<ul className="list-disc list-inside mt-1">
-						{validationResult.errors.map((err, index) => (
-							<li key={index} className="text-xs">
-								{err}
-							</li>
-						))}
+					<ul className="mt-1 list-inside list-disc">
+						{validationResult.errors.map((err, index) => {
+							const i = index;
+							return (
+								<li key={i} className="text-xs">
+									{err}
+								</li>
+							);
+						})}
 					</ul>
 				</div>
 			)}

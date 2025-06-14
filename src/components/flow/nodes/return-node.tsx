@@ -39,11 +39,13 @@ export function ReturnNode({ data, id }: NodeProps) {
 				<div className="space-y-2">
 					<div>
 						<Label className="font-medium text-xs">Return Value:</Label>
-						<div className={`font-bold text-sm ${returnValue ? "text-green-600" : "text-red-600"}`}>
+						<div
+							className={`font-bold text-sm ${returnValue ? "text-green-600" : "text-red-600"}`}
+						>
 							{returnValue ? "TRUE" : "FALSE"}
 						</div>
 					</div>
-					<div className="text-xs text-muted-foreground">
+					<div className="text-muted-foreground text-xs">
 						This node returns {returnValue ? "true" : "false"} when reached
 					</div>
 				</div>

@@ -127,31 +127,36 @@ function FlowValidation({
 				</div>
 			) : (
 				<div className="space-y-2">
-					<div className="text-destructive font-medium">Issues found:</div>
+					<div className="font-medium text-destructive">Issues found:</div>
 					<ul className="space-y-1">
-						{validationResult.errors.map((error, index) => (
-							<li key={index} className="text-destructive">
-								• {error}
-							</li>
-						))}
+						{validationResult.errors.map((error, index) => {
+							const i = index;
+							return (
+								<li key={i} className="text-destructive">
+									• {error}
+								</li>
+							);
+						})}
 					</ul>
 					{validationResult.unterminatedNodes.length > 0 && (
 						<div className="mt-2">
-							<div className="text-muted-foreground font-medium">
+							<div className="font-medium text-muted-foreground">
 								Problematic nodes:
 							</div>
-							<div className="text-xs text-muted-foreground">
+							<div className="text-muted-foreground text-xs">
 								{validationResult.unterminatedNodes.join(", ")}
 							</div>
 						</div>
 					)}
 				</div>
 			)}
-			<div className="border-t pt-2 mt-2 text-muted-foreground">
+			<div className="mt-2 border-t pt-2 text-muted-foreground">
 				<strong>Requirements:</strong>
 				<ul className="mt-1 space-y-1">
 					<li>• Every Start and Policy node must have a Policy ID</li>
-					<li>• Every Start and Policy node must have both TRUE and FALSE paths</li>
+					<li>
+						• Every Start and Policy node must have both TRUE and FALSE paths
+					</li>
 					<li>• All paths must end at a Return or Custom node</li>
 					<li>• No circular references allowed</li>
 					<li>• All nodes must be connected to the flow</li>
@@ -221,11 +226,14 @@ function FlowTestResults({
 				<div>
 					<Label className="font-medium text-destructive">Errors:</Label>
 					<div className="space-y-1">
-						{testResult.errors.map((error, index) => (
-							<div key={index} className="text-destructive text-xs">
-								• {error}
-							</div>
-						))}
+						{testResult.errors.map((error, index) => {
+							const i = index;
+							return (
+								<div key={i} className="text-destructive text-xs">
+									• {error}
+								</div>
+							);
+						})}
 					</div>
 				</div>
 			)}
@@ -236,10 +244,10 @@ function FlowTestResults({
 function FlowYamlPreview({ yaml }: { yaml: string }) {
 	return (
 		<div className="space-y-2">
-			<Label className="text-xs font-medium text-foreground">
+			<Label className="font-medium text-foreground text-xs">
 				YAML Representation:
 			</Label>
-			<div className="text-xs text-muted-foreground">
+			<div className="text-muted-foreground text-xs">
 				This YAML will be sent to the server alongside the flow data when saving
 			</div>
 			<pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">

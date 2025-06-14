@@ -21,13 +21,12 @@ export function usePolicySearch() {
 			const data = await response.json();
 			let filteredPolicies = data.policies || [];
 
-			if (query && query.trim()) {
+			if (query?.trim()) {
 				filteredPolicies = filteredPolicies.filter(
 					(policy: PolicySpec) =>
 						policy.name.toLowerCase().includes(query.toLowerCase()) ||
 						policy.id.toLowerCase().includes(query.toLowerCase()) ||
-						(policy.description &&
-							policy.description.toLowerCase().includes(query.toLowerCase())),
+						policy.description?.toLowerCase().includes(query.toLowerCase()),
 				);
 			}
 

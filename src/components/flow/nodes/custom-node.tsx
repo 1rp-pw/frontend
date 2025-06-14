@@ -92,7 +92,6 @@ export function CustomNode({ data, id }: NodeProps) {
 						</div>
 					</div>
 				)}
-
 			</CardContent>
 
 			{/* Input handle */}
