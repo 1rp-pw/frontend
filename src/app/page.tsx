@@ -112,52 +112,54 @@ export default function PolicyList() {
 	const getFlows = () => {
 		if (flows.length === 0) return null;
 
-		return (
-			<div>
-				<h2 className="mb-4 font-semibold text-2xl">Flows</h2>
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Name</TableHead>
-							<TableHead>Created</TableHead>
-							<TableHead>Updated</TableHead>
-							<TableHead>Last Published</TableHead>
-							<TableHead>Has Draft In Progress</TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{flows.map((flow: FlowSpec) => (
-							<TableRow key={flow.baseId}>
-								<TableCell>
-									<Link href={`/flow/${flow.baseId}`}>{flow.name}</Link>
-								</TableCell>
-								<TableCell>
-									<Link href={`/flow/${flow.baseId}`}>
-										{formatDate(flow.createdAt)}
-									</Link>
-								</TableCell>
-								<TableCell>
-									<Link href={`/policy/${flow.baseId}`}>
-										{formatDate(flow.updatedAt)}
-									</Link>
-								</TableCell>
-								<TableCell>
-									<Link href={`/flow/${flow.baseId}`}>
-										{isValidPublishDate(flow.lastPublishedAt) &&
-										flow.lastPublishedAt
-											? formatDate(flow.lastPublishedAt)
-											: "Not Published Yet"}
-									</Link>
-								</TableCell>
-								<TableCell>
-									<Link href={`/flow/${flow.baseId}`}>{flow.hasDraft}</Link>
-								</TableCell>
-							</TableRow>
-						))}
-					</TableBody>
-				</Table>
-			</div>
-		);
+		return null
+
+		// return (
+		// 	<div>
+		// 		<h2 className="mb-4 font-semibold text-2xl">Flows</h2>
+		// 		<Table>
+		// 			<TableHeader>
+		// 				<TableRow>
+		// 					<TableHead>Name</TableHead>
+		// 					<TableHead>Created</TableHead>
+		// 					<TableHead>Updated</TableHead>
+		// 					<TableHead>Last Published</TableHead>
+		// 					<TableHead>Has Draft In Progress</TableHead>
+		// 				</TableRow>
+		// 			</TableHeader>
+		// 			<TableBody>
+		// 				{flows.map((flow: FlowSpec) => (
+		// 					<TableRow key={flow.baseId}>
+		// 						<TableCell>
+		// 							<Link href={`/flow/${flow.baseId}`}>{flow.name}</Link>
+		// 						</TableCell>
+		// 						<TableCell>
+		// 							<Link href={`/flow/${flow.baseId}`}>
+		// 								{formatDate(flow.createdAt)}
+		// 							</Link>
+		// 						</TableCell>
+		// 						<TableCell>
+		// 							<Link href={`/policy/${flow.baseId}`}>
+		// 								{formatDate(flow.updatedAt)}
+		// 							</Link>
+		// 						</TableCell>
+		// 						<TableCell>
+		// 							<Link href={`/flow/${flow.baseId}`}>
+		// 								{isValidPublishDate(flow.lastPublishedAt) &&
+		// 								flow.lastPublishedAt
+		// 									? formatDate(flow.lastPublishedAt)
+		// 									: "Not Published Yet"}
+		// 							</Link>
+		// 						</TableCell>
+		// 						<TableCell>
+		// 							<Link href={`/flow/${flow.baseId}`}>{flow.hasDraft}</Link>
+		// 						</TableCell>
+		// 					</TableRow>
+		// 				))}
+		// 			</TableBody>
+		// 		</Table>
+		// 	</div>
+		// );
 	};
 
 	return (

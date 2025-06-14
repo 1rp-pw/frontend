@@ -15,7 +15,7 @@ export function CustomNode({ data, id }: NodeProps) {
 	const [outcome, setOutcome] = useState(
 		(data as unknown as CustomNodeData).outcome || "",
 	);
-	const { changeNodeType, deleteNode } = useFlowContext();
+	const { deleteNode } = useFlowContext();
 
 	const handleSave = () => {
 		(data as unknown as CustomNodeData).outcome = outcome;
@@ -93,28 +93,6 @@ export function CustomNode({ data, id }: NodeProps) {
 					</div>
 				)}
 
-				{/* Node Type Conversion */}
-				<div className="border-border border-t pt-3">
-					<Label className="font-medium text-xs">Change to:</Label>
-					<div className="mt-1 flex gap-1">
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={() => changeNodeType(id, "return")}
-							className="flex-1 text-xs"
-						>
-							Return
-						</Button>
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={() => changeNodeType(id, "policy")}
-							className="flex-1 text-xs"
-						>
-							Policy
-						</Button>
-					</div>
-				</div>
 			</CardContent>
 
 			{/* Input handle */}

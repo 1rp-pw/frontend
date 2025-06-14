@@ -2,36 +2,15 @@
 
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { X } from "lucide-react";
-import { useState } from "react";
 import { useFlowContext } from "~/components/flow/flow-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "~/components/ui/select";
 import type { ReturnNodeData } from "~/lib/types";
 
 export function ReturnNode({ data, id }: NodeProps) {
-	const [isEditing, setIsEditing] = useState(false);
-	const [returnValue, setReturnValue] = useState(
-		(data as unknown as ReturnNodeData).returnValue,
-	);
+	const returnValue = (data as unknown as ReturnNodeData).returnValue;
 	const { changeNodeType, deleteNode } = useFlowContext();
-
-	const handleSave = () => {
-		(data as unknown as ReturnNodeData).returnValue = returnValue;
-		setIsEditing(false);
-	};
-
-	const handleCancel = () => {
-		setReturnValue((data as unknown as ReturnNodeData).returnValue);
-		setIsEditing(false);
-	};
 
 	const bgColor = returnValue
 		? "bg-green-50 border-green-500"
@@ -57,55 +36,17 @@ export function ReturnNode({ data, id }: NodeProps) {
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-3">
-				{!isEditing ? (
-					<div className="space-y-2">
-						<div>
-							<Label className="font-medium text-xs">Return Value:</Label>
-							<div className="font-medium text-gray-600 text-xs">
-								{returnValue ? "TRUE" : "FALSE"}
-							</div>
-						</div>
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={() => setIsEditing(true)}
-							className="w-full"
-						>
-							Edit
-						</Button>
-					</div>
-				) : (
-					<div className="space-y-3">
-						<div>
-							<Label className="font-medium text-xs">Return Value</Label>
-							<Select
-								value={returnValue.toString()}
-								onValueChange={(value) => setReturnValue(value === "true")}
-							>
-								<SelectTrigger className="text-xs">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="true">TRUE</SelectItem>
-									<SelectItem value="false">FALSE</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
-						<div className="flex gap-2">
-							<Button size="sm" onClick={handleSave} className="flex-1">
-								Save
-							</Button>
-							<Button
-								size="sm"
-								variant="outline"
-								onClick={handleCancel}
-								className="flex-1"
-							>
-								Cancel
-							</Button>
+				<div className="space-y-2">
+					<div>
+						<Label className="font-medium text-xs">Return Value:</Label>
+						<div className={`font-bold text-sm ${returnValue ? "text-green-600" : "text-red-600"}`}>
+							{returnValue ? "TRUE" : "FALSE"}
 						</div>
 					</div>
-				)}
+					<div className="text-xs text-muted-foreground">
+						This node returns {returnValue ? "true" : "false"} when reached
+					</div>
+				</div>
 
 				{/* Node Type Conversion */}
 				<div className="border-border border-t pt-3">

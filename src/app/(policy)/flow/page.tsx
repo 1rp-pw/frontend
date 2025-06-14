@@ -77,57 +77,34 @@ export default function FlowEditor() {
 	
 	const { flows, searchFlows } = useFlowSearch();
 	
-	const [nodes, setNodes, onNodesChange] = useNodesState(
-		storeNodes.map(node => ({
-			id: node.id,
-			type: node.type,
-			position: { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 }, // Default positioning
-			data: node,
-		}))
-	);
-	const [edges, setEdges, onEdgesChange] = useEdgesState(
-		storeEdges.map(edge => ({
-			...edge,
-			style: edge.style || {},
-			labelStyle: edge.labelStyle || {},
-		}))
-	);
+	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-	// Sync store changes to React Flow
+	// Initialize from store only once on mount or when loading a different flow
 	useEffect(() => {
-		const flowNodes = storeNodes.map(node => ({
-			id: node.id,
-			type: node.type,
-			position: nodes.find(n => n.id === node.id)?.position || { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 },
-			data: node,
-		}));
-		
-		const flowEdges = storeEdges.map(edge => ({
-			...edge,
-			style: edge.style || {},
-			labelStyle: edge.labelStyle || {},
-		}));
-		
-		setNodes(flowNodes);
-		setEdges(flowEdges);
-	}, [storeNodes, storeEdges, setNodes, setEdges]);
-	
-	// Sync React Flow changes to store
-	useEffect(() => {
-		const flowNodes: FlowNodeData[] = nodes.map(node => node.data as FlowNodeData);
-		const flowEdges: FlowEdgeData[] = edges.map(edge => ({
-			id: edge.id,
-			source: edge.source,
-			target: edge.target,
-			sourceHandle: edge.sourceHandle || undefined,
-			targetHandle: edge.targetHandle || undefined,
-			label: edge.label || undefined,
-			style: edge.style,
-			labelStyle: edge.labelStyle,
-		}));
-		
-		updateNodesAndEdges(flowNodes, flowEdges);
-	}, [nodes, edges, updateNodesAndEdges]);
+		const flowIdChanged = id !== flowSpec?.id;
+		if (flowIdChanged && storeNodes.length > 0) {
+			const flowNodes = storeNodes.map((node, index) => ({
+				id: node.id,
+				type: node.type,
+				position: { 
+					x: 100 + (index % 3) * 350, 
+					y: 100 + Math.floor(index / 3) * 200 
+				},
+				data: node,
+			}));
+			
+			const flowEdges = storeEdges.map(edge => ({
+				...edge,
+				style: edge.style || {},
+				labelStyle: edge.labelStyle || {},
+			}));
+			
+			setNodes(flowNodes);
+			setEdges(flowEdges);
+		}
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [id]); // Only re-sync when flow ID changes
 
 	const nodeTypes: NodeTypes = useMemo(
 		() => ({
@@ -193,7 +170,7 @@ export default function FlowEditor() {
 					data = {
 						id: targetId,
 						type: "return" as const,
-						label: "Return",
+						label: `Return ${outputType === "true" ? "True" : "False"}`,
 						returnValue: outputType === "true",
 					} satisfies ReturnNodeData;
 					break;
@@ -255,11 +232,15 @@ export default function FlowEditor() {
 							} satisfies PolicyNodeData;
 							break;
 						case "return":
+							// Preserve the return value if converting from another return node
+							const currentReturnValue = node.type === "return" 
+								? (node.data as unknown as ReturnNodeData).returnValue 
+								: true;
 							newData = {
 								id: nodeId,
 								type: "return" as const,
-								label: "Return",
-								returnValue: true,
+								label: `Return ${currentReturnValue ? "True" : "False"}`,
+								returnValue: currentReturnValue,
 							} satisfies ReturnNodeData;
 							break;
 						case "custom":
@@ -319,13 +300,31 @@ export default function FlowEditor() {
 	);
 
 	const handleSaveFlow = useCallback(async () => {
-		const result = await saveFlow();
-		if (result.success) {
-			console.log("Flow saved successfully", result.returnId);
-		} else {
-			console.error("Failed to save flow:", result.error);
-		}
-	}, [saveFlow]);
+		// Update store with current React Flow state before saving
+		const flowNodes: FlowNodeData[] = nodes.map(node => node.data as FlowNodeData);
+		const flowEdges: FlowEdgeData[] = edges.map(edge => ({
+			id: edge.id,
+			source: edge.source,
+			target: edge.target,
+			sourceHandle: edge.sourceHandle || undefined,
+			targetHandle: edge.targetHandle || undefined,
+			label: edge.label || undefined,
+			style: edge.style,
+			labelStyle: edge.labelStyle,
+		}));
+		
+		updateNodesAndEdges(flowNodes, flowEdges);
+		
+		// Save after a short delay to ensure state is updated
+		setTimeout(async () => {
+			const result = await saveFlow();
+			if (result.success) {
+				console.log("Flow saved successfully", result.returnId);
+			} else {
+				console.error("Failed to save flow:", result.error);
+			}
+		}, 100);
+	}, [nodes, edges, updateNodesAndEdges, saveFlow]);
 
 	const handleLoadFlow = useCallback(async (flowId: string) => {
 		const result = await getFlow(flowId);
@@ -337,30 +336,48 @@ export default function FlowEditor() {
 	}, [getFlow]);
 
 	const handleTestFlow = useCallback(async () => {
-		// Find start node and get its JSON data
-		const startNode = storeNodes.find(node => node.type === "start");
-		if (!startNode) {
-			console.error("No start node found");
-			return;
-		}
-
-		const startData = startNode as any;
-		let testData: object;
+		// Update store with current React Flow state before testing
+		const flowNodes: FlowNodeData[] = nodes.map(node => node.data as FlowNodeData);
+		const flowEdges: FlowEdgeData[] = edges.map(edge => ({
+			id: edge.id,
+			source: edge.source,
+			target: edge.target,
+			sourceHandle: edge.sourceHandle || undefined,
+			targetHandle: edge.targetHandle || undefined,
+			label: edge.label || undefined,
+			style: edge.style,
+			labelStyle: edge.labelStyle,
+		}));
 		
-		try {
-			testData = JSON.parse(startData.jsonData || "{}");
-		} catch (error) {
-			console.error("Invalid JSON in start node:", error);
-			return;
-		}
+		updateNodesAndEdges(flowNodes, flowEdges);
+		
+		// Test after a short delay to ensure state is updated
+		setTimeout(async () => {
+			// Find start node and get its JSON data
+			const startNode = flowNodes.find(node => node.type === "start");
+			if (!startNode) {
+				console.error("No start node found");
+				return;
+			}
 
-		const result = await testFlow(testData);
-		if (result.success) {
-			console.log("Flow test completed:", result.result);
-		} else {
-			console.error("Flow test failed:", result.error);
-		}
-	}, [storeNodes, testFlow]);
+			const startData = startNode as any;
+			let testData: object;
+			
+			try {
+				testData = JSON.parse(startData.jsonData || "{}");
+			} catch (error) {
+				console.error("Invalid JSON in start node:", error);
+				return;
+			}
+
+			const result = await testFlow(testData);
+			if (result.success) {
+				console.log("Flow test completed:", result.result);
+			} else {
+				console.error("Flow test failed:", result.error);
+			}
+		}, 100);
+	}, [nodes, edges, updateNodesAndEdges, testFlow]);
 
 	const clearFlow = useCallback(() => {
 		reset();
