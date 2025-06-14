@@ -23,10 +23,13 @@ export function validateFlowTermination(
 		if (!adjacencyMap[edge.source]) {
 			adjacencyMap[edge.source] = {};
 		}
+		const sourceMap = adjacencyMap[edge.source];
+		if (!sourceMap) return; // This should never happen due to the check above, but TypeScript needs it
+
 		if (edge.sourceHandle === "true") {
-			adjacencyMap[edge.source].true = edge.target;
+			sourceMap.true = edge.target;
 		} else if (edge.sourceHandle === "false") {
-			adjacencyMap[edge.source].false = edge.target;
+			sourceMap.false = edge.target;
 		}
 	});
 

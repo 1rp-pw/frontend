@@ -68,12 +68,18 @@ export function FlowEditor({
 		})),
 	);
 
-	const [edges, setEdges, onEdgesChange] = useEdgesState(
+	// Create a custom type that ensures style and labelStyle are always defined
+	type RequiredStyleEdge = Edge & {
+		style: Record<string, unknown>;
+		labelStyle: Record<string, unknown>;
+	};
+
+	const [edges, setEdges, onEdgesChange] = useEdgesState<RequiredStyleEdge>(
 		initialEdges.map((edge) => ({
 			...edge,
 			style: edge.style || {},
 			labelStyle: edge.labelStyle || {},
-		})),
+		})) as RequiredStyleEdge[],
 	);
 
 	const nodeTypes: NodeTypes = useMemo(
@@ -88,9 +94,15 @@ export function FlowEditor({
 
 	const onConnect = useCallback(
 		(params: Connection) => {
-			const edge: Edge = {
+			if (!params.source || !params.target) return;
+
+			const edge: RequiredStyleEdge = {
 				...params,
 				id: `edge-${params.source}-${params.target}`,
+				source: params.source,
+				target: params.target,
+				sourceHandle: params.sourceHandle || undefined,
+				targetHandle: params.targetHandle || undefined,
 				label: params.sourceHandle === "true" ? "True" : "False",
 				style: {
 					stroke: params.sourceHandle === "true" ? "#22c55e" : "#ef4444",
@@ -100,7 +112,7 @@ export function FlowEditor({
 					fill: params.sourceHandle === "true" ? "#22c55e" : "#ef4444",
 					fontWeight: 600,
 				},
-			};
+			} as RequiredStyleEdge;
 			setEdges((eds) => addEdge(edge, eds));
 		},
 		[setEdges],
@@ -153,14 +165,14 @@ export function FlowEditor({
 					break;
 			}
 
-			const newNode: Node = {
+			const newNode = {
 				id: targetId,
 				type: targetType,
 				position,
 				data,
 			};
 
-			const newEdge: Edge = {
+			const newEdge: RequiredStyleEdge = {
 				id: `edge-${sourceNodeId}-${targetId}`,
 				source: sourceNodeId,
 				target: targetId,
@@ -174,7 +186,7 @@ export function FlowEditor({
 					fill: outputType === "true" ? "#22c55e" : "#ef4444",
 					fontWeight: 600,
 				},
-			};
+			} as RequiredStyleEdge;
 
 			setNodes((nds) => nds.concat(newNode));
 			setEdges((eds) => eds.concat(newEdge));
@@ -288,9 +300,9 @@ export function FlowEditor({
 				target: edge.target,
 				sourceHandle: edge.sourceHandle || undefined,
 				targetHandle: edge.targetHandle || undefined,
-				label: edge.label || undefined,
-				style: edge.style,
-				labelStyle: edge.labelStyle,
+				label: typeof edge.label === "string" ? edge.label : undefined,
+				style: edge.style as Record<string, unknown>,
+				labelStyle: edge.labelStyle as Record<string, unknown>,
 			}));
 			onEdgesChangeRef.current(flowEdges);
 		}
