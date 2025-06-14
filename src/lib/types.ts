@@ -1,44 +1,3 @@
-export interface NodeData {
-	label?: string;
-
-	// Input node data
-	jsonData?: string;
-	policyId?: string;
-
-	// Action node data
-	actionType?: "return" | "policy" | "custom";
-	outcome?: string;
-	nextPolicyId?: string;
-	customOutcome?: string;
-	parentNodeId?: string;
-	condition?: "true" | "false";
-}
-
-export interface FlowSpec {
-	baseId: string;
-	id: string;
-	name: string;
-	description?: string;
-	createdAt: Date;
-	updatedAt: Date;
-	lastPublishedAt?: Date;
-	actions: FlowActions[];
-	version: number | string;
-	draft: boolean;
-	status: string;
-	hasDraft: boolean;
-}
-
-export interface FlowActions {
-	id: string;
-	type: "return" | "policy" | "custom";
-	outcome: string;
-	nextPolicyId?: string;
-	customOutcome?: string;
-	condition?: "true" | "false";
-	parentNodeId?: string;
-}
-
 export interface PolicySpec {
 	baseId: string;
 	id: string;
@@ -85,3 +44,84 @@ export const PROPERTY_TYPES = [
 ] as const;
 
 export type PropertyType = (typeof PROPERTY_TYPES)[number]["value"];
+
+export interface FlowNodeData extends Record<string, unknown> {
+	id: string;
+	type: "start" | "policy" | "return" | "custom";
+	label: string;
+}
+
+export interface StartNodeData extends FlowNodeData {
+	type: "start";
+	jsonData: string;
+	policyId: string;
+	policyName?: string;
+}
+
+export interface PolicyNodeData extends FlowNodeData {
+	type: "policy";
+	policyId: string;
+	policyName?: string;
+}
+
+export interface ReturnNodeData extends FlowNodeData {
+	type: "return";
+	returnValue: boolean;
+}
+
+export interface CustomNodeData extends FlowNodeData {
+	type: "custom";
+	outcome: string;
+}
+
+export type FlowNode =
+	| StartNodeData
+	| PolicyNodeData
+	| ReturnNodeData
+	| CustomNodeData;
+
+export interface FlowSpec {
+	baseId: string;
+	id: string;
+	name: string;
+	description?: string;
+	tags?: string[];
+	nodes: FlowNodeData[];
+	edges: FlowEdgeData[];
+	version: number | string;
+	draft: boolean;
+	status: string;
+	createdAt: Date;
+	updatedAt: Date;
+	lastPublishedAt?: Date;
+	hasDraft: boolean;
+}
+
+export interface FlowEdgeData {
+	id: string;
+	source: string;
+	target: string;
+	sourceHandle?: string;
+	targetHandle?: string;
+	label?: string;
+	style?: Record<string, unknown>;
+	labelStyle?: Record<string, unknown>;
+}
+
+export interface FlowVersion {
+	version: number;
+	spec: FlowSpec;
+	createdAt: Date;
+	changelog?: string;
+}
+
+export interface FlowWithVersions {
+	id: string;
+	currentVersion: number;
+	versions: FlowVersion[];
+	metadata: {
+		totalVersions: number;
+		createdAt: Date;
+		lastModified: Date;
+	};
+}

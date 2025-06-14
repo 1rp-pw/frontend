@@ -1,195 +1,134 @@
 "use client";
 
-import type React from "react";
+import { useCallback } from "react";
+import { FlowEditor } from "~/components/flow/FlowEditor";
+import { FlowFooter } from "~/components/flow/FlowFooter";
+import { FlowHeader } from "~/components/flow/FlowHeader";
+import { useFlowStore } from "~/lib/state/flow";
+import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
+import { flowToYaml } from "~/lib/utils/flow-to-yaml";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import ReactFlow, {
-	MiniMap,
-	Controls,
-	Background,
-	useNodesState,
-	useEdgesState,
-	addEdge,
-	type Connection,
-	type Edge,
-	type Node,
-	type NodeTypes,
-	type EdgeTypes,
-	Panel,
-} from "reactflow";
-import "reactflow/dist/style.css";
-import { Play, Plus, Save } from "lucide-react";
-import type { ReactFlowInstance } from "reactflow";
-import { CustomEdge } from "~/components/flow/edges/custom";
-import { ActionNode } from "~/components/flow/nodes/action";
-import { InputNode } from "~/components/flow/nodes/input";
-import { Button } from "~/components/ui/button";
-import type { NodeData } from "~/lib/types";
+export default function FlowPage() {
+	const {
+		nodes: storeNodes,
+		edges: storeEdges,
+		name,
+		id,
+		updateNodesAndEdges,
+		setFlowName,
+		saveFlow,
+		getFlow,
+		reset,
+		isLoading,
+		error,
+		testFlow,
+		isTestRunning,
+		testResult,
+		validationResult,
+	} = useFlowStore();
 
-const nodeTypes: NodeTypes = {
-	input: InputNode,
-	action: ActionNode,
-};
-
-const edgeTypes: EdgeTypes = {
-	custom: CustomEdge,
-};
-
-export default function FlowBuilder() {
-	const reactFlowWrapper = useRef<HTMLDivElement>(null);
-	const [nodes, setNodes, onNodesChange] = useNodesState([]);
-	const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-	const [reactFlowInstance, setReactFlowInstance] =
-		useState<ReactFlowInstance | null>(null);
-
-	const onConnect = useCallback(
-		(params: Connection | Edge) =>
-			setEdges((eds) => addEdge({ ...params, type: "custom" }, eds)),
-		[setEdges],
-	);
-
-	const onDragOver = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-		event.preventDefault();
-		event.dataTransfer.dropEffect = "move";
-	}, []);
-
-	const addInputNode = useCallback(() => {
-		if (!reactFlowInstance) return;
-
-		const position = reactFlowInstance.project({
-			x: 100,
-			y: 100,
-		});
-
-		const newNode: Node<NodeData> = {
-			id: `input-${Date.now()}`,
-			type: "input",
-			position,
-			data: {
-				jsonData: '{\n  "key": "value"\n}',
-				policyId: "",
-				label: "Input Node",
-			},
-		};
-
-		setNodes((nds) => nds.concat(newNode));
-	}, [reactFlowInstance, setNodes]);
-
-	const addActionNode = useCallback(
-		(sourceNodeId: string, condition: "true" | "false") => {
-			if (!reactFlowInstance) return;
-
-			const sourceNode = nodes.find((node) => node.id === sourceNodeId);
-			if (!sourceNode) return;
-
-			const position = {
-				x: sourceNode.position.x + (condition === "true" ? -150 : 150),
-				y: sourceNode.position.y + 150,
-			};
-
-			const newNodeId = `action-${Date.now()}`;
-			const newNode: Node<NodeData> = {
-				id: newNodeId,
-				type: "action",
-				position,
-				data: {
-					actionType: "return",
-					outcome: condition,
-					nextPolicyId: "",
-					customOutcome: "",
-					label: `Action Node (${condition})`,
-					parentNodeId: sourceNodeId,
-					condition,
-				},
-			};
-
-			const newEdge: Edge = {
-				id: `edge-${sourceNodeId}-${newNodeId}`,
-				source: sourceNodeId,
-				target: newNodeId,
-				type: "custom",
-				data: { condition },
-				label: condition,
-			};
-
-			setNodes((nds) => nds.concat(newNode));
-			setEdges((eds) => eds.concat(newEdge));
+	// Handle node and edge changes from the FlowEditor
+	const handleNodesChange = useCallback(
+		(newNodes: FlowNodeData[]) => {
+			updateNodesAndEdges(newNodes, storeEdges);
 		},
-		[reactFlowInstance, nodes, setNodes, setEdges],
+		[storeEdges, updateNodesAndEdges],
 	);
 
-	useEffect(() => {
-		const handleAddPath = (event: CustomEvent) => {
-			const { nodeId, condition } = event.detail;
-			addActionNode(nodeId, condition);
-		};
+	const handleEdgesChange = useCallback(
+		(newEdges: FlowEdgeData[]) => {
+			updateNodesAndEdges(storeNodes, newEdges);
+		},
+		[storeNodes, updateNodesAndEdges],
+	);
 
-		window.addEventListener("add-path", handleAddPath as EventListener);
-		return () => {
-			window.removeEventListener("add-path", handleAddPath as EventListener);
-		};
-	}, [addActionNode]);
+	// Handler functions for header
+	const handleSaveFlow = useCallback(async () => {
+		const result = await saveFlow();
+		if (result.success) {
+			console.log("Flow saved successfully", result.returnId);
+		} else {
+			console.error("Failed to save flow:", result.error);
+		}
+	}, [saveFlow]);
 
-	const saveFlow = () => {
-		if (nodes.length === 0) return;
+	const handleLoadFlow = useCallback(
+		async (flowId: string) => {
+			const result = await getFlow(flowId);
+			if (result.success) {
+				console.log("Flow loaded successfully");
+			} else {
+				console.error("Failed to load flow:", result.error);
+			}
+		},
+		[getFlow],
+	);
 
-		const flow = { nodes, edges };
-		localStorage.setItem("flowData", JSON.stringify(flow));
-		alert("Flow saved successfully!");
-	};
+	const handleTestFlow = useCallback(async () => {
+		const startNode = storeNodes.find((node) => node.type === "start");
+		if (!startNode) {
+			console.error("No start node found");
+			return;
+		}
 
-	const runFlow = () => {
-		if (nodes.length === 0) return;
-		alert("Flow execution would start here with the input data");
-		// In a real implementation, this would execute the flow logic
-	};
+		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		const startData = startNode as any;
+		let testData: object;
+
+		try {
+			testData = JSON.parse(startData.jsonData || "{}");
+		} catch (error) {
+			console.error("Invalid JSON in start node:", error);
+			return;
+		}
+
+		const result = await testFlow(testData);
+		if (result.success) {
+			console.log("Flow test completed:", result.result);
+		} else {
+			console.error("Flow test failed:", result.error);
+		}
+	}, [storeNodes, testFlow]);
+
+	// Generate YAML preview
+	const yamlPreview = flowToYaml(storeNodes, storeEdges);
+
+	const isSaveDisabled =
+		isLoading || (validationResult && !validationResult.isValid);
 
 	return (
-		<div className="h-[80vh] w-full rounded-lg border" ref={reactFlowWrapper}>
-			<ReactFlow
-				nodes={nodes}
-				edges={edges}
-				onNodesChange={onNodesChange}
-				onEdgesChange={onEdgesChange}
-				onConnect={onConnect}
-				onInit={setReactFlowInstance}
-				onDragOver={onDragOver}
-				nodeTypes={nodeTypes}
-				edgeTypes={edgeTypes}
-				fitView
-			>
-				<Controls />
-				<MiniMap />
-				<Background />
-				<Panel position="top-right">
-					<div className="flex gap-2">
-						<Button
-							onClick={addInputNode}
-							variant="outline"
-							size="sm"
-							className={"cursor-pointer"}
-						>
-							<Plus className="mr-2 h-4 w-4" /> Add Input
-						</Button>
-						<Button
-							onClick={saveFlow}
-							variant="outline"
-							size="sm"
-							className={"cursor-pointer"}
-						>
-							<Save className="mr-2 h-4 w-4" /> Save
-						</Button>
-						<Button
-							onClick={runFlow}
-							variant="default"
-							size="sm"
-							className={"cursor-pointer"}
-						>
-							<Play className="mr-2 h-4 w-4" /> Run
-						</Button>
-					</div>
-				</Panel>
-			</ReactFlow>
+		<div className="flex h-screen flex-col bg-background text-foreground">
+			<FlowHeader
+				name={name}
+				id={id}
+				isLoading={isLoading}
+				isSaveDisabled={isSaveDisabled}
+				isTestRunning={isTestRunning}
+				error={error}
+				validationResult={validationResult}
+				onNameChange={setFlowName}
+				onLoadFlow={handleLoadFlow}
+				onTestFlow={handleTestFlow}
+				onSaveFlow={handleSaveFlow}
+				onNewFlow={reset}
+			/>
+
+			<main className="relative flex-1 bg-muted/10">
+				<FlowEditor
+					nodes={storeNodes}
+					edges={storeEdges}
+					onNodesChange={handleNodesChange}
+					onEdgesChange={handleEdgesChange}
+					validationResult={validationResult}
+				/>
+			</main>
+
+			<FlowFooter
+				validationResult={validationResult}
+				testResult={testResult}
+				isTestRunning={isTestRunning}
+				yamlPreview={yamlPreview}
+			/>
 		</div>
 	);
 }
