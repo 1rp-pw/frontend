@@ -84,8 +84,44 @@ export interface FlowSpec {
 	baseId: string;
 	id: string;
 	name: string;
+	description?: string;
+	tags?: string[];
+	nodes: FlowNodeData[];
+	edges: FlowEdgeData[];
+	version: number | string;
+	draft: boolean;
+	status: string;
 	createdAt: Date;
 	updatedAt: Date;
 	lastPublishedAt?: Date;
 	hasDraft: boolean;
+}
+
+export interface FlowEdgeData {
+	id: string;
+	source: string;
+	target: string;
+	sourceHandle?: string;
+	targetHandle?: string;
+	label?: string;
+	style?: Record<string, unknown>;
+	labelStyle?: Record<string, unknown>;
+}
+
+export interface FlowVersion {
+	version: number;
+	spec: FlowSpec;
+	createdAt: Date;
+	changelog?: string;
+}
+
+export interface FlowWithVersions {
+	id: string;
+	currentVersion: number;
+	versions: FlowVersion[];
+	metadata: {
+		totalVersions: number;
+		createdAt: Date;
+		lastModified: Date;
+	};
 }

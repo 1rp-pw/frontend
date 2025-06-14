@@ -13,7 +13,8 @@ import {
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
-import {useCallback, useMemo} from "react";
+import {Save, FolderOpen, Play} from "lucide-react";
+import {useCallback, useEffect, useMemo} from "react";
 import {FlowContext} from "~/components/flow/flow-context";
 import {CustomNode} from "~/components/flow/nodes/custom-node";
 import {PolicyNode} from "~/components/flow/nodes/policy-node";
@@ -21,7 +22,19 @@ import {ReturnNode} from "~/components/flow/nodes/return-node";
 import {StartNode} from "~/components/flow/nodes/start-node";
 import {Button} from "~/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "~/components/ui/card";
-import type {CustomNodeData, PolicyNodeData, ReturnNodeData, StartNodeData,} from "~/lib/types";
+import {Input} from "~/components/ui/input";
+import {Label} from "~/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "~/components/ui/select";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "~/components/ui/tabs";
+import {useFlowSearch} from "~/hooks/use-flow-search";
+import {useFlowStore} from "~/lib/state/flow";
+import type {CustomNodeData, PolicyNodeData, ReturnNodeData, StartNodeData, FlowNodeData, FlowEdgeData} from "~/lib/types";
 
 import "@xyflow/react/dist/style.css";
 
@@ -44,8 +57,77 @@ const initialNodes: Node[] = [
 const initialEdges: Edge[] = [];
 
 export default function FlowEditor() {
-	const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-	const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+	const {
+		flowSpec,
+		nodes: storeNodes,
+		edges: storeEdges,
+		name,
+		id,
+		updateNodesAndEdges,
+		setFlowName,
+		saveFlow,
+		getFlow,
+		reset,
+		isLoading,
+		error,
+		testFlow,
+		isTestRunning,
+		testResult,
+	} = useFlowStore();
+	
+	const { flows, searchFlows } = useFlowSearch();
+	
+	const [nodes, setNodes, onNodesChange] = useNodesState(
+		storeNodes.map(node => ({
+			id: node.id,
+			type: node.type,
+			position: { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 }, // Default positioning
+			data: node,
+		}))
+	);
+	const [edges, setEdges, onEdgesChange] = useEdgesState(
+		storeEdges.map(edge => ({
+			...edge,
+			style: edge.style || {},
+			labelStyle: edge.labelStyle || {},
+		}))
+	);
+
+	// Sync store changes to React Flow
+	useEffect(() => {
+		const flowNodes = storeNodes.map(node => ({
+			id: node.id,
+			type: node.type,
+			position: nodes.find(n => n.id === node.id)?.position || { x: Math.random() * 200 + 100, y: Math.random() * 200 + 100 },
+			data: node,
+		}));
+		
+		const flowEdges = storeEdges.map(edge => ({
+			...edge,
+			style: edge.style || {},
+			labelStyle: edge.labelStyle || {},
+		}));
+		
+		setNodes(flowNodes);
+		setEdges(flowEdges);
+	}, [storeNodes, storeEdges, setNodes, setEdges]);
+	
+	// Sync React Flow changes to store
+	useEffect(() => {
+		const flowNodes: FlowNodeData[] = nodes.map(node => node.data as FlowNodeData);
+		const flowEdges: FlowEdgeData[] = edges.map(edge => ({
+			id: edge.id,
+			source: edge.source,
+			target: edge.target,
+			sourceHandle: edge.sourceHandle || undefined,
+			targetHandle: edge.targetHandle || undefined,
+			label: edge.label || undefined,
+			style: edge.style,
+			labelStyle: edge.labelStyle,
+		}));
+		
+		updateNodesAndEdges(flowNodes, flowEdges);
+	}, [nodes, edges, updateNodesAndEdges]);
 
 	const nodeTypes: NodeTypes = useMemo(
 		() => ({
@@ -236,20 +318,132 @@ export default function FlowEditor() {
 		[setNodes, setEdges],
 	);
 
+	const handleSaveFlow = useCallback(async () => {
+		const result = await saveFlow();
+		if (result.success) {
+			console.log("Flow saved successfully", result.returnId);
+		} else {
+			console.error("Failed to save flow:", result.error);
+		}
+	}, [saveFlow]);
+
+	const handleLoadFlow = useCallback(async (flowId: string) => {
+		const result = await getFlow(flowId);
+		if (result.success) {
+			console.log("Flow loaded successfully");
+		} else {
+			console.error("Failed to load flow:", result.error);
+		}
+	}, [getFlow]);
+
+	const handleTestFlow = useCallback(async () => {
+		// Find start node and get its JSON data
+		const startNode = storeNodes.find(node => node.type === "start");
+		if (!startNode) {
+			console.error("No start node found");
+			return;
+		}
+
+		const startData = startNode as any;
+		let testData: object;
+		
+		try {
+			testData = JSON.parse(startData.jsonData || "{}");
+		} catch (error) {
+			console.error("Invalid JSON in start node:", error);
+			return;
+		}
+
+		const result = await testFlow(testData);
+		if (result.success) {
+			console.log("Flow test completed:", result.result);
+		} else {
+			console.error("Flow test failed:", result.error);
+		}
+	}, [storeNodes, testFlow]);
+
 	const clearFlow = useCallback(() => {
-		setNodes(initialNodes);
-		setEdges(initialEdges);
-	}, [setNodes, setEdges]);
+		reset();
+	}, [reset]);
 
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
 			<header className="flex border-border border-b bg-card px-6 py-4">
 				<div className="flex w-full items-center justify-between">
-					<h1 className="font-bold text-xl">Flow Editor</h1>
-					<Button onClick={clearFlow} variant="secondary" size="sm">
-						Clear Flow
-					</Button>
+					<div className="flex items-center gap-4">
+						<h1 className="font-bold text-xl">Flow Editor</h1>
+						<div className="flex items-center gap-2">
+							<Label htmlFor="flow-name" className="text-sm font-medium">Name:</Label>
+							<Input
+								id="flow-name"
+								value={name}
+								onChange={(e) => setFlowName(e.target.value)}
+								placeholder="Flow name"
+								className="w-48 text-sm"
+							/>
+						</div>
+						{id && (
+							<div className="text-sm text-muted-foreground">
+								ID: {id}
+							</div>
+						)}
+					</div>
+					<div className="flex items-center gap-2">
+						<div className="flex items-center gap-2">
+							<Label htmlFor="load-flow" className="text-sm font-medium">Load:</Label>
+							<Select onValueChange={handleLoadFlow}>
+								<SelectTrigger id="load-flow" className="w-48 text-sm">
+									<SelectValue placeholder="Select flow..." />
+								</SelectTrigger>
+								<SelectContent>
+									{flows.map((flow) => (
+										<SelectItem key={flow.id} value={flow.id}>
+											{flow.name}
+										</SelectItem>
+									))}
+									{flows.length === 0 && (
+										<SelectItem value="no-flows" disabled>
+											No flows found
+										</SelectItem>
+									)}
+								</SelectContent>
+							</Select>
+							<Button
+								onClick={() => searchFlows()}
+								variant="outline"
+								size="sm"
+							>
+								<FolderOpen className="h-4 w-4" />
+							</Button>
+						</div>
+						<Button 
+							onClick={handleTestFlow} 
+							variant="outline" 
+							size="sm"
+							disabled={isTestRunning}
+						>
+							<Play className="mr-2 h-4 w-4" />
+							{isTestRunning ? "Testing..." : "Test Flow"}
+						</Button>
+						<Button 
+							onClick={handleSaveFlow} 
+							variant="default" 
+							size="sm"
+							disabled={isLoading}
+						>
+							<Save className="mr-2 h-4 w-4" />
+							{isLoading ? "Saving..." : "Save Flow"}
+						</Button>
+						<Button onClick={clearFlow} variant="secondary" size="sm">
+							New Flow
+						</Button>
+					</div>
 				</div>
+				{error && (
+					<div className="mt-2 text-sm text-destructive">
+						Error: {error}
+					</div>
+				)}
 			</header>
 
 			<main className="relative flex-1 bg-muted/10">
@@ -305,21 +499,87 @@ export default function FlowEditor() {
 			<footer className="border-border border-t bg-card px-6 py-4">
 				<Card className="rounded-lg border-border bg-card shadow-sm">
 					<CardHeader className="pb-3">
-						<CardTitle className="font-medium text-sm">Instructions</CardTitle>
+						<CardTitle className="font-medium text-sm">Flow Designer</CardTitle>
 					</CardHeader>
-					<CardContent className="space-y-2 text-muted-foreground text-xs">
-						<p>
-							<strong className="font-medium text-foreground">Building Flows:</strong> Start with the green Start Node, then click "Add True" or "Add False" to create connected nodes
-						</p>
-						<p>
-							<strong className="font-medium text-foreground">Node Types:</strong> Return nodes (True/False), Policy nodes (execute another policy), or Custom nodes (custom outcome)
-						</p>
-						<p>
-							<strong className="font-medium text-foreground">Converting Nodes:</strong> Use "Change to" buttons on terminal nodes to switch between Return, Policy, and Custom types
-						</p>
-						<p>
-							<strong className="font-medium text-foreground">Policy Search:</strong> Type a Policy ID then click the search icon to browse available policies
-						</p>
+					<CardContent>
+						<Tabs defaultValue="instructions" className="w-full">
+							<TabsList className="grid w-full grid-cols-2">
+								<TabsTrigger value="instructions">Instructions</TabsTrigger>
+								<TabsTrigger value="test-results">Test Results</TabsTrigger>
+							</TabsList>
+							<TabsContent value="instructions" className="space-y-2 text-muted-foreground text-xs">
+								<p>
+									<strong className="font-medium text-foreground">Building Flows:</strong> Start with the green Start Node, then click "Add True" or "Add False" to create connected nodes
+								</p>
+								<p>
+									<strong className="font-medium text-foreground">Node Types:</strong> Return nodes (True/False), Policy nodes (execute another policy), or Custom nodes (custom outcome)
+								</p>
+								<p>
+									<strong className="font-medium text-foreground">Testing:</strong> Enter JSON test data in the Start node, then click "Test Flow" to execute the flow with that data
+								</p>
+								<p>
+									<strong className="font-medium text-foreground">Saving & Loading:</strong> Name your flow and click "Save Flow" to store it. Use the Load dropdown to select and load existing flows
+								</p>
+								<p>
+									<strong className="font-medium text-foreground">Deleting Nodes:</strong> Click the X button in the top-right corner of any node (except Start node) to remove it
+								</p>
+							</TabsContent>
+							<TabsContent value="test-results" className="space-y-3">
+								{testResult ? (
+									<div className="space-y-2 text-xs">
+										<div className="grid grid-cols-2 gap-4">
+											<div>
+												<Label className="font-medium text-foreground">Final Outcome:</Label>
+												<div className={`font-medium ${typeof testResult.finalOutcome === 'boolean' 
+													? (testResult.finalOutcome ? 'text-green-600' : 'text-red-600')
+													: 'text-blue-600'
+												}`}>
+													{typeof testResult.finalOutcome === 'boolean' 
+														? (testResult.finalOutcome ? 'TRUE' : 'FALSE')
+														: testResult.finalOutcome
+													}
+												</div>
+											</div>
+											<div>
+												<Label className="font-medium text-foreground">Execution Path:</Label>
+												<div className="text-muted-foreground">
+													{testResult.executionPath.join(' → ')}
+												</div>
+											</div>
+										</div>
+										<div>
+											<Label className="font-medium text-foreground">Final Node:</Label>
+											<div className="text-muted-foreground">
+												{testResult.nodeName} ({testResult.nodeId})
+											</div>
+										</div>
+										{testResult.errors && testResult.errors.length > 0 && (
+											<div>
+												<Label className="font-medium text-destructive">Errors:</Label>
+												<div className="space-y-1">
+													{testResult.errors.map((error, index) => (
+														<div key={index} className="text-destructive text-xs">
+															• {error}
+														</div>
+													))}
+												</div>
+											</div>
+										)}
+									</div>
+								) : (
+									<div className="text-muted-foreground text-xs">
+										{isTestRunning ? (
+											<div className="flex items-center gap-2">
+												<div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+												Running flow test...
+											</div>
+										) : (
+											"No test results yet. Click 'Test Flow' to execute the flow with the Start node's JSON data."
+										)}
+									</div>
+								)}
+							</TabsContent>
+						</Tabs>
 					</CardContent>
 				</Card>
 			</footer>
