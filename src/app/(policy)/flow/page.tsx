@@ -4,7 +4,6 @@ import { useCallback } from "react";
 import { FlowEditor } from "~/components/flow/FlowEditor";
 import { FlowFooter } from "~/components/flow/FlowFooter";
 import { FlowHeader } from "~/components/flow/FlowHeader";
-import { useFlowSearch } from "~/hooks/use-flow-search";
 import { useFlowStore } from "~/lib/state/flow";
 import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
 import { flowToYaml } from "~/lib/utils/flow-to-yaml";
@@ -28,7 +27,6 @@ export default function FlowPage() {
 		validationResult,
 	} = useFlowStore();
 
-	const { flows, searchFlows } = useFlowSearch();
 	// Handle node and edge changes from the FlowEditor
 	const handleNodesChange = useCallback(
 		(newNodes: FlowNodeData[]) => {
@@ -103,7 +101,6 @@ export default function FlowPage() {
 			<FlowHeader
 				name={name}
 				id={id}
-				flows={flows}
 				isLoading={isLoading}
 				isSaveDisabled={isSaveDisabled}
 				isTestRunning={isTestRunning}
@@ -111,7 +108,6 @@ export default function FlowPage() {
 				validationResult={validationResult}
 				onNameChange={setFlowName}
 				onLoadFlow={handleLoadFlow}
-				onSearchFlows={searchFlows}
 				onTestFlow={handleTestFlow}
 				onSaveFlow={handleSaveFlow}
 				onNewFlow={reset}
