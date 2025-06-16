@@ -15,15 +15,11 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "~/components/ui/select";
-import { Textarea } from "~/components/ui/textarea";
 import { usePolicySearch } from "~/hooks/use-policy-search";
 import type { StartNodeData } from "~/lib/types";
 
 export function StartNode({ data, id }: NodeProps) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [jsonData, setJsonData] = useState(
-		(data as unknown as StartNodeData).jsonData || "{}",
-	);
 	const [policyId, setPolicyId] = useState(
 		(data as unknown as StartNodeData).policyId || "",
 	);
@@ -37,14 +33,12 @@ export function StartNode({ data, id }: NodeProps) {
 
 	const handleSave = () => {
 		// Update node data
-		(data as unknown as StartNodeData).jsonData = jsonData;
 		(data as unknown as StartNodeData).policyId = policyId;
 		(data as unknown as StartNodeData).policyName = policyName;
 		setIsEditing(false);
 	};
 
 	const handleCancel = () => {
-		setJsonData((data as unknown as StartNodeData).jsonData || "{}");
 		setPolicyId((data as unknown as StartNodeData).policyId || "");
 		setPolicyName((data as unknown as StartNodeData).policyName || "");
 		setIsEditing(false);
@@ -62,12 +56,6 @@ export function StartNode({ data, id }: NodeProps) {
 				{!isEditing ? (
 					<div className="space-y-2">
 						<div>
-							<Label className="font-medium text-xs">JSON Data:</Label>
-							<div className="max-h-20 overflow-y-auto rounded-md bg-muted p-2 text-muted-foreground text-xs">
-								{jsonData || "{}"}
-							</div>
-						</div>
-						<div>
 							<Label className="font-medium text-xs">Policy:</Label>
 							<div className="text-muted-foreground text-xs">
 								{policyName || policyId || "Not selected"}
@@ -84,18 +72,6 @@ export function StartNode({ data, id }: NodeProps) {
 					</div>
 				) : (
 					<div className="space-y-3">
-						<div>
-							<Label htmlFor={`json-${id}`} className="font-medium text-xs">
-								JSON Data
-							</Label>
-							<Textarea
-								id={`json-${id}`}
-								value={jsonData}
-								onChange={(e) => setJsonData(e.target.value)}
-								placeholder='{"key": "value"}'
-								className="min-h-20 text-xs"
-							/>
-						</div>
 						<div>
 							<Label className="font-medium text-xs">Policy Selection</Label>
 							<div className="space-y-2">

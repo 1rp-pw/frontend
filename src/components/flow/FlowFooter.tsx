@@ -3,22 +3,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import type { FlowTestResult } from "~/lib/state/flow";
 import type { FlowValidationResult } from "~/lib/utils/flow-validation";
 
 interface FlowFooterProps {
 	validationResult: FlowValidationResult | null;
-	testResult: FlowTestResult | null;
-	isTestRunning: boolean;
 	yamlPreview: string;
 }
 
-export function FlowFooter({
-	validationResult,
-	testResult,
-	isTestRunning,
-	yamlPreview,
-}: FlowFooterProps) {
+export function FlowFooter({ validationResult, yamlPreview }: FlowFooterProps) {
 	return (
 		<footer className="border-border border-t bg-card px-6 py-4">
 			<Card className="rounded-lg border-border bg-card shadow-sm">
@@ -27,10 +19,9 @@ export function FlowFooter({
 				</CardHeader>
 				<CardContent>
 					<Tabs defaultValue="instructions" className="w-full">
-						<TabsList className="grid w-full grid-cols-4">
+						<TabsList className="grid w-full grid-cols-3">
 							<TabsTrigger value="instructions">Instructions</TabsTrigger>
 							<TabsTrigger value="validation">Validation</TabsTrigger>
-							<TabsTrigger value="test-results">Test Results</TabsTrigger>
 							<TabsTrigger value="yaml-preview">YAML Preview</TabsTrigger>
 						</TabsList>
 
@@ -43,13 +34,6 @@ export function FlowFooter({
 
 						<TabsContent value="validation" className="space-y-3">
 							<FlowValidation validationResult={validationResult} />
-						</TabsContent>
-
-						<TabsContent value="test-results" className="space-y-3">
-							<FlowTestResults
-								testResult={testResult}
-								isTestRunning={isTestRunning}
-							/>
 						</TabsContent>
 
 						<TabsContent value="yaml-preview" className="space-y-3">
@@ -162,81 +146,6 @@ function FlowValidation({
 					<li>• All nodes must be connected to the flow</li>
 				</ul>
 			</div>
-		</div>
-	);
-}
-
-function FlowTestResults({
-	testResult,
-	isTestRunning,
-}: {
-	testResult: FlowTestResult | null;
-	isTestRunning: boolean;
-}) {
-	if (!testResult) {
-		return (
-			<div className="text-muted-foreground text-xs">
-				{isTestRunning ? (
-					<div className="flex items-center gap-2">
-						<div className="h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-						Running flow test...
-					</div>
-				) : (
-					"No test results yet. Click 'Test Flow' to execute the flow with the Start node's JSON data."
-				)}
-			</div>
-		);
-	}
-
-	return (
-		<div className="space-y-2 text-xs">
-			<div className="grid grid-cols-2 gap-4">
-				<div>
-					<Label className="font-medium text-foreground">Final Outcome:</Label>
-					<div
-						className={`font-medium ${
-							typeof testResult.finalOutcome === "boolean"
-								? testResult.finalOutcome
-									? "text-green-600"
-									: "text-red-600"
-								: "text-blue-600"
-						}`}
-					>
-						{typeof testResult.finalOutcome === "boolean"
-							? testResult.finalOutcome
-								? "TRUE"
-								: "FALSE"
-							: testResult.finalOutcome}
-					</div>
-				</div>
-				<div>
-					<Label className="font-medium text-foreground">Execution Path:</Label>
-					<div className="text-muted-foreground">
-						{testResult.executionPath.join(" → ")}
-					</div>
-				</div>
-			</div>
-			<div>
-				<Label className="font-medium text-foreground">Final Node:</Label>
-				<div className="text-muted-foreground">
-					{testResult.nodeName} ({testResult.nodeId})
-				</div>
-			</div>
-			{testResult.errors && testResult.errors.length > 0 && (
-				<div>
-					<Label className="font-medium text-destructive">Errors:</Label>
-					<div className="space-y-1">
-						{testResult.errors.map((error, index) => {
-							const i = index;
-							return (
-								<div key={i} className="text-destructive text-xs">
-									• {error}
-								</div>
-							);
-						})}
-					</div>
-				</div>
-			)}
 		</div>
 	);
 }

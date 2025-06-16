@@ -331,6 +331,7 @@ export function FlowEditor({
 				nodeTypes={nodeTypes}
 				fitView
 				attributionPosition="top-right"
+				colorMode={"system"}
 			>
 				<Background />
 				<Controls />

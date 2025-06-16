@@ -1,5 +1,10 @@
 import { create } from "zustand";
-import type { FlowEdgeData, FlowNodeData, FlowSpec } from "~/lib/types";
+import type {
+	FlowEdgeData,
+	FlowNodeData,
+	FlowSpec,
+	FlowTest,
+} from "~/lib/types";
 import { flowToFlatYaml, flowToYaml } from "~/lib/utils/flow-to-yaml";
 import {
 	type FlowValidationResult,
@@ -13,6 +18,13 @@ export interface FlowTestResult {
 	executionPath: string[];
 	finalOutcome: boolean | string;
 	errors?: string[];
+	nodeResponses?: Array<{
+		result: boolean | string;
+		trace?: unknown;
+		rule?: string[];
+		data?: unknown;
+		error?: string | null;
+	}>;
 }
 
 interface FlowStore {
@@ -47,14 +59,31 @@ interface FlowStore {
 		error?: string;
 	}>;
 
+	// Test management
+	tests: FlowTest[];
+	currentTest: FlowTest | null;
+	createTest: () => void;
+	saveTest: (
+		data: string,
+		name: string,
+		expectedOutcome?: string | boolean,
+	) => void;
+	selectTest: (test: FlowTest | null) => void;
+	deleteTest: (testId: string) => void;
+	updateTestResult: (testId: string, result: FlowTestResult) => void;
+
 	// Test execution
 	testFlow: (testData: object) => Promise<{
 		success: boolean;
 		result?: FlowTestResult;
 		error?: string;
 	}>;
+	runTest: (testId: string) => Promise<void>;
+	runAllTests: () => Promise<void>;
 	isTestRunning: boolean;
 	testResult: FlowTestResult | null;
+	testData: string;
+	setTestData: (data: string) => void;
 
 	// Validation
 	validateFlow: () => FlowValidationResult;
@@ -81,7 +110,6 @@ const createDefaultFlowSpec = (): FlowSpec => ({
 			id: "start-1",
 			type: "start" as const,
 			label: "Start",
-			jsonData: '{"example": "data"}',
 			policyId: "",
 			policyName: "",
 		},
@@ -95,6 +123,17 @@ const createDefaultFlowSpec = (): FlowSpec => ({
 	hasDraft: true,
 });
 
+const defaultTests: FlowTest[] = [
+	{
+		id: "default-1",
+		name: "Test 1",
+		data: '{\n  "example": "data",\n  "value": 123\n}',
+		expectedOutcome: true,
+		created: true,
+		createdAt: new Date(),
+	},
+];
+
 export const useFlowStore = create<FlowStore>((set, get) => {
 	const defaultSpec = createDefaultFlowSpec();
 
@@ -105,9 +144,14 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 		name: defaultSpec.name,
 		id: defaultSpec.id || null,
 
+		// Test management state
+		tests: defaultTests,
+		currentTest: defaultTests[0] || null,
+
 		// Test execution state
 		isTestRunning: false,
 		testResult: null,
+		testData: defaultTests[0]?.data || '{\n  "example": "data"\n}',
 
 		// Validation state
 		validationResult: null,
@@ -169,6 +213,113 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 		error: null,
 		setLoading: (loading) => set({ isLoading: loading }),
 		setError: (error) => set({ error }),
+		setTestData: (data) => set({ testData: data }),
+
+		// Test management
+		createTest: () => {
+			const { tests } = get();
+			const newTest: FlowTest = {
+				id: `test-${Date.now()}`,
+				name: `Test ${tests.length + 1}`,
+				data: '{\n  "example": "data"\n}',
+				expectedOutcome: true,
+				created: false,
+				createdAt: new Date(),
+			};
+			set({ currentTest: newTest, testData: newTest.data });
+		},
+
+		saveTest: (data, name, expectedOutcome = true) => {
+			const { currentTest, tests } = get();
+			if (!currentTest) return;
+
+			let updatedTest: FlowTest;
+
+			if (currentTest.created) {
+				// Update existing test
+				updatedTest = {
+					...currentTest,
+					data,
+					name,
+					expectedOutcome,
+				};
+				const updatedTests = tests.map((t) =>
+					t.id === currentTest.id ? updatedTest : t,
+				);
+				set({ tests: updatedTests, currentTest: updatedTest });
+			} else {
+				// Create new test
+				updatedTest = {
+					...currentTest,
+					data,
+					name,
+					expectedOutcome,
+					created: true,
+				};
+				set({
+					tests: [...tests, updatedTest],
+					currentTest: updatedTest,
+				});
+			}
+		},
+
+		selectTest: (test) => {
+			set({
+				currentTest: test,
+				testData: test?.data || '{\n  "example": "data"\n}',
+			});
+		},
+
+		deleteTest: (testId) => {
+			const { tests, currentTest } = get();
+			const updatedTests = tests.filter((t) => t.id !== testId);
+			const newCurrentTest =
+				currentTest?.id === testId ? updatedTests[0] || null : currentTest;
+			set({
+				tests: updatedTests,
+				currentTest: newCurrentTest,
+				testData: newCurrentTest?.data || '{\n  "example": "data"\n}',
+			});
+		},
+
+		updateTestResult: (testId, result) => {
+			const { tests } = get();
+			const updatedTests = tests.map((test) => {
+				if (test.id === testId) {
+					return {
+						...test,
+						lastRun: new Date(),
+						result,
+					};
+				}
+				return test;
+			});
+			set({ tests: updatedTests });
+		},
+
+		runTest: async (testId) => {
+			const { tests, testFlow } = get();
+			const test = tests.find((t) => t.id === testId);
+			if (!test) return;
+
+			try {
+				const testData = JSON.parse(test.data);
+				const result = await testFlow(testData);
+				if (result.success && result.result) {
+					get().updateTestResult(testId, result.result);
+				}
+			} catch (error) {
+				console.error("Failed to run test:", error);
+			}
+		},
+
+		runAllTests: async () => {
+			const { tests, runTest } = get();
+			const promises = tests
+				.filter((t) => t.created)
+				.map((test) => runTest(test.id));
+			await Promise.all(promises);
+		},
 
 		validateFlow: () => {
 			const { nodes, edges } = get();
@@ -428,10 +579,13 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				edges: defaultSpec.edges,
 				name: defaultSpec.name,
 				id: defaultSpec.id || null,
+				tests: defaultTests,
+				currentTest: defaultTests[0] || null,
 				isLoading: false,
 				error: null,
 				isTestRunning: false,
 				testResult: null,
+				testData: defaultTests[0]?.data || '{\n  "example": "data"\n}',
 				validationResult: null,
 			});
 		},
