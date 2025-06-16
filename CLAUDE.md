@@ -62,7 +62,7 @@ interface Test {
 - `/flow` - Visual workflow builder using ReactFlow
 - `/policy/[policy_id]` - Individual policy view/edit
 - `/api/policy` - Policy CRUD API proxy
-- `/api/test` - Policy test execution API
+- `/api/policy/test` - Policy test execution API
 
 ### 4-Panel IDE Layout (`/policy`)
 1. **Policy Text Editor** (top-left) - DSL rule editing with syntax highlighting

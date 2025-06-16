@@ -66,41 +66,7 @@ export function FlowHeader({
 					</Button>
 				</div>
 			</div>
-			{(error || (validationResult && !validationResult.isValid)) && (
-				<FlowValidationStatus
-					error={error}
-					validationResult={validationResult}
-				/>
-			)}
 		</header>
 	);
 }
 
-export function FlowValidationStatus({
-	error,
-	validationResult,
-}: {
-	error: string | null;
-	validationResult: FlowValidationResult | null;
-}) {
-	return (
-		<div className="mt-2 flex flex-col gap-1">
-			{error && <div className="text-destructive text-sm">Error: {error}</div>}
-			{validationResult && !validationResult.isValid && (
-				<div className="text-sm text-warning">
-					<strong>Validation Issues:</strong>
-					<ul className="mt-1 list-inside list-disc">
-						{validationResult.errors.map((err, index) => {
-							const i = index;
-							return (
-								<li key={i} className="text-xs">
-									{err}
-								</li>
-							);
-						})}
-					</ul>
-				</div>
-			)}
-		</div>
-	);
-}

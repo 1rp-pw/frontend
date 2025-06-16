@@ -967,7 +967,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					rule,
 				};
 
-				const response = await fetch("/api/test", {
+				const response = await fetch("/api/policy/test", {
 					method: "POST",
 					body: JSON.stringify(dataSet),
 				});

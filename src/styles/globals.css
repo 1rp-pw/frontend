@@ -135,3 +135,9 @@
 .react-flow__minimap {
 	background-color: var(--background) !important;
 }
+.react-flow__controls-button {
+	background-color: var(--background) !important;
+}
+.react-flow__attribution {
+	display: none;
+}
