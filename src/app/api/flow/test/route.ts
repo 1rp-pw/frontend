@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
+import { env } from "~/env";
 import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
 import { flowToYaml } from "~/lib/utils/flow-to-yaml";
-import { env } from "~/env";
 
 interface FlowTestRequest {
 	testData: object;
 	nodes: FlowNodeData[];
 	edges: FlowEdgeData[];
+}
+
+interface ServerFlowTestResponse {
+	result: boolean | string;
+	nodeResponse?: Array<{
+		result: boolean | string;
+		trace?: unknown;
+		rule?: string[];
+		data?: unknown;
+		error?: string | null;
+	}>;
 }
 
 interface FlowTestResult {
@@ -16,6 +27,13 @@ interface FlowTestResult {
 	executionPath: string[];
 	finalOutcome: boolean | string;
 	errors?: string[];
+	nodeResponses?: Array<{
+		result: boolean | string;
+		trace?: unknown;
+		rule?: string[];
+		data?: unknown;
+		error?: string | null;
+	}>;
 }
 
 export async function POST(request: Request) {
@@ -46,6 +64,8 @@ export async function POST(request: Request) {
 			cache: "no-store",
 		});
 
+		console.info("req", JSON.stringify({ data: testData, flow: yaml }));
+
 		if (!response.ok) {
 			const errorData = await response.json().catch(() => ({}));
 			return NextResponse.json(
@@ -54,8 +74,23 @@ export async function POST(request: Request) {
 			);
 		}
 
-		const result = await response.json();
-		return NextResponse.json(result, { status: 200 });
+		const serverResult: ServerFlowTestResponse = await response.json();
+
+		// Map server response to our FlowTestResult format
+		const mappedResult: FlowTestResult = {
+			nodeId: startNode.id,
+			nodeName: startNode.label || "Start",
+			result: serverResult.result,
+			executionPath: [], // Could be extracted from nodeResponse if needed
+			finalOutcome: serverResult.result,
+			errors:
+				serverResult.nodeResponse
+					?.filter((nr) => nr.error)
+					.map((nr) => nr.error as string) || [],
+			nodeResponses: serverResult.nodeResponse || [],
+		};
+
+		return NextResponse.json(mappedResult, { status: 200 });
 	} catch (error) {
 		console.error("Error testing flow:", error);
 		return NextResponse.json({ error: "Failed to test flow" }, { status: 500 });

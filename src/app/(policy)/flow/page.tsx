@@ -1,9 +1,16 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { FlowEditor } from "~/components/flow/FlowEditor";
 import { FlowFooter } from "~/components/flow/FlowFooter";
 import { FlowHeader } from "~/components/flow/FlowHeader";
+import { FlowTestList } from "~/components/flow/FlowTestList";
+import { FlowTestPanel } from "~/components/flow/FlowTestPanel";
+import {
+	ResizableHandle,
+	ResizablePanel,
+	ResizablePanelGroup,
+} from "~/components/ui/resizable";
 import { useFlowStore } from "~/lib/state/flow";
 import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
 import { flowToYaml } from "~/lib/utils/flow-to-yaml";
@@ -21,25 +28,44 @@ export default function FlowPage() {
 		reset,
 		isLoading,
 		error,
-		testFlow,
 		isTestRunning,
 		testResult,
+		testData,
+		setTestData,
+		tests,
+		currentTest,
+		createTest,
+		saveTest,
+		selectTest,
+		deleteTest,
+		runTest,
+		runAllTests,
 		validationResult,
+		validateFlow,
 	} = useFlowStore();
+
+	// Run initial validation when component loads
+	useEffect(() => {
+		validateFlow();
+	}, [validateFlow]);
 
 	// Handle node and edge changes from the FlowEditor
 	const handleNodesChange = useCallback(
 		(newNodes: FlowNodeData[]) => {
 			updateNodesAndEdges(newNodes, storeEdges);
+			// Trigger validation after nodes change
+			setTimeout(() => validateFlow(), 0);
 		},
-		[storeEdges, updateNodesAndEdges],
+		[storeEdges, updateNodesAndEdges, validateFlow],
 	);
 
 	const handleEdgesChange = useCallback(
 		(newEdges: FlowEdgeData[]) => {
 			updateNodesAndEdges(storeNodes, newEdges);
+			// Trigger validation after edges change
+			setTimeout(() => validateFlow(), 0);
 		},
-		[storeNodes, updateNodesAndEdges],
+		[storeNodes, updateNodesAndEdges, validateFlow],
 	);
 
 	// Handler functions for header
@@ -64,31 +90,11 @@ export default function FlowPage() {
 		[getFlow],
 	);
 
-	const handleTestFlow = useCallback(async () => {
-		const startNode = storeNodes.find((node) => node.type === "start");
-		if (!startNode) {
-			console.error("No start node found");
-			return;
+	const handleRunCurrentTest = useCallback(async () => {
+		if (currentTest) {
+			await runTest(currentTest.id);
 		}
-
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-		const startData = startNode as any;
-		let testData: object;
-
-		try {
-			testData = JSON.parse(startData.jsonData || "{}");
-		} catch (error) {
-			console.error("Invalid JSON in start node:", error);
-			return;
-		}
-
-		const result = await testFlow(testData);
-		if (result.success) {
-			console.log("Flow test completed:", result.result);
-		} else {
-			console.error("Flow test failed:", result.error);
-		}
-	}, [storeNodes, testFlow]);
+	}, [currentTest, runTest]);
 
 	// Generate YAML preview
 	const yamlPreview = flowToYaml(storeNodes, storeEdges);
@@ -103,30 +109,60 @@ export default function FlowPage() {
 				id={id}
 				isLoading={isLoading}
 				isSaveDisabled={isSaveDisabled}
-				isTestRunning={isTestRunning}
 				error={error}
 				validationResult={validationResult}
 				onNameChange={setFlowName}
 				onLoadFlow={handleLoadFlow}
-				onTestFlow={handleTestFlow}
 				onSaveFlow={handleSaveFlow}
 				onNewFlow={reset}
 			/>
 
 			<main className="relative flex-1 bg-muted/10">
-				<FlowEditor
-					nodes={storeNodes}
-					edges={storeEdges}
-					onNodesChange={handleNodesChange}
-					onEdgesChange={handleEdgesChange}
-					validationResult={validationResult}
-				/>
+				<ResizablePanelGroup direction="horizontal">
+					<ResizablePanel defaultSize={70} minSize={50}>
+						<FlowEditor
+							nodes={storeNodes}
+							edges={storeEdges}
+							onNodesChange={handleNodesChange}
+							onEdgesChange={handleEdgesChange}
+							validationResult={validationResult}
+						/>
+					</ResizablePanel>
+					<ResizableHandle withHandle />
+					<ResizablePanel defaultSize={30} minSize={25} maxSize={45}>
+						<ResizablePanelGroup direction="vertical">
+							<ResizablePanel defaultSize={40} minSize={30}>
+								<FlowTestList
+									tests={tests}
+									currentTest={currentTest}
+									onCreateTest={createTest}
+									onSelectTest={selectTest}
+									onDeleteTest={deleteTest}
+									onRunTest={runTest}
+									onRunAllTests={runAllTests}
+									isRunning={isTestRunning}
+								/>
+							</ResizablePanel>
+							<ResizableHandle withHandle />
+							<ResizablePanel defaultSize={60} minSize={40}>
+								<FlowTestPanel
+									testData={testData}
+									currentTest={currentTest}
+									isRunning={isTestRunning}
+									testResult={testResult}
+									error={error}
+									onTestDataChange={setTestData}
+									onRunTest={handleRunCurrentTest}
+									onSaveTest={saveTest}
+								/>
+							</ResizablePanel>
+						</ResizablePanelGroup>
+					</ResizablePanel>
+				</ResizablePanelGroup>
 			</main>
 
 			<FlowFooter
 				validationResult={validationResult}
-				testResult={testResult}
-				isTestRunning={isTestRunning}
 				yamlPreview={yamlPreview}
 			/>
 		</div>

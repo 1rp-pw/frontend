@@ -1,6 +1,6 @@
 "use client";
 
-import { Play, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import type { FlowValidationResult } from "~/lib/utils/flow-validation";
 
@@ -9,12 +9,10 @@ interface FlowHeaderProps {
 	id: string | null;
 	isLoading: boolean;
 	isSaveDisabled: boolean | null;
-	isTestRunning: boolean;
 	error: string | null;
 	validationResult: FlowValidationResult | null;
 	onNameChange: (name: string) => void;
 	onLoadFlow: (flowId: string) => void;
-	onTestFlow: () => void;
 	onSaveFlow: () => void;
 	onNewFlow: () => void;
 }
@@ -22,10 +20,8 @@ interface FlowHeaderProps {
 export function FlowHeader({
 	isLoading,
 	isSaveDisabled,
-	isTestRunning,
 	error,
 	validationResult,
-	onTestFlow,
 	onSaveFlow,
 	onNewFlow,
 }: FlowHeaderProps) {
@@ -38,15 +34,6 @@ export function FlowHeader({
 					<h1 className="font-bold text-xl">Flow Editor</h1>
 				</div>
 				<div className="flex items-center gap-2">
-					<Button
-						onClick={onTestFlow}
-						variant="outline"
-						size="sm"
-						disabled={isTestRunning}
-					>
-						<Play className="mr-2 h-4 w-4" />
-						{isTestRunning ? "Testing..." : "Test Flow"}
-					</Button>
 					<Button
 						onClick={onSaveFlow}
 						variant="default"
@@ -69,4 +56,3 @@ export function FlowHeader({
 		</header>
 	);
 }
-

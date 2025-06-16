@@ -53,7 +53,6 @@ export interface FlowNodeData extends Record<string, unknown> {
 
 export interface StartNodeData extends FlowNodeData {
 	type: "start";
-	jsonData: string;
 	policyId: string;
 	policyName?: string;
 }
@@ -123,5 +122,30 @@ export interface FlowWithVersions {
 		totalVersions: number;
 		createdAt: Date;
 		lastModified: Date;
+	};
+}
+
+export interface FlowTest {
+	id: string;
+	name: string;
+	data: string; // JSON string
+	expectedOutcome: string | boolean; // Can be true, false, or custom string like "beep"
+	created: boolean;
+	createdAt: Date;
+	lastRun?: Date;
+	result?: {
+		nodeId: string;
+		nodeName: string;
+		result: boolean | string;
+		executionPath: string[];
+		finalOutcome: boolean | string;
+		errors?: string[];
+		nodeResponses?: Array<{
+			result: boolean | string;
+			trace?: unknown;
+			rule?: string[];
+			data?: unknown;
+			error?: string | null;
+		}>;
 	};
 }
