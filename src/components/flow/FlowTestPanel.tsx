@@ -6,8 +6,8 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { JsonEditor } from "~/components/ui/json-editor";
 import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
 import type { FlowTest } from "~/lib/types";
 import { cn } from "~/lib/utils";
 
@@ -16,11 +16,20 @@ interface FlowTestPanelProps {
 	currentTest: FlowTest | null;
 	isRunning: boolean;
 	testResult: {
-		nodeId: string;
-		nodeName: string;
 		result: boolean | string;
-		executionPath: string[];
 		finalOutcome: boolean | string;
+		executionPath: string[];
+		nodeResponses: Array<{
+			nodeId: string;
+			nodeType: string;
+			response: {
+				result: boolean | string;
+				trace?: unknown;
+				rule?: string[];
+				data?: unknown;
+				error?: string | null;
+			};
+		}>;
 		errors?: string[];
 	} | null;
 	error: string | null;
@@ -159,21 +168,12 @@ export function FlowTestPanel({
 					<Label htmlFor="test-data" className="mb-2 block shrink-0">
 						JSON Test Data
 					</Label>
-					<Textarea
-						id="test-data"
+					<JsonEditor
 						value={testData}
-						onChange={(e) => handleDataChange(e.target.value)}
+						onChange={handleDataChange}
 						placeholder='{\n  "example": "data",\n  "nested": {\n    "value": 123\n  }\n}'
-						className={cn(
-							"min-h-32 flex-1 font-mono text-sm",
-							jsonError && "border-destructive focus:ring-destructive",
-						)}
+						className="flex-1"
 					/>
-					{jsonError && (
-						<p className="mt-2 shrink-0 text-destructive text-sm">
-							{jsonError}
-						</p>
-					)}
 				</div>
 
 				{error && (
@@ -181,93 +181,6 @@ export function FlowTestPanel({
 						<p className="text-destructive text-sm">{error}</p>
 					</div>
 				)}
-
-				{/*{testResult && (*/}
-				{/*	<div className="max-h-64 shrink-0 space-y-3 overflow-y-auto rounded-md border p-4">*/}
-				{/*		<div className="flex items-center justify-between">*/}
-				{/*			<h4 className="font-semibold">Test Result</h4>*/}
-				{/*			{(() => {*/}
-				{/*				const expectedOutcome = currentTest?.expectedOutcome;*/}
-				{/*				const actualOutcome = testResult.finalOutcome;*/}
-				{/*				const testPassed = expectedOutcome === actualOutcome;*/}
-
-				{/*				return (*/}
-				{/*					<Badge variant={testPassed ? "default" : "destructive"}>*/}
-				{/*						{testPassed ? (*/}
-				{/*							<>*/}
-				{/*								<CheckCircle className="mr-1 h-3 w-3" />*/}
-				{/*								Passed*/}
-				{/*							</>*/}
-				{/*						) : (*/}
-				{/*							<>*/}
-				{/*								<XCircle className="mr-1 h-3 w-3" />*/}
-				{/*								Failed*/}
-				{/*							</>*/}
-				{/*						)}*/}
-				{/*					</Badge>*/}
-				{/*				);*/}
-				{/*			})()}*/}
-				{/*		</div>*/}
-
-				{/*		<div className="space-y-2">*/}
-				{/*			<div className="grid grid-cols-2 gap-4">*/}
-				{/*				<div>*/}
-				{/*					<p className="font-medium text-muted-foreground text-sm">*/}
-				{/*						Expected*/}
-				{/*					</p>*/}
-				{/*					<p className="font-mono text-sm">*/}
-				{/*						{currentTest?.expectedOutcome?.toString() || "N/A"}*/}
-				{/*					</p>*/}
-				{/*				</div>*/}
-				{/*				<div>*/}
-				{/*					<p className="font-medium text-muted-foreground text-sm">*/}
-				{/*						Actual*/}
-				{/*					</p>*/}
-				{/*					<p className="font-mono text-sm">*/}
-				{/*						{testResult.finalOutcome?.toString()}*/}
-				{/*					</p>*/}
-				{/*				</div>*/}
-				{/*			</div>*/}
-
-				{/*			<div>*/}
-				{/*				<p className="font-medium text-muted-foreground text-sm">*/}
-				{/*					Final Node*/}
-				{/*				</p>*/}
-				{/*				<p className="text-sm">*/}
-				{/*					{testResult.nodeName} ({testResult.nodeId})*/}
-				{/*				</p>*/}
-				{/*			</div>*/}
-
-				{/*			<div>*/}
-				{/*				<p className="font-medium text-muted-foreground text-sm">*/}
-				{/*					Execution Path*/}
-				{/*				</p>*/}
-				{/*				<div className="mt-1 flex flex-wrap gap-1">*/}
-				{/*					{testResult?.executionPath?.map((step) => (*/}
-				{/*						<Badge key={step} variant="outline" className="text-xs">*/}
-				{/*							{step}*/}
-				{/*						</Badge>*/}
-				{/*					))}*/}
-				{/*				</div>*/}
-				{/*			</div>*/}
-
-				{/*			{testResult.errors && testResult.errors.length > 0 && (*/}
-				{/*				<div>*/}
-				{/*					<p className="font-medium text-muted-foreground text-sm">*/}
-				{/*						Errors*/}
-				{/*					</p>*/}
-				{/*					<ul className="mt-1 list-inside list-disc">*/}
-				{/*						{testResult.errors.map((error) => (*/}
-				{/*							<li key={error} className="text-destructive text-sm">*/}
-				{/*								{error}*/}
-				{/*							</li>*/}
-				{/*						))}*/}
-				{/*					</ul>*/}
-				{/*				</div>*/}
-				{/*			)}*/}
-				{/*		</div>*/}
-				{/*	</div>*/}
-				{/*)}*/}
 			</div>
 		</Card>
 	);

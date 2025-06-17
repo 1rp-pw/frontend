@@ -203,7 +203,17 @@ const formatJsonWithRainbowBraces = (
 };
 
 export function RainbowBraces({ json, className = "" }: RainbowBracesProps) {
-	const jsonObj = typeof json === "string" ? JSON.parse(json) : json;
+	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+	let jsonObj;
+	try {
+		if (typeof json === "string") {
+			jsonObj = JSON.parse(json);
+		} else {
+			jsonObj = json;
+		}
+	} catch (error) {
+		jsonObj = json;
+	}
 	const formattedElements = formatJsonWithRainbowBraces(jsonObj);
 
 	return (

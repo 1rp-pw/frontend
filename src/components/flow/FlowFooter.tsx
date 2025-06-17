@@ -12,12 +12,12 @@ interface FlowFooterProps {
 
 export function FlowFooter({ validationResult, yamlPreview }: FlowFooterProps) {
 	return (
-		<footer className="border-border border-t bg-card px-6 py-4">
-			<Card className="rounded-lg border-border bg-card shadow-sm">
+		<div className="h-full overflow-auto border-border border-t bg-card p-4">
+			<Card className="h-full rounded-lg border-border bg-card shadow-sm">
 				<CardHeader className="pb-3">
 					<CardTitle className="font-medium text-sm">Flow Designer</CardTitle>
 				</CardHeader>
-				<CardContent>
+				<CardContent className="h-[calc(100%-4rem)] overflow-auto">
 					<Tabs defaultValue="instructions" className="w-full">
 						<TabsList className="grid w-full grid-cols-3">
 							<TabsTrigger value="instructions">Instructions</TabsTrigger>
@@ -42,7 +42,7 @@ export function FlowFooter({ validationResult, yamlPreview }: FlowFooterProps) {
 					</Tabs>
 				</CardContent>
 			</Card>
-		</footer>
+		</div>
 	);
 }
 

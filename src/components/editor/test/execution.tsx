@@ -11,7 +11,7 @@ import {
 	DialogTitle,
 } from "~/components/ui/dialog";
 import { RainbowBraces } from "~/components/ui/rainbow";
-import { ScrollArea } from "~/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
@@ -199,10 +199,11 @@ export function PolicyExecutionModal({
 					{/* Execution Detail - Right Panel */}
 					<div className="flex-1">
 						<Tabs defaultValue="conditions" className="h-full">
-							<TabsList className="grid w-full grid-cols-3">
+							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="conditions">Conditions</TabsTrigger>
 								<TabsTrigger value="data">Input Data</TabsTrigger>
 								<TabsTrigger value="text">Policy Text</TabsTrigger>
+								<TabsTrigger value="raw">Raw Output</TabsTrigger>
 							</TabsList>
 
 							<TabsContent
@@ -506,6 +507,21 @@ export function PolicyExecutionModal({
 										})}
 									</div>
 								</ScrollArea>
+							</TabsContent>
+
+							<TabsContent value="raw" className="mt-4 h-[calc(100%-3rem)]">
+								<div className="h-full">
+									<h3 className="mb-2 font-semibold text-lg">
+										Raw Policy Execution Data
+									</h3>
+									<ScrollArea className="h-[calc(100%-2rem)] max-w-[32vw] rounded border bg-muted">
+										<pre className="p-3 text-sm">
+											<RainbowBraces json={executionData} className="text-sm" />
+										</pre>
+										<ScrollBar orientation="horizontal" />
+										<ScrollBar orientation="vertical" />
+									</ScrollArea>
+								</div>
 							</TabsContent>
 						</Tabs>
 					</div>
