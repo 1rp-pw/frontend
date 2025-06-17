@@ -117,54 +117,60 @@ export default function FlowPage() {
 				onNewFlow={reset}
 			/>
 
-			<main className="relative flex-1 bg-muted/10">
-				<ResizablePanelGroup direction="horizontal">
-					<ResizablePanel defaultSize={70} minSize={50}>
-						<FlowEditor
-							nodes={storeNodes}
-							edges={storeEdges}
-							onNodesChange={handleNodesChange}
-							onEdgesChange={handleEdgesChange}
-							validationResult={validationResult}
-						/>
-					</ResizablePanel>
-					<ResizableHandle withHandle />
-					<ResizablePanel defaultSize={30} minSize={25} maxSize={45}>
-						<ResizablePanelGroup direction="vertical">
-							<ResizablePanel defaultSize={40} minSize={30}>
-								<FlowTestList
-									tests={tests}
-									currentTest={currentTest}
-									onCreateTest={createTest}
-									onSelectTest={selectTest}
-									onDeleteTest={deleteTest}
-									onRunTest={runTest}
-									onRunAllTests={runAllTests}
-									isRunning={isTestRunning}
+			<ResizablePanelGroup direction="vertical" className="flex-1">
+				<ResizablePanel defaultSize={75} minSize={50}>
+					<main className="h-full bg-muted/10">
+						<ResizablePanelGroup direction="horizontal">
+							<ResizablePanel defaultSize={70} minSize={50}>
+								<FlowEditor
+									nodes={storeNodes}
+									edges={storeEdges}
+									onNodesChange={handleNodesChange}
+									onEdgesChange={handleEdgesChange}
+									validationResult={validationResult}
 								/>
 							</ResizablePanel>
 							<ResizableHandle withHandle />
-							<ResizablePanel defaultSize={60} minSize={40}>
-								<FlowTestPanel
-									testData={testData}
-									currentTest={currentTest}
-									isRunning={isTestRunning}
-									testResult={testResult}
-									error={error}
-									onTestDataChange={setTestData}
-									onRunTest={handleRunCurrentTest}
-									onSaveTest={saveTest}
-								/>
+							<ResizablePanel defaultSize={30} minSize={25} maxSize={45}>
+								<ResizablePanelGroup direction="vertical">
+									<ResizablePanel defaultSize={40} minSize={30}>
+										<FlowTestList
+											tests={tests}
+											currentTest={currentTest}
+											onCreateTest={createTest}
+											onSelectTest={selectTest}
+											onDeleteTest={deleteTest}
+											onRunTest={runTest}
+											onRunAllTests={runAllTests}
+											isRunning={isTestRunning}
+										/>
+									</ResizablePanel>
+									<ResizableHandle withHandle />
+									<ResizablePanel defaultSize={60} minSize={40}>
+										<FlowTestPanel
+											testData={testData}
+											currentTest={currentTest}
+											isRunning={isTestRunning}
+											testResult={testResult}
+											error={error}
+											onTestDataChange={setTestData}
+											onRunTest={handleRunCurrentTest}
+											onSaveTest={saveTest}
+										/>
+									</ResizablePanel>
+								</ResizablePanelGroup>
 							</ResizablePanel>
 						</ResizablePanelGroup>
-					</ResizablePanel>
-				</ResizablePanelGroup>
-			</main>
-
-			<FlowFooter
-				validationResult={validationResult}
-				yamlPreview={yamlPreview}
-			/>
+					</main>
+				</ResizablePanel>
+				<ResizableHandle withHandle />
+				<ResizablePanel defaultSize={25} minSize={15} maxSize={50}>
+					<FlowFooter
+						validationResult={validationResult}
+						yamlPreview={yamlPreview}
+					/>
+				</ResizablePanel>
+			</ResizablePanelGroup>
 		</div>
 	);
 }

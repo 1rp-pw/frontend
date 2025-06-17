@@ -1,6 +1,6 @@
 "use client";
 
-import { FilePlusIcon, PlayIcon } from "lucide-react";
+import { CopyIcon, FilePlusIcon, PlayIcon } from "lucide-react";
 import { useEffect } from "react";
 import { Editor } from "~/components/editor/editor";
 import { PublishPolicy } from "~/components/editor/publish";
@@ -74,7 +74,20 @@ export default function Maker({
 	return (
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
-				<h1 className="font-bold text-xl">{name}</h1>
+				<div className="flex items-center gap-2">
+					<h1 className="font-bold text-xl">{name}</h1>
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={() => {
+							navigator.clipboard.writeText(policy_id);
+						}}
+						className="h-7 px-2"
+						title="Copy Policy ID"
+					>
+						<CopyIcon className="h-3 w-3" />
+					</Button>
+				</div>
 			</header>
 
 			<main className="grid flex-1 grid-cols-2 grid-rows-[1fr_1fr] gap-1 overflow-auto p-1">

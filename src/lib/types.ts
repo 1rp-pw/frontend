@@ -134,18 +134,33 @@ export interface FlowTest {
 	createdAt: Date;
 	lastRun?: Date;
 	result?: {
-		nodeId: string;
-		nodeName: string;
 		result: boolean | string;
-		executionPath: string[];
 		finalOutcome: boolean | string;
-		errors?: string[];
-		nodeResponses?: Array<{
-			result: boolean | string;
-			trace?: unknown;
-			rule?: string[];
-			data?: unknown;
-			error?: string | null;
+		executionPath: string[];
+		nodeResponse: Array<{
+			nodeId: string;
+			nodeType: string;
+			response: {
+				result: boolean | string;
+				trace?: {
+					execution?: Array<{
+						conditions: unknown[];
+						outcome: {
+							value: string;
+							pos?: unknown;
+						};
+						result: boolean;
+						selector: {
+							value: string;
+							pos?: unknown;
+						};
+					}>;
+				};
+				rule?: string[];
+				data?: unknown;
+				error?: string | null;
+			};
 		}>;
+		errors?: string[];
 	};
 }

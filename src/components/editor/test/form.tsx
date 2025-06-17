@@ -4,6 +4,7 @@ import {
 	BracesIcon,
 	ChevronLeftIcon,
 	ChevronRightIcon,
+	CopyIcon,
 	EditIcon,
 	FileTextIcon,
 } from "lucide-react";
@@ -453,6 +454,22 @@ export function TestForm({
 			</TabsContent>
 			<TabsContent value={"preview"}>
 				<div className="space-y-2">
+					<div className="flex items-center justify-between">
+						<span className="font-medium text-sm">JSON Preview</span>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => {
+								navigator.clipboard.writeText(
+									JSON.stringify(formData, null, 2),
+								);
+							}}
+							className="h-7 px-2"
+						>
+							<CopyIcon className="h-3 w-3" />
+							Copy JSON
+						</Button>
+					</div>
 					<pre className="max-h-70 overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
 						<RainbowBraces json={formData} className={"text-xs"} />
 					</pre>

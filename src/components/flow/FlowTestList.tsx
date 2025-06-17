@@ -1,6 +1,8 @@
 "use client";
 
 import { CheckCircle, Clock, Play, Plus, Trash2, XCircle } from "lucide-react";
+import { useState } from "react";
+import { FlowExecutionModal } from "~/components/flow/FlowExecutionModal";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -35,13 +37,17 @@ export function FlowTestList({
 	onRunAllTests,
 	isRunning,
 }: FlowTestListProps) {
+	const [executionModalOpen, setExecutionModalOpen] = useState(false);
+	const [selectedTestForModal, setSelectedTestForModal] =
+		useState<FlowTest | null>(null);
+
 	const getTestStatus = (test: FlowTest) => {
 		if (!test.result || !test.lastRun) {
 			return { icon: Clock, label: "Not Run", variant: "secondary" as const };
 		}
 
 		// Compare expected outcome with actual result
-		const actualOutcome = test.result.finalOutcome;
+		const actualOutcome = test.result.result;
 		const expectedOutcome = test.expectedOutcome;
 
 		// Handle both string and boolean comparisons
@@ -98,6 +104,7 @@ export function FlowTestList({
 								const status = getTestStatus(test);
 								const StatusIcon = status.icon;
 								const isSelected = currentTest?.id === test.id;
+								const hasResult = test.result && test.lastRun;
 
 								return (
 									<div
@@ -107,34 +114,60 @@ export function FlowTestList({
 											isSelected && "border-primary bg-accent",
 										)}
 									>
-										<button
-											type="button"
-											onClick={() => onSelectTest(test)}
-											className="flex flex-1 items-center gap-3 text-left"
-										>
-											<StatusIcon
-												className={cn(
-													"h-4 w-4",
-													status.variant === "default" && "text-green-600",
-													status.variant === "destructive" &&
-														"text-destructive",
-													status.variant === "secondary" &&
-														"text-muted-foreground",
-												)}
-											/>
-											<div className="flex-1">
-												<div className="font-medium text-sm">{test.name}</div>
-												<div className="flex items-center gap-2 text-muted-foreground text-xs">
-													<span>Expect: {test.expectedOutcome.toString()}</span>
-													{test.lastRun && (
-														<span>
-															• Last run:{" "}
-															{new Date(test.lastRun).toLocaleTimeString()}
-														</span>
-													)}
+										<div className="flex flex-1 items-center gap-3">
+											{hasResult ? (
+												<button
+													type="button"
+													onClick={() => {
+														setSelectedTestForModal(test);
+														setExecutionModalOpen(true);
+													}}
+													className="flex cursor-pointer items-center"
+													title="View execution details"
+												>
+													<StatusIcon
+														className={cn(
+															"h-4 w-4",
+															status.variant === "default" &&
+																"text-green-600 hover:text-green-700",
+															status.variant === "destructive" &&
+																"text-destructive hover:text-red-700",
+															"cursor-pointer",
+														)}
+													/>
+												</button>
+											) : (
+												<div className="flex items-center">
+													<StatusIcon
+														className={cn(
+															"h-4 w-4",
+															status.variant === "secondary" &&
+																"text-muted-foreground",
+														)}
+													/>
 												</div>
-											</div>
-										</button>
+											)}
+											<button
+												type="button"
+												onClick={() => onSelectTest(test)}
+												className="flex flex-1 items-center gap-3 text-left"
+											>
+												<div className="flex-1">
+													<div className="font-medium text-sm">{test.name}</div>
+													<div className="flex items-center gap-2 text-muted-foreground text-xs">
+														<span>
+															Expect: {test.expectedOutcome.toString()}
+														</span>
+														{test.lastRun && (
+															<span>
+																• Last run:{" "}
+																{new Date(test.lastRun).toLocaleTimeString()}
+															</span>
+														)}
+													</div>
+												</div>
+											</button>
+										</div>
 										<div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 											<Button
 												size="sm"
@@ -159,6 +192,14 @@ export function FlowTestList({
 					</div>
 				</ScrollArea>
 			</CardContent>
+
+			<FlowExecutionModal
+				open={executionModalOpen}
+				onOpenChange={setExecutionModalOpen}
+				executionData={selectedTestForModal?.result || null}
+				testName={selectedTestForModal?.name}
+				expectedOutcome={selectedTestForModal?.expectedOutcome}
+			/>
 		</Card>
 	);
 }

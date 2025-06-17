@@ -199,10 +199,11 @@ export function PolicyExecutionModal({
 					{/* Execution Detail - Right Panel */}
 					<div className="flex-1">
 						<Tabs defaultValue="conditions" className="h-full">
-							<TabsList className="grid w-full grid-cols-3">
+							<TabsList className="grid w-full grid-cols-4">
 								<TabsTrigger value="conditions">Conditions</TabsTrigger>
 								<TabsTrigger value="data">Input Data</TabsTrigger>
 								<TabsTrigger value="text">Policy Text</TabsTrigger>
+								<TabsTrigger value="raw">Raw Output</TabsTrigger>
 							</TabsList>
 
 							<TabsContent
@@ -504,6 +505,19 @@ export function PolicyExecutionModal({
 												</div>
 											);
 										})}
+									</div>
+								</ScrollArea>
+							</TabsContent>
+
+							<TabsContent value="raw" className="mt-4 h-[calc(100%-3rem)]">
+								<ScrollArea className="h-full">
+									<div>
+										<h3 className="mb-2 font-semibold text-lg">
+											Raw Policy Execution Data
+										</h3>
+										<pre className="overflow-x-auto rounded bg-muted p-3 text-sm">
+											<RainbowBraces json={executionData} className="text-sm" />
+										</pre>
 									</div>
 								</ScrollArea>
 							</TabsContent>
