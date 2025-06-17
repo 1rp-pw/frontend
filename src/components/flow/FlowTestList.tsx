@@ -115,38 +115,31 @@ export function FlowTestList({
 										)}
 									>
 										<div className="flex flex-1 items-center gap-3">
-											{hasResult ? (
-												<button
-													type="button"
-													onClick={() => {
-														setSelectedTestForModal(test);
-														setExecutionModalOpen(true);
-													}}
-													className="flex cursor-pointer items-center"
-													title="View execution details"
-												>
-													<StatusIcon
-														className={cn(
-															"h-4 w-4",
-															status.variant === "default" &&
-																"text-green-600 hover:text-green-700",
-															status.variant === "destructive" &&
-																"text-destructive hover:text-red-700",
-															"cursor-pointer",
-														)}
-													/>
-												</button>
-											) : (
-												<div className="flex items-center">
-													<StatusIcon
-														className={cn(
-															"h-4 w-4",
-															status.variant === "secondary" &&
-																"text-muted-foreground",
-														)}
-													/>
-												</div>
-											)}
+											<button
+												type="button"
+												onClick={() => {
+													setSelectedTestForModal(test);
+													setExecutionModalOpen(true);
+												}}
+												className="flex cursor-pointer items-center"
+												title={
+													hasResult
+														? "View execution details"
+														: "View test details"
+												}
+											>
+												<StatusIcon
+													className={cn(
+														"h-4 w-4 cursor-pointer",
+														status.variant === "default" &&
+															"text-green-600 hover:text-green-700",
+														status.variant === "destructive" &&
+															"text-destructive hover:text-red-700",
+														status.variant === "secondary" &&
+															"text-muted-foreground hover:text-muted-foreground/80",
+													)}
+												/>
+											</button>
 											<button
 												type="button"
 												onClick={() => onSelectTest(test)}

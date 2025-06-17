@@ -15,7 +15,7 @@ export interface FlowTestResult {
 	result: boolean | string;
 	finalOutcome: boolean | string;
 	executionPath: string[];
-	nodeResponse: Array<{
+	nodeResponses: Array<{
 		nodeId: string;
 		nodeType: string;
 		response: {
