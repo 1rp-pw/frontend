@@ -253,20 +253,23 @@ export function FlowExecutionModal({
 																		<strong>Conditions:</strong>
 																		<div className="mt-2 space-y-2">
 																			{execution.conditions.map(
-																				(condition, condIndex) => (
-																					<div
-																						key={`cond-${condIndex}`}
-																						className="rounded bg-muted/50 p-3 text-sm"
-																					>
-																						<pre className="whitespace-pre-wrap">
-																							{JSON.stringify(
-																								condition,
-																								null,
-																								2,
-																							)}
-																						</pre>
-																					</div>
-																				),
+																				(condition, condIndex) => {
+																					const ci = condIndex;
+																					return (
+																						<div
+																							key={`cond-${ci}`}
+																							className="rounded bg-muted/50 p-3 text-sm"
+																						>
+																							<pre className="whitespace-pre-wrap">
+																								{JSON.stringify(
+																									condition,
+																									null,
+																									2,
+																								)}
+																							</pre>
+																						</div>
+																					);
+																				},
 																			)}
 																		</div>
 																	</div>
