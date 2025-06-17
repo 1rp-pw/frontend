@@ -10,7 +10,7 @@ import {
 	DialogTitle,
 } from "~/components/ui/dialog";
 import { RainbowBraces } from "~/components/ui/rainbow";
-import { ScrollArea } from "~/components/ui/scroll-area";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
 	Tooltip,
@@ -184,12 +184,18 @@ export function FlowExecutionModal({
 														{selectedNode.response.data ? (
 															<div className="mt-4">
 																<strong>Input Data:</strong>
-																<pre className="mt-2 overflow-x-auto rounded bg-muted p-3 text-sm">
-																	<RainbowBraces
-																		json={selectedNode.response.data as object}
-																		className="text-sm"
-																	/>
-																</pre>
+																<ScrollArea className="mt-2 h-48 w-full rounded border bg-muted">
+																	<pre className="p-3 text-sm">
+																		<RainbowBraces
+																			json={
+																				selectedNode.response.data as object
+																			}
+																			className="text-sm"
+																		/>
+																	</pre>
+																	<ScrollBar orientation="horizontal" />
+																	<ScrollBar orientation="vertical" />
+																</ScrollArea>
 															</div>
 														) : null}
 													</div>
@@ -309,19 +315,21 @@ export function FlowExecutionModal({
 									</TabsContent>
 
 									<TabsContent value="raw" className="mt-4 h-[calc(100%-3rem)]">
-										<ScrollArea className="h-full">
-											<div>
-												<h3 className="mb-2 font-semibold text-lg">
-													Raw Flow Execution Data
-												</h3>
-												<pre className="overflow-x-auto rounded bg-muted p-3 text-sm">
+										<div className="h-full">
+											<h3 className="mb-2 font-semibold text-lg">
+												Raw Flow Execution Data
+											</h3>
+											<ScrollArea className="h-[calc(100%-2rem)] w-full rounded border bg-muted">
+												<pre className="p-3 text-sm">
 													<RainbowBraces
 														json={executionData || {}}
 														className="text-sm"
 													/>
 												</pre>
-											</div>
-										</ScrollArea>
+												<ScrollBar orientation="horizontal" />
+												<ScrollBar orientation="vertical" />
+											</ScrollArea>
+										</div>
 									</TabsContent>
 								</Tabs>
 							</div>
