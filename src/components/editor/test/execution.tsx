@@ -514,7 +514,7 @@ export function PolicyExecutionModal({
 									<h3 className="mb-2 font-semibold text-lg">
 										Raw Policy Execution Data
 									</h3>
-									<ScrollArea className="h-[calc(100%-2rem)] w-full rounded border bg-muted">
+									<ScrollArea className="h-[calc(100%-2rem)] max-w-[32vw] rounded border bg-muted">
 										<pre className="p-3 text-sm">
 											<RainbowBraces json={executionData} className="text-sm" />
 										</pre>

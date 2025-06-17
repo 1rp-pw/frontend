@@ -319,7 +319,7 @@ export function FlowExecutionModal({
 											<h3 className="mb-2 font-semibold text-lg">
 												Raw Flow Execution Data
 											</h3>
-											<ScrollArea className="h-[calc(100%-2rem)] w-full rounded border bg-muted">
+											<ScrollArea className="h-[calc(100%-2rem)] w-full max-w-[32vw] rounded border bg-muted">
 												<pre className="p-3 text-sm">
 													<RainbowBraces
 														json={executionData || {}}
