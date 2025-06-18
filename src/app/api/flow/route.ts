@@ -11,8 +11,7 @@ export async function POST(request: Request) {
 			nodes,
 			edges,
 			tests: tests.map(test => ({ ...test, result: false })),
-			yaml,
-			yamlFlat,
+			flowFlat: yamlFlat,
 		})
 
 		console.info("body", body)
