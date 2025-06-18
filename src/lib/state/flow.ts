@@ -125,9 +125,11 @@ const createDefaultFlowSpec = (): FlowSpec => ({
 			id: "start-1",
 			type: "start" as const,
 			label: "Start",
+			position: { x: 100, y: 100 },
+			data: null,
 			policyId: "",
 			policyName: "",
-		},
+		} as FlowNodeData,
 	],
 	edges: [],
 	version: 1,
@@ -136,6 +138,7 @@ const createDefaultFlowSpec = (): FlowSpec => ({
 	createdAt: new Date(),
 	updatedAt: new Date(),
 	hasDraft: true,
+	flow: "",
 });
 
 const defaultTests: FlowTest[] = [
@@ -456,15 +459,26 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					name: result.name,
 					description: result.description,
 					tags: result.tags,
-					nodes: JSON.parse(result.nodes),
-					edges: JSON.parse(result.edges),
-					tests: result.tests ? JSON.parse(result.tests) : [],
+					nodes:
+						typeof result.nodes === "string"
+							? JSON.parse(result.nodes)
+							: result.nodes,
+					edges:
+						typeof result.edges === "string"
+							? JSON.parse(result.edges)
+							: result.edges,
+					tests: result.tests
+						? typeof result.tests === "string"
+							? JSON.parse(result.tests)
+							: result.tests
+						: [],
 					version: result.version || 1,
 					createdAt: new Date(result.createdAt || Date.now()),
 					updatedAt: new Date(result.updatedAt || Date.now()),
 					status: result.status,
 					draft: result.status === "draft",
 					hasDraft: result.hasDraft,
+					flow: result.flow || result.yaml || "",
 				};
 
 				set({

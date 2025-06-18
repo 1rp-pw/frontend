@@ -148,8 +148,8 @@ export function FlowEditor({
 						data: null,
 						position: {
 							x: position.x,
-							y: position.y
-						}
+							y: position.y,
+						},
 					} satisfies PolicyNodeData;
 					break;
 				case "return":
@@ -161,8 +161,8 @@ export function FlowEditor({
 						data: null,
 						position: {
 							x: position.x,
-							y: position.y
-						}
+							y: position.y,
+						},
 					} satisfies ReturnNodeData;
 					break;
 				case "custom":
@@ -174,8 +174,8 @@ export function FlowEditor({
 						data: null,
 						position: {
 							x: position.x,
-							y: position.y
-						}
+							y: position.y,
+						},
 					} satisfies CustomNodeData;
 					break;
 			}
@@ -228,8 +228,8 @@ export function FlowEditor({
 								data: null,
 								position: {
 									x: node.position.x,
-									y: node.position.y
-								}
+									y: node.position.y,
+								},
 							} satisfies PolicyNodeData;
 							break;
 						case "return": {
@@ -246,8 +246,8 @@ export function FlowEditor({
 								data: null,
 								position: {
 									x: node.position.x,
-									y: node.position.y
-								}
+									y: node.position.y,
+								},
 							} satisfies ReturnNodeData;
 							break;
 						}
@@ -260,8 +260,8 @@ export function FlowEditor({
 								data: null,
 								position: {
 									x: node.position.x,
-									y: node.position.y
-								}
+									y: node.position.y,
+								},
 							} satisfies CustomNodeData;
 							break;
 					}
@@ -337,9 +337,6 @@ export function FlowEditor({
 			onEdgesChangeRef.current(flowEdges);
 		}
 	}, [edges]);
-
-	console.info("nodes", nodes)
-	console.info("edges", edges)
 
 	return (
 		<FlowContext.Provider

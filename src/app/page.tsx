@@ -112,8 +112,6 @@ export default function PolicyList() {
 	const getFlows = () => {
 		if (flows.length === 0) return null;
 
-		console.info("flows", flows);
-
 		return (
 			<div>
 				<h2 className="mb-4 font-semibold text-2xl">Flows</h2>

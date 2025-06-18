@@ -1,18 +1,20 @@
 "use client";
 
-import {Clock, FilePenLine, FilePlus2, FileText,} from "lucide-react";
+import { Clock, FilePenLine, FilePlus2, FileText } from "lucide-react";
 import Link from "next/link";
-import {useEffect, useMemo, useState} from "react";
-import {Badge} from "~/components/ui/badge";
-import {Button} from "~/components/ui/button";
-import {Card, CardContent, CardDescription, CardHeader, CardTitle,} from "~/components/ui/card";
-import {ScrollArea} from "~/components/ui/scroll-area";
-import type {FlowEdgeData, FlowNodeData, FlowSpec} from "~/lib/types";
-import {type Edge, type NodeTypes, ReactFlow, useEdgesState, useNodesState} from "@xyflow/react";
-import {StartNode} from "~/components/flow/nodes/start-node";
-import {PolicyNode} from "~/components/flow/nodes/policy-node";
-import {ReturnNode} from "~/components/flow/nodes/return-node";
-import {CustomNode} from "~/components/flow/nodes/custom-node";
+import { useEffect, useState } from "react";
+import { FlowVersionPreview } from "~/components/flow/FlowVersionPreview";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "~/components/ui/card";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import type { FlowSpec } from "~/lib/types";
 
 async function getFlowVersions(flow_id: string) {
 	const resp = await fetch(`/api/flow/versions?flow_id=${flow_id}`, {
@@ -24,34 +26,9 @@ async function getFlowVersions(flow_id: string) {
 	return await resp.json();
 }
 
-type RequiredStyleEdge = Edge & {
-	style: Record<string, unknown>;
-	labelStyle: Record<string, unknown>;
-};
-
 export default function FlowInfo({ flow_id }: { flow_id: string }) {
-	const selectedNodes: FlowNodeData[] = []
-	const selectedEdges: FlowEdgeData[] = []
-
 	const [versions, setVersions] = useState<FlowSpec[]>([]);
 	const [selectedVersion, setSelectedVersion] = useState<FlowSpec | null>(null);
-	const [nodes, setNodes] = useNodesState(selectedNodes.map((node, index) => ({
-		id: node.id,
-		type: node.type,
-		position: {
-			x: node.position.x,
-			y: node.position.y,
-		},
-		data: node,
-	})));
-	const [edges, setEdges] = useEdgesState<RequiredStyleEdge>(
-		selectedEdges.map((edge) => ({
-			...edge,
-			style: edge.style || {},
-			labelStyle: edge.labelStyle || {},
-		})) as RequiredStyleEdge[],
-	);
-
 
 	const getStatusVariant = (status: string) => {
 		switch (status) {
@@ -75,42 +52,6 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 			}
 		});
 	}, [flow_id]);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	useEffect(() => {
-		if (selectedVersion?.nodes && typeof selectedVersion.nodes === "string") {
-			try {
-				const n = JSON.parse(selectedVersion.nodes);
-				setNodes(n)
-			} catch (e) {
-				console.error("Error parsing nodes", e);
-			}
-		}
-
-		if (selectedVersion?.edges && typeof selectedVersion.edges === "string") {
-			try {
-				const n = JSON.parse(selectedVersion.edges);
-				setEdges(n)
-			} catch (e) {
-				console.error("Error parsing edges", e);
-			}
-		}
-	}, [selectedVersion]);
-
-	const nodeTypes: NodeTypes = useMemo(
-		() => ({
-			start: StartNode,
-			policy: PolicyNode,
-			return: ReturnNode,
-			custom: CustomNode,
-		}),
-		[],
-	);
-
-	// console.info("versions", versions);
-	// console.info("selectedVersion", selectedVersion);
-	// console.info("nodes", nodes);
-	// console.info("edges", edges);
 
 	if (versions.length === 0) {
 		return null;
@@ -225,21 +166,21 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 					</div>
 
 					<div className={"min-h-0 flex-1"}>
-						<ScrollArea className={"h-full"}>
-							<div className={"p-6"}>
-								{selectedVersion ? (
-									<ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} />
-								) : (
-									<div
-										className={
-											"flex h-32 items-center justify-center text-muted-foreground"
-										}
-									>
-										Select a version to view its rule
-									</div>
-								)}
+						{selectedVersion ? (
+							<FlowVersionPreview
+								nodes={selectedVersion.nodes}
+								edges={selectedVersion.edges}
+								className="h-full"
+							/>
+						) : (
+							<div
+								className={
+									"flex h-32 items-center justify-center text-muted-foreground"
+								}
+							>
+								Select a version to view its flow
 							</div>
-						</ScrollArea>
+						)}
 					</div>
 				</div>
 

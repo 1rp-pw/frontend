@@ -90,8 +90,8 @@ export interface FlowSpec {
 	name: string;
 	description?: string;
 	tags?: string[];
-	nodes: FlowNodeData[] | string;
-	edges: FlowEdgeData[] | string;
+	nodes: FlowNodeData[];
+	edges: FlowEdgeData[];
 	tests?: FlowTest[];
 	version: number | string;
 	draft: boolean;

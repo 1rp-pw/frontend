@@ -3,25 +3,29 @@ import { env } from "~/env";
 
 export async function POST(request: Request) {
 	try {
-		const { name, description, tags, nodes, edges, tests, yaml, yamlFlat } =
+		const { name, nodes, edges, tests, yaml, yamlFlat } =
 			await request.json();
+
+		const body = JSON.stringify({
+			name,
+			nodes,
+			edges,
+			tests: tests.map(test => ({ ...test, result: false })),
+			yaml,
+			yamlFlat,
+		})
+
+		console.info("body", body)
 
 		const response = await fetch(`${env.API_SERVER}/flow`, {
 			method: "POST",
-			body: JSON.stringify({
-				name,
-				description,
-				tags,
-				nodes,
-				edges,
-				tests,
-				yaml,
-				yamlFlat,
-			}),
+			body,
 			cache: "no-store",
 		});
 
+		// console.info("resp", response)
 		const resp = await response.json();
+		// console.info("resp", resp)
 
 		return NextResponse.json(
 			{
@@ -30,6 +34,8 @@ export async function POST(request: Request) {
 			{ status: 200 },
 		);
 	} catch (error) {
+		console.error("Error while creating route", error);
+
 		return NextResponse.json({ error: error }, { status: 500 });
 	}
 }

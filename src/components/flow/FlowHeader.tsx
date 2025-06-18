@@ -3,6 +3,7 @@
 import { Save } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import type { FlowValidationResult } from "~/lib/utils/flow-validation";
+import {SaveFlow} from "~/components/flow/save";
 
 interface FlowHeaderProps {
 	name: string;
@@ -31,6 +32,7 @@ export function FlowHeader({
 					<h1 className="font-bold text-xl">Flow Editor</h1>
 				</div>
 				<div className="flex items-center gap-2">
+					<SaveFlow />
 					<Button
 						onClick={onSaveFlow}
 						variant="default"
