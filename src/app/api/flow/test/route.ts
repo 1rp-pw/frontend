@@ -51,7 +51,6 @@ export async function POST(request: Request) {
 
 		// Generate YAML representation of the flow
 		const yaml = flowToYaml(nodes, edges);
-		console.info("yaml", yaml);
 
 		// Send to API server for execution
 		const response = await fetch(`${env.API_SERVER}/flow/test`, {
@@ -64,7 +63,7 @@ export async function POST(request: Request) {
 			cache: "no-store",
 		});
 
-		console.info("req", JSON.stringify({ data: testData, flow: yaml }));
+		//console.info("req", JSON.stringify({ data: testData, flow: yaml }));
 
 		if (!response.ok) {
 			const errorData = await response.json().catch(() => ({}));

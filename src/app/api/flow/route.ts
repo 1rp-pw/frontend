@@ -3,7 +3,7 @@ import { env } from "~/env";
 
 export async function POST(request: Request) {
 	try {
-		const { name, description, tags, nodes, edges, yaml, yamlFlat } =
+		const { name, description, tags, nodes, edges, tests, yaml, yamlFlat } =
 			await request.json();
 
 		const response = await fetch(`${env.API_SERVER}/flow`, {
@@ -14,6 +14,7 @@ export async function POST(request: Request) {
 				tags,
 				nodes,
 				edges,
+				tests,
 				yaml,
 				yamlFlat,
 			}),
@@ -42,6 +43,7 @@ export async function PUT(request: Request) {
 			tags,
 			nodes,
 			edges,
+			tests,
 			yaml,
 			yamlFlat,
 			version,
@@ -57,6 +59,7 @@ export async function PUT(request: Request) {
 			tags,
 			nodes,
 			edges,
+			tests,
 			yaml,
 			yamlFlat,
 			version: "",

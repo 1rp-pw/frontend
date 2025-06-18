@@ -9,10 +9,8 @@ interface FlowHeaderProps {
 	id: string | null;
 	isLoading: boolean;
 	isSaveDisabled: boolean | null;
-	error: string | null;
 	validationResult: FlowValidationResult | null;
 	onNameChange: (name: string) => void;
-	onLoadFlow: (flowId: string) => void;
 	onSaveFlow: () => void;
 	onNewFlow: () => void;
 }
@@ -20,7 +18,6 @@ interface FlowHeaderProps {
 export function FlowHeader({
 	isLoading,
 	isSaveDisabled,
-	error,
 	validationResult,
 	onSaveFlow,
 	onNewFlow,

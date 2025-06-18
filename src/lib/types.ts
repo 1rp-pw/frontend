@@ -49,6 +49,11 @@ export interface FlowNodeData extends Record<string, unknown> {
 	id: string;
 	type: "start" | "policy" | "return" | "custom";
 	label: string;
+	position: {
+		x: number;
+		y: number;
+	};
+	data: FlowNodeData | null;
 }
 
 export interface StartNodeData extends FlowNodeData {
@@ -85,8 +90,9 @@ export interface FlowSpec {
 	name: string;
 	description?: string;
 	tags?: string[];
-	nodes: FlowNodeData[];
-	edges: FlowEdgeData[];
+	nodes: FlowNodeData[] | string;
+	edges: FlowEdgeData[] | string;
+	tests?: FlowTest[];
 	version: number | string;
 	draft: boolean;
 	status: string;
@@ -94,6 +100,7 @@ export interface FlowSpec {
 	updatedAt: Date;
 	lastPublishedAt?: Date;
 	hasDraft: boolean;
+	flow: string;
 }
 
 export interface FlowEdgeData {

@@ -21,10 +21,10 @@ import type { StartNodeData } from "~/lib/types";
 export function StartNode({ data, id }: NodeProps) {
 	const [isEditing, setIsEditing] = useState(false);
 	const [policyId, setPolicyId] = useState(
-		(data as unknown as StartNodeData).policyId || "",
+		(data as unknown as StartNodeData)?.policyId || "",
 	);
 	const [policyName, setPolicyName] = useState(
-		(data as unknown as StartNodeData).policyName || "",
+		(data as unknown as StartNodeData)?.policyName || "",
 	);
 	const [showPolicySearch, setShowPolicySearch] = useState(false);
 	const { policies, isLoading, searchPolicies } = usePolicySearch();

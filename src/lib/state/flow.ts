@@ -458,6 +458,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					tags: result.tags,
 					nodes: JSON.parse(result.nodes),
 					edges: JSON.parse(result.edges),
+					tests: result.tests ? JSON.parse(result.tests) : [],
 					version: result.version || 1,
 					createdAt: new Date(result.createdAt || Date.now()),
 					updatedAt: new Date(result.updatedAt || Date.now()),
@@ -470,6 +471,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					flowSpec: flowSpec,
 					nodes: flowSpec.nodes,
 					edges: flowSpec.edges,
+					tests: flowSpec.tests || [],
 					name: flowSpec.name,
 					id: flowSpec.id,
 					isLoading: false,
@@ -517,13 +519,17 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				};
 			}
 
-			// Update the flowSpec with current nodes and edges before saving
+			// Update the flowSpec with current nodes, edges, and tests before saving
+			const { tests } = get();
 			const updatedFlowSpec = {
 				...flowSpec,
 				nodes,
 				edges,
+				tests,
 				updatedAt: new Date(),
 			};
+
+			console.info("Saving flow", updatedFlowSpec);
 
 			try {
 				// Generate YAML representations
@@ -536,6 +542,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					tags: updatedFlowSpec.tags,
 					nodes: updatedFlowSpec.nodes,
 					edges: updatedFlowSpec.edges,
+					tests: updatedFlowSpec.tests,
 					yaml: yamlNested,
 					yamlFlat: yamlFlat,
 					id: id || undefined,
@@ -543,6 +550,8 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					status: updatedFlowSpec.status,
 					baseId: updatedFlowSpec.baseId,
 				};
+
+				console.info("Saving flow to API", apiData);
 
 				const response = await fetch("/api/flow", {
 					method: flowSpec.id ? "PUT" : "POST",
