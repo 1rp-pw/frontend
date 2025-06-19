@@ -20,8 +20,6 @@ export function FlowHeader({
 	isLoading,
 	isSaveDisabled,
 	validationResult,
-	onSaveFlow,
-	onNewFlow,
 }: FlowHeaderProps) {
 	const saveDisabled = isSaveDisabled === null ? false : isSaveDisabled;
 
@@ -33,23 +31,6 @@ export function FlowHeader({
 				</div>
 				<div className="flex items-center gap-2">
 					<SaveFlow />
-					<Button
-						onClick={onSaveFlow}
-						variant="default"
-						size="sm"
-						disabled={saveDisabled}
-						title={
-							validationResult && !validationResult.isValid
-								? validationResult.errors.join("\n")
-								: "Save flow"
-						}
-					>
-						<Save className="mr-2 h-4 w-4" />
-						{isLoading ? "Saving..." : "Save Flow"}
-					</Button>
-					<Button onClick={onNewFlow} variant="secondary" size="sm">
-						New Flow
-					</Button>
 				</div>
 			</div>
 		</header>

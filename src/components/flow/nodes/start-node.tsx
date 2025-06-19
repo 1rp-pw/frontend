@@ -82,14 +82,14 @@ export function StartNode({ data, id }: NodeProps) {
 										placeholder="Policy ID"
 										className="text-xs"
 									/>
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => setShowPolicySearch(!showPolicySearch)}
-										disabled={!policyId.trim()}
-									>
-										<Search className="h-3 w-3" />
-									</Button>
+									{/*<Button*/}
+									{/*	size="sm"*/}
+									{/*	variant="outline"*/}
+									{/*	onClick={() => setShowPolicySearch(!showPolicySearch)}*/}
+									{/*	disabled={!policyId.trim()}*/}
+									{/*>*/}
+									{/*	<Search className="h-3 w-3" />*/}
+									{/*</Button>*/}
 								</div>
 								{showPolicySearch && (
 									<Select

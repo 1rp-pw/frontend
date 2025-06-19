@@ -3,14 +3,15 @@ import { env } from "~/env";
 
 export async function POST(request: Request) {
 	try {
-		const { name, nodes, edges, tests, yaml, yamlFlat } =
+		const { name, nodes, edges, tests, yamlFlat } =
 			await request.json();
 
 		const body = JSON.stringify({
 			name,
 			nodes,
 			edges,
-			tests: tests.map(test => ({ ...test, result: false })),
+			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			tests: tests.map((test: any) => ({ ...test, result: false })),
 			flowFlat: yamlFlat,
 		})
 

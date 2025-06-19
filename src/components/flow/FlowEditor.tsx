@@ -131,9 +131,17 @@ export function FlowEditor({
 			if (!sourceNode) return;
 
 			const position = {
-				x: sourceNode.position.x + 320,
-				y: sourceNode.position.y + (outputType === "true" ? -50 : 50),
+				x: 100 + sourceNode.position.x + 320,
+				y: sourceNode.position.y
 			};
+
+			if (outputType === "true") {
+				position.y -= 125
+			} else {
+				position.y += 175
+			}
+
+
 
 			let data: PolicyNodeData | ReturnNodeData | CustomNodeData;
 

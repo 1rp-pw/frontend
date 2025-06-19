@@ -63,21 +63,12 @@ export function PolicyNode({ data, id }: NodeProps) {
 			</CardHeader>
 			<CardContent className="space-y-3">
 				{!isEditing ? (
-					<div className="space-y-2">
-						<div>
-							<Label className="font-medium text-xs">Policy:</Label>
-							<div className="text-muted-foreground text-xs">
-								{policyName || policyId || "Not selected"}
-							</div>
+					// biome-ignore lint/a11y/useKeyWithClickEvents: <explanation>
+					<div className=" cursor-pointer space-y-2" onClick={() => setIsEditing(true)}>
+						<Label className="font-medium text-xs">Policy:</Label>
+						<div className="text-muted-foreground text-xs">
+							{policyName || policyId || "Not selected"}
 						</div>
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={() => setIsEditing(true)}
-							className="w-full"
-						>
-							Edit
-						</Button>
 					</div>
 				) : (
 					<div className="space-y-3">
@@ -91,14 +82,14 @@ export function PolicyNode({ data, id }: NodeProps) {
 										placeholder="Policy ID"
 										className="text-xs"
 									/>
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => setShowPolicySearch(!showPolicySearch)}
-										disabled={!policyId.trim()}
-									>
-										<Search className="h-3 w-3" />
-									</Button>
+									{/*<Button*/}
+									{/*	size="sm"*/}
+									{/*	variant="outline"*/}
+									{/*	onClick={() => setShowPolicySearch(!showPolicySearch)}*/}
+									{/*	disabled={!policyId.trim()}*/}
+									{/*>*/}
+									{/*	<Search className="h-3 w-3" />*/}
+									{/*</Button>*/}
 								</div>
 								{showPolicySearch && (
 									<Select

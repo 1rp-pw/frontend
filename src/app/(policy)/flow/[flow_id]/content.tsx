@@ -42,7 +42,7 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		getFlowVersions(flow_id).then((respVersions) => {
-			// console.info("respVersions", respVersions);
+			console.info("respVersions", respVersions);
 
 			setVersions(respVersions);
 
@@ -72,7 +72,7 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 					<div className={"p-2"}>
 						{versions.map((version) => (
 							<Card
-								key={version.id}
+								key={`card-${version.id}`}
 								className={`mb-2 cursor-pointer transition-colors hover:bg-muted/50 ${selectedVersion?.id === version.id ? "bg-muted/30 ring-2 ring-primary" : ""}`}
 								onClick={() => setSelectedVersion(version)}
 							>
