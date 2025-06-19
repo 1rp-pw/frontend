@@ -56,6 +56,9 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 	if (versions.length === 0) {
 		return null;
 	}
+	if (versions.error !== undefined) {
+		return null
+	}
 
 	return (
 		<div className={"flex h-screen bg-background"}>

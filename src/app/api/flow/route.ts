@@ -1,10 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { env } from "~/env";
+import {flowToYaml} from "~/lib/utils/flow-to-yaml";
 
 export async function POST(request: Request) {
 	try {
-		const { name, nodes, edges, tests, yamlFlat } =
+		const { name, nodes, edges, tests } =
 			await request.json();
+
+		const yaml = flowToYaml(nodes, edges);
 
 		const body = JSON.stringify({
 			name,
@@ -12,7 +15,7 @@ export async function POST(request: Request) {
 			edges,
 			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 			tests: tests.map((test: any) => ({ ...test, result: false })),
-			flowFlat: yamlFlat,
+			flowFlat: yaml,
 		})
 
 		console.info("body", body)
