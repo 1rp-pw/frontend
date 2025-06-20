@@ -125,7 +125,10 @@ export default function PolicyList() {
 
 	const getFlows = () => {
 		if (flows.length === 0) return null;
-		if (loadFlowsError) return null;
+		if (loadFlowsError) {
+			console.info("loadFlowsError", loadFlowsError);
+			return null;
+		}
 
 		return (
 			<div>
