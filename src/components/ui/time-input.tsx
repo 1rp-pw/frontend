@@ -26,7 +26,6 @@ export const TimeInput: FC<TimeInputProps> = ({
 	onChange,
 	disabled = false,
 	className,
-	id,
 }) => {
 	const [time, setTime] = useState<TimeParts>(() => {
 		const d = value ? new Date(value) : new Date();

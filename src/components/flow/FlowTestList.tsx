@@ -3,7 +3,6 @@
 import { CheckCircle, Clock, Play, Plus, Trash2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { FlowExecutionModal } from "~/components/flow/FlowExecutionModal";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
 	Card,

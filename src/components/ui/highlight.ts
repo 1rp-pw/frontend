@@ -20,7 +20,6 @@ export const highlightText = (text: string) => {
 	// Maps original full definition line to its action part
 	const definitionLineToActionMap = new Map<string, string>();
 
-	// biome-ignore lint/complexity/noForEach: it needs to loop
 	lines.forEach((line) => {
 		const trimmedLine = line.trim();
 		// Patterns to match:
@@ -41,7 +40,6 @@ export const highlightText = (text: string) => {
 	// We need to iterate through the *entire text* again to find references.
 	const rulesWithExternalReferences = new Set<string>(); // Actions that are referenced
 
-	// biome-ignore lint/complexity/noForEach: it needs to loop
 	lines.forEach((currentLine) => {
 		const trimmedCurrentLine = currentLine.trim();
 		const actionPartOfCurrentDefinition =
@@ -60,9 +58,9 @@ export const highlightText = (text: string) => {
 			);
 
 			// Find all matches in the current line
-			// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+			// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
 			let match;
-			// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+			// biome-ignore lint/suspicious/noAssignInExpressions: its fine
 			while ((match = referencePattern.exec(currentLine)) !== null) {
 				const matchedText = match[1];
 
@@ -96,7 +94,6 @@ export const highlightText = (text: string) => {
 	// Step 4: Apply highlighting based on our pre-analysis
 	const processedHtmlLines: string[] = [];
 
-	// biome-ignore lint/complexity/noForEach: it needs to loop
 	lines.forEach((originalLine) => {
 		let lineHtml = originalLine; // Start with the original (escaped) line content
 		const trimmedOriginalLine = originalLine.trim();
@@ -122,7 +119,7 @@ export const highlightText = (text: string) => {
 
 				lineHtml = lineHtml.replace(
 					definitionActionPattern,
-					(match, actionPart) => {
+					(_match, actionPart) => {
 						// Re-extract the prefix for this specific line's format to rebuild correctly
 						const prefixMatch = originalLine.match(
 							/^(?:[\w.]+\.\s+)?A\s+\*\*\w+\*\*(\s+)?/,
@@ -159,7 +156,7 @@ export const highlightText = (text: string) => {
 				if (
 					isDefinitionLine &&
 					p1 === actionPartOfThisDefinition &&
-					// biome-ignore lint/style/noNonNullAssertion: <explanation>
+					// biome-ignore lint/style/noNonNullAssertion: its fine
 					!rulesWithExternalReferences.has(actionPartOfThisDefinition!)
 				) {
 					return match; // This is a definition that is NOT referenced, keep it unhighlighted.
@@ -184,7 +181,7 @@ export const highlightText = (text: string) => {
 	// These should be run *after* the rule-based highlighting to avoid interference.
 
 	// Highlight numbers
-	html = html.replace(/\b(\d+)\b/g, (match, p1) => {
+	html = html.replace(/\b(\d+)\b/g, (_match, p1) => {
 		return createPlaceholder(`<span class="${numberColor}">${p1}</span>`);
 	});
 
@@ -220,7 +217,7 @@ export const highlightText = (text: string) => {
 	// This needs careful placement. If the line structure is "LABEL. A **Object** Action",
 	// we want to highlight LABEL.
 	// This regex should still work on the HTML string with placeholders as it looks for raw text structure.
-	html = html.replace(/^([\w.]+\.)\s+(?=A\s)/gm, (match, p1) => {
+	html = html.replace(/^([\w.]+\.)\s+(?=A\s)/gm, (_match, p1) => {
 		// We captured the full match including the space, so just return the placeholder and the space.
 		return `${createPlaceholder(`<span class="${labelColor}">${p1}</span>`)}`;
 	});

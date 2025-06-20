@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
 		const id = searchParams.get("id");
 		const version = searchParams.get("version");
 
-		// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+		// biome-ignore lint/suspicious/noImplicitAnyLet: runtime
 		let response;
 		if (version) {
 			response = await fetch(`${env.API_SERVER}/policy/${id}/${version}`);

@@ -125,9 +125,11 @@ const createDefaultFlowSpec = (): FlowSpec => ({
 			id: "start-1",
 			type: "start" as const,
 			label: "Start",
+			position: { x: 100, y: 100 },
+			data: null,
 			policyId: "",
 			policyName: "",
-		},
+		} as FlowNodeData,
 	],
 	edges: [],
 	version: 1,
@@ -136,6 +138,8 @@ const createDefaultFlowSpec = (): FlowSpec => ({
 	createdAt: new Date(),
 	updatedAt: new Date(),
 	hasDraft: true,
+	flow: "",
+	error: null,
 });
 
 const defaultTests: FlowTest[] = [
@@ -416,7 +420,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 			});
 
 			try {
-				// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+				// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
 				let response;
 
 				if (version) {
@@ -456,20 +460,34 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					name: result.name,
 					description: result.description,
 					tags: result.tags,
-					nodes: JSON.parse(result.nodes),
-					edges: JSON.parse(result.edges),
+					nodes:
+						typeof result.nodes === "string"
+							? JSON.parse(result.nodes)
+							: result.nodes,
+					edges:
+						typeof result.edges === "string"
+							? JSON.parse(result.edges)
+							: result.edges,
+					tests: result.tests
+						? typeof result.tests === "string"
+							? JSON.parse(result.tests)
+							: result.tests
+						: [],
 					version: result.version || 1,
 					createdAt: new Date(result.createdAt || Date.now()),
 					updatedAt: new Date(result.updatedAt || Date.now()),
 					status: result.status,
 					draft: result.status === "draft",
 					hasDraft: result.hasDraft,
+					flow: result.flow || result.yaml || "",
+					error: null,
 				};
 
 				set({
 					flowSpec: flowSpec,
 					nodes: flowSpec.nodes,
 					edges: flowSpec.edges,
+					tests: flowSpec.tests || [],
 					name: flowSpec.name,
 					id: flowSpec.id,
 					isLoading: false,
@@ -517,13 +535,17 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				};
 			}
 
-			// Update the flowSpec with current nodes and edges before saving
+			// Update the flowSpec with current nodes, edges, and tests before saving
+			const { tests } = get();
 			const updatedFlowSpec = {
 				...flowSpec,
 				nodes,
 				edges,
+				tests,
 				updatedAt: new Date(),
 			};
+
+			console.info("Saving flow", updatedFlowSpec);
 
 			try {
 				// Generate YAML representations
@@ -536,6 +558,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					tags: updatedFlowSpec.tags,
 					nodes: updatedFlowSpec.nodes,
 					edges: updatedFlowSpec.edges,
+					tests: updatedFlowSpec.tests,
 					yaml: yamlNested,
 					yamlFlat: yamlFlat,
 					id: id || undefined,
@@ -543,6 +566,8 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					status: updatedFlowSpec.status,
 					baseId: updatedFlowSpec.baseId,
 				};
+
+				console.info("Saving flow to API", apiData);
 
 				const response = await fetch("/api/flow", {
 					method: flowSpec.id ? "PUT" : "POST",

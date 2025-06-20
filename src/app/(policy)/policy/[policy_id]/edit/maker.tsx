@@ -15,7 +15,10 @@ import { usePolicyStore } from "~/lib/state/policy";
 export default function Maker({
 	policy_id,
 	version,
-}: { policy_id: string; version: string | undefined }) {
+}: {
+	policy_id: string;
+	version: string | undefined;
+}) {
 	const {
 		schema,
 		tests,
@@ -38,13 +41,13 @@ export default function Maker({
 
 	// Check if all tests have been run and passed
 	const createdTests = tests.filter((test) => test.created);
-	const allTestsPassed =
+	const _allTestsPassed =
 		createdTests.length > 0 &&
 		createdTests.every(
 			(test) => test.outcome.ran && test.outcome.status === "passed",
 		);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: dont need others
 	useEffect(() => {
 		const loadPolicy = async () => {
 			await getPolicy(policy_id, version);

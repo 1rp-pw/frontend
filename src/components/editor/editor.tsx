@@ -1,6 +1,6 @@
 "use client";
-import { useRef } from "react";
 import type React from "react";
+import { useRef } from "react";
 import { highlightText } from "~/components/ui/highlight";
 
 interface EditorProps {

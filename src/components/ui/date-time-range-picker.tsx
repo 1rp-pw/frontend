@@ -14,7 +14,7 @@ import {
 	subDays,
 	subMonths,
 } from "date-fns";
-import { type Locale, enUS } from "date-fns/locale";
+import { enUS, type Locale } from "date-fns/locale";
 import { CalendarIcon, CheckIcon, ChevronRightIcon } from "lucide-react";
 import type { FC, JSX } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -162,9 +162,9 @@ export const DateTimeRangePicker: FC<DateTimeRangePickerProps> = ({
 		for (const preset of PRESETS) {
 			const presetRange = getPresetRange(preset.name);
 			if (
-				// biome-ignore lint/style/noNonNullAssertion: <explanation>
+				// biome-ignore lint/style/noNonNullAssertion: shadcn
 				isEqual(startOfDay(range.from), startOfDay(presetRange.from!)) &&
-				// biome-ignore lint/style/noNonNullAssertion: <explanation>
+				// biome-ignore lint/style/noNonNullAssertion: shadcn
 				isEqual(endOfDay(range.to), endOfDay(presetRange.to!))
 			) {
 				setSelectedPreset(preset.name);
@@ -187,6 +187,7 @@ export const DateTimeRangePicker: FC<DateTimeRangePickerProps> = ({
 		checkPreset();
 	}, [checkPreset]);
 
+	// biome-ignore lint/nursery/noNestedComponentDefinitions: shadcn
 	const PresetButton = ({
 		preset,
 		label,

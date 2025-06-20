@@ -1,26 +1,33 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { env } from "~/env";
+import { flowToYaml } from "~/lib/utils/flow-to-yaml";
 
 export async function POST(request: Request) {
 	try {
-		const { name, description, tags, nodes, edges, yaml, yamlFlat } =
-			await request.json();
+		const { name, nodes, edges, tests } = await request.json();
+
+		const yaml = flowToYaml(nodes, edges);
+
+		const body = JSON.stringify({
+			name,
+			nodes,
+			edges,
+			// biome-ignore lint/suspicious/noExplicitAny: can be anything
+			tests: tests.map((test: any) => ({ ...test, result: false })),
+			flowFlat: yaml,
+		});
+
+		console.info("body", body);
 
 		const response = await fetch(`${env.API_SERVER}/flow`, {
 			method: "POST",
-			body: JSON.stringify({
-				name,
-				description,
-				tags,
-				nodes,
-				edges,
-				yaml,
-				yamlFlat,
-			}),
+			body,
 			cache: "no-store",
 		});
 
+		// console.info("resp", response)
 		const resp = await response.json();
+		// console.info("resp", resp)
 
 		return NextResponse.json(
 			{
@@ -29,6 +36,8 @@ export async function POST(request: Request) {
 			{ status: 200 },
 		);
 	} catch (error) {
+		console.error("Error while creating route", error);
+
 		return NextResponse.json({ error: error }, { status: 500 });
 	}
 }
@@ -42,6 +51,7 @@ export async function PUT(request: Request) {
 			tags,
 			nodes,
 			edges,
+			tests,
 			yaml,
 			yamlFlat,
 			version,
@@ -57,6 +67,7 @@ export async function PUT(request: Request) {
 			tags,
 			nodes,
 			edges,
+			tests,
 			yaml,
 			yamlFlat,
 			version: "",
@@ -84,7 +95,7 @@ export async function GET(request: NextRequest) {
 		const id = searchParams.get("id");
 		const version = searchParams.get("version");
 
-		// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+		// biome-ignore lint/suspicious/noImplicitAnyLet: needs to be redefined at runtime
 		let response;
 		if (version) {
 			response = await fetch(`${env.API_SERVER}/flow/${id}/${version}`);

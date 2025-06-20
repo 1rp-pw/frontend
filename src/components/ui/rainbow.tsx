@@ -44,7 +44,7 @@ const createSeededRandom = (seed: number) => {
 };
 
 const formatJsonWithRainbowBraces = (
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: its fine
 	obj: any,
 	indent = 0,
 	braceCounter = { count: 0, random: createSeededRandom(12345) }, // Seeded for consistency
@@ -203,7 +203,7 @@ const formatJsonWithRainbowBraces = (
 };
 
 export function RainbowBraces({ json, className = "" }: RainbowBracesProps) {
-	// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+	// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
 	let jsonObj;
 	try {
 		if (typeof json === "string") {
@@ -211,7 +211,7 @@ export function RainbowBraces({ json, className = "" }: RainbowBracesProps) {
 		} else {
 			jsonObj = json;
 		}
-	} catch (error) {
+	} catch (_error) {
 		jsonObj = json;
 	}
 	const formattedElements = formatJsonWithRainbowBraces(jsonObj);
@@ -220,7 +220,7 @@ export function RainbowBraces({ json, className = "" }: RainbowBracesProps) {
 		<pre className={`font-mono text-sm ${className}`}>
 			<code>
 				{formattedElements.map((element, index) =>
-					// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+					// biome-ignore lint/suspicious/noArrayIndexKey: its fine
 					React.cloneElement(element as React.ReactElement, { key: index }),
 				)}
 			</code>

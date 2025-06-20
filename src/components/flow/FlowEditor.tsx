@@ -1,15 +1,14 @@
 "use client";
 
 import {
+	addEdge,
 	Background,
 	type Connection,
 	Controls,
 	type Edge,
 	MiniMap,
-	type Node,
 	type NodeTypes,
 	ReactFlow,
-	addEdge,
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
@@ -25,7 +24,6 @@ import type {
 	FlowNodeData,
 	PolicyNodeData,
 	ReturnNodeData,
-	StartNodeData,
 } from "~/lib/types";
 
 import "@xyflow/react/dist/style.css";
@@ -131,9 +129,15 @@ export function FlowEditor({
 			if (!sourceNode) return;
 
 			const position = {
-				x: sourceNode.position.x + 320,
-				y: sourceNode.position.y + (outputType === "true" ? -50 : 50),
+				x: 100 + sourceNode.position.x + 320,
+				y: sourceNode.position.y,
 			};
+
+			if (outputType === "true") {
+				position.y -= 125;
+			} else {
+				position.y += 175;
+			}
 
 			let data: PolicyNodeData | ReturnNodeData | CustomNodeData;
 
@@ -145,6 +149,11 @@ export function FlowEditor({
 						label: "Policy",
 						policyId: "",
 						policyName: "",
+						data: null,
+						position: {
+							x: position.x,
+							y: position.y,
+						},
 					} satisfies PolicyNodeData;
 					break;
 				case "return":
@@ -153,6 +162,11 @@ export function FlowEditor({
 						type: "return" as const,
 						label: `Return ${outputType === "true" ? "True" : "False"}`,
 						returnValue: outputType === "true",
+						data: null,
+						position: {
+							x: position.x,
+							y: position.y,
+						},
 					} satisfies ReturnNodeData;
 					break;
 				case "custom":
@@ -161,6 +175,11 @@ export function FlowEditor({
 						type: "custom" as const,
 						label: "Custom",
 						outcome: "",
+						data: null,
+						position: {
+							x: position.x,
+							y: position.y,
+						},
 					} satisfies CustomNodeData;
 					break;
 			}
@@ -210,6 +229,11 @@ export function FlowEditor({
 								label: "Policy",
 								policyId: "",
 								policyName: "",
+								data: null,
+								position: {
+									x: node.position.x,
+									y: node.position.y,
+								},
 							} satisfies PolicyNodeData;
 							break;
 						case "return": {
@@ -223,6 +247,11 @@ export function FlowEditor({
 								type: "return" as const,
 								label: `Return ${currentReturnValue ? "True" : "False"}`,
 								returnValue: currentReturnValue,
+								data: null,
+								position: {
+									x: node.position.x,
+									y: node.position.y,
+								},
 							} satisfies ReturnNodeData;
 							break;
 						}
@@ -232,6 +261,11 @@ export function FlowEditor({
 								type: "custom" as const,
 								label: "Custom",
 								outcome: "",
+								data: null,
+								position: {
+									x: node.position.x,
+									y: node.position.y,
+								},
 							} satisfies CustomNodeData;
 							break;
 					}

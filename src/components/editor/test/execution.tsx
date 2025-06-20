@@ -12,7 +12,6 @@ import {
 } from "~/components/ui/dialog";
 import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { Separator } from "~/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import {
 	Tooltip,
@@ -40,7 +39,7 @@ export function PolicyExecutionModal({
 	if (!executionData.trace) return null;
 	if (!executionData.trace.execution) return null;
 
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	const getValueFromPath = (path: string, obj: any): any => {
 		if (!path.startsWith("$.")) return null;
 		const cleanPath = path.substring(2); // Remove '$.'
@@ -69,7 +68,7 @@ export function PolicyExecutionModal({
 	const selectedExecution =
 		executionData.trace.execution[selectedExecutionIndex];
 
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	const renderCondition = (condition: any, index: number) => {
 		return (
 			<div key={index} className="mb-3 rounded-lg border p-4">
@@ -160,7 +159,7 @@ export function PolicyExecutionModal({
 							<div className="space-y-2">
 								{executionData.trace.execution.map((execution, index) => (
 									<button
-										// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+										// biome-ignore lint/suspicious/noArrayIndexKey: ignore
 										key={index}
 										type="button"
 										onClick={() => setSelectedExecutionIndex(index)}
@@ -275,7 +274,7 @@ export function PolicyExecutionModal({
 
 												// First pass: handle **Entity** patterns
 												const entityRegex = /\*\*(.*?)\*\*/g;
-												// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+												// biome-ignore lint/suspicious/noImplicitAnyLet: need to set this outside
 												let entityMatch;
 												const entityMatches: Array<{
 													match: string;
@@ -285,7 +284,7 @@ export function PolicyExecutionModal({
 												}> = [];
 
 												while (
-													// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+													// biome-ignore lint/suspicious/noAssignInExpressions: this is not a mistype
 													(entityMatch = entityRegex.exec(text)) !== null
 												) {
 													entityMatches.push({
@@ -298,7 +297,7 @@ export function PolicyExecutionModal({
 
 												// Second pass: handle __property__ patterns
 												const propertyRegex = /__(.*?)__/g;
-												// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+												// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
 												let propertyMatch;
 												const propertyMatches: Array<{
 													match: string;
@@ -308,7 +307,7 @@ export function PolicyExecutionModal({
 												}> = [];
 
 												while (
-													// biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+													// biome-ignore lint/suspicious/noAssignInExpressions: its fine
 													(propertyMatch = propertyRegex.exec(text)) !== null
 												) {
 													propertyMatches.push({
@@ -416,7 +415,7 @@ export function PolicyExecutionModal({
 														if (propertyPaths.has(normalized)) {
 															foundPath = propertyPaths.get(normalized);
 															foundValue = getValueFromPath(
-																// biome-ignore lint/style/noNonNullAssertion: <explanation>
+																// biome-ignore lint/style/noNonNullAssertion: its fine
 																foundPath!,
 																executionData.data,
 															);
@@ -492,15 +491,13 @@ export function PolicyExecutionModal({
 												return parts.length > 0 ? parts : [text];
 											};
 
+											const i = index;
 											return (
 												<div
-													// biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-													key={index}
+													key={i}
 													className="mb-0 whitespace-pre-wrap p-1 transition-colors hover:bg-muted/50"
 												>
-													<span className={"pr-2 text-red-700"}>
-														{index + 1}.
-													</span>{" "}
+													<span className={"pr-2 text-red-700"}>{i + 1}.</span>{" "}
 													{renderLineWithTooltips(line)}
 												</div>
 											);

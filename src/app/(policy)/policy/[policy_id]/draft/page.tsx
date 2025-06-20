@@ -3,7 +3,6 @@ import { env } from "~/env";
 
 export default async function IDEPage({
 	params,
-	searchParams,
 }: {
 	params: Promise<{ policy_id: string }>;
 	searchParams: Promise<{ [key: string]: string | undefined }>;

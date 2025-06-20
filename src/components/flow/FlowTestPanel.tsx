@@ -1,15 +1,13 @@
 "use client";
 
-import { CheckCircle, Loader2, Play, Save, XCircle } from "lucide-react";
+import { Loader2, Play, Save } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { JsonEditor } from "~/components/ui/json-editor";
 import { Label } from "~/components/ui/label";
 import type { FlowTest } from "~/lib/types";
-import { cn } from "~/lib/utils";
 
 interface FlowTestPanelProps {
 	testData: string;
@@ -46,7 +44,6 @@ export function FlowTestPanel({
 	testData,
 	currentTest,
 	isRunning,
-	testResult,
 	error,
 	onTestDataChange,
 	onRunTest,
@@ -72,7 +69,7 @@ export function FlowTestPanel({
 			try {
 				JSON.parse(value);
 				setJsonError(null);
-			} catch (e) {
+			} catch (_) {
 				setJsonError("Invalid JSON format");
 			}
 		} else {
@@ -141,7 +138,7 @@ export function FlowTestPanel({
 							Test Name
 						</Label>
 						<Input
-							id="test-name"
+							name="test-name"
 							value={testName}
 							onChange={(e) => setTestName(e.target.value)}
 							placeholder="Enter test name"
@@ -153,7 +150,7 @@ export function FlowTestPanel({
 							Expected Outcome
 						</Label>
 						<Input
-							id="expected-outcome"
+							name="expected-outcome"
 							value={expectedOutcome}
 							onChange={(e) => setExpectedOutcome(e.target.value)}
 							placeholder="true, false, or custom value like 'beep'"

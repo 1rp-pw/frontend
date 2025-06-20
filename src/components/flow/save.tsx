@@ -26,23 +26,27 @@ import {
 	FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { usePolicyStore } from "~/lib/state/policy";
+import { useFlowStore } from "~/lib/state/flow";
 
-export function SavePolicy() {
+export function SaveFlow({
+	isSaveDisabled = null,
+}: {
+	isSaveDisabled?: boolean | null;
+}) {
 	const [formOpen, setFormOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
-	const { id, name, setPolicyName, savePolicy } = usePolicyStore();
+	const { id, name, setFlowName, saveFlow, validationResult } = useFlowStore();
 
 	const formSchema = z.object({
-		policyName: z.string().min(2, "Policy name needs to be more than 2 chars"),
+		flowName: z.string().min(2, "Flow name needs to be more than 2 chars"),
 	});
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			policyName: "",
+			flowName: "",
 		},
 	});
 
@@ -50,23 +54,23 @@ export function SavePolicy() {
 		setIsLoading(true);
 		try {
 			if (!id) {
-				setPolicyName(data.policyName);
+				setFlowName(data.flowName);
 			}
-			const result = await savePolicy();
+			const result = await saveFlow();
 			if (result.success) {
-				toast("Policy Saved!");
+				toast("Flow Saved!");
 				setFormOpen(false);
 				form.reset();
 
 				if (result.returnId) {
-					router.push(`/policy/${result.returnId}`);
+					router.push(`/flow/${result.returnId}`);
 				}
 			} else {
-				toast("Failed to Save Policy!");
+				toast("Failed to Save Flow!");
 			}
 		} catch (error) {
 			console.error("save error", error);
-			toast("Policy Save Failed");
+			toast("Flow Save Failed");
 		} finally {
 			setIsLoading(false);
 			setFormOpen(false);
@@ -78,37 +82,47 @@ export function SavePolicy() {
 			<Button
 				disabled={isLoading}
 				onClick={() => {
-					onSubmit({ policyName: name }).then();
+					onSubmit({ flowName: name }).then();
 				}}
 			>
-				{isLoading ? "Saving..." : id ? "Update Draft" : "Save Policy"}
+				{isLoading ? "Saving..." : id ? "Update Draft" : "Save Flow"}
 			</Button>
 		);
 	}
 
+	const saveDisabled = isSaveDisabled === null ? false : isSaveDisabled;
+
 	return (
 		<Dialog open={formOpen} onOpenChange={setFormOpen}>
 			<DialogTrigger asChild>
-				<Button className={"rounded text-sm"}>
+				<Button
+					className={"rounded text-sm"}
+					disabled={saveDisabled}
+					title={
+						validationResult && !validationResult.isValid
+							? validationResult.errors.join("\n")
+							: "Save flow"
+					}
+				>
 					<SaveIcon />
 					{id ? "Update" : "Save"}
 				</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>{id ? `Update ${name}` : "Save Policy"}</DialogTitle>
-					<DialogDescription>Save the draft policy</DialogDescription>
+					<DialogTitle>{id ? `Update ${name}` : "Save Flow"}</DialogTitle>
+					<DialogDescription>Save the draft flow</DialogDescription>
 				</DialogHeader>
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)}>
 						<FormField
 							control={form.control}
-							name={"policyName"}
+							name={"flowName"}
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Policy Name</FormLabel>
+									<FormLabel>Flow Name</FormLabel>
 									<FormControl>
-										<Input placeholder="Policy Name" {...field} />
+										<Input placeholder="Flow Name" {...field} />
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -121,7 +135,7 @@ export function SavePolicy() {
 								</Button>
 							</DialogClose>
 							<Button type="submit" disabled={isLoading}>
-								{isLoading ? "Saving..." : id ? "Update Draft" : "Save Policy"}
+								{isLoading ? "Saving..." : id ? "Update Draft" : "Save Flow"}
 							</Button>
 						</div>
 					</form>

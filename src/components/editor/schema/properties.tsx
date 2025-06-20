@@ -37,7 +37,7 @@ export function PropertyForm({ onAddProperty }: PropertyFormProps) {
 
 	const handleAddProperty = () => {
 		if (!newPropName.trim()) return;
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: many options
 		const propertyOptions: any = {};
 		switch (newPropType) {
 			case "string":
@@ -157,7 +157,7 @@ export function PropertyForm({ onAddProperty }: PropertyFormProps) {
 				{renderTypeSpecificOptions()}
 				<div className={"flex items-center space-x-1"}>
 					<Switch
-						id="required"
+						name={"required"}
 						checked={newPropRequired}
 						onCheckedChange={setNewPropRequired}
 					/>

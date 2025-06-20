@@ -8,6 +8,7 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
+import { Button } from "~/components/ui/button";
 
 interface BreadcrumbNavProps {
 	editingObject: string | null;
@@ -27,10 +28,9 @@ export function BreadcrumbNav({
 			<BreadcrumbList>
 				<BreadcrumbItem>
 					<BreadcrumbLink asChild>
-						{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-						<span className="cursor-pointer" onClick={() => onNavigateTo(null)}>
-							$.
-						</span>
+						<Button asChild variant={"link"} onClick={() => onNavigateTo(null)}>
+							<span className="cursor-pointer">$.</span>
+						</Button>
 					</BreadcrumbLink>
 				</BreadcrumbItem>
 				{breadcrumb.map((item, index) => {
@@ -46,13 +46,13 @@ export function BreadcrumbNav({
 									<BreadcrumbPage>{item}</BreadcrumbPage>
 								) : (
 									<BreadcrumbLink asChild>
-										{/* biome-ignore lint/a11y/useKeyWithClickEvents: <explanation> */}
-										<span
-											className="cursor-pointer"
+										<Button
+											asChild
+											variant={"link"}
 											onClick={() => onNavigateTo(pathToHere)}
 										>
-											{item}
-										</span>
+											<span className="cursor-pointer">{item}</span>
+										</Button>
 									</BreadcrumbLink>
 								)}
 							</BreadcrumbItem>

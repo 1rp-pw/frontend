@@ -1,10 +1,8 @@
 "use client";
 
-import { CopyIcon, FilePlusIcon, PlayIcon } from "lucide-react";
+import { CopyIcon, PlayIcon } from "lucide-react";
 import { useEffect } from "react";
 import { Editor } from "~/components/editor/editor";
-import { PublishPolicy } from "~/components/editor/publish";
-import { SavePolicy } from "~/components/editor/save";
 import { SchemaBuilder } from "~/components/editor/schema/builder";
 import { TestForm } from "~/components/editor/test/form";
 import { TestList } from "~/components/editor/test/list";
@@ -15,7 +13,10 @@ import { usePolicyStore } from "~/lib/state/policy";
 export default function Maker({
 	policy_id,
 	version,
-}: { policy_id: string; version: string | undefined }) {
+}: {
+	policy_id: string;
+	version: string | undefined;
+}) {
 	const {
 		schema,
 		tests,
@@ -37,19 +38,18 @@ export default function Maker({
 
 	// Check if all tests have been run and passed
 	const createdTests = tests.filter((test) => test.created);
-	const allTestsPassed =
+	const _allTestsPassed =
 		createdTests.length > 0 &&
 		createdTests.every(
 			(test) => test.outcome.ran && test.outcome.status === "passed",
 		);
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		const loadPolicy = async () => {
 			await getPolicy(policy_id, version);
 		};
 		loadPolicy();
-	}, [policy_id, version]);
+	}, [policy_id, version, getPolicy]);
 
 	if (isLoading) {
 		return (

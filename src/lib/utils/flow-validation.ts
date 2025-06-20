@@ -18,7 +18,6 @@ export function validateFlowTermination(
 
 	// Build adjacency map
 	const adjacencyMap: Record<string, { true?: string; false?: string }> = {};
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	edges.forEach((edge) => {
 		if (!adjacencyMap[edge.source]) {
 			adjacencyMap[edge.source] = {};
@@ -41,7 +40,6 @@ export function validateFlowTermination(
 	}
 
 	// Check each node that should have connections
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	nodes.forEach((node) => {
 		// Terminal nodes don't need connections
 		if (terminalNodeTypes.includes(node.type)) {
@@ -49,7 +47,7 @@ export function validateFlowTermination(
 		}
 
 		const connections = adjacencyMap[node.id];
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: node data is anything
 		const nodeData = node as any;
 
 		// Check for policy ID in start and policy nodes
@@ -150,7 +148,6 @@ export function validateFlowTermination(
 	if (startNode) {
 		markReachable(startNode.id);
 
-		// biome-ignore lint/complexity/noForEach: <explanation>
 		nodes.forEach((node) => {
 			if (!reachableNodes.has(node.id) && node.id !== startNode.id) {
 				errors.push(`Node "${node.id}" is not connected to the flow`);

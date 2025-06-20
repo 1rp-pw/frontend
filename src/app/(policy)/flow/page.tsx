@@ -22,11 +22,8 @@ export default function FlowPage() {
 		name,
 		id,
 		updateNodesAndEdges,
-		setFlowName,
 		saveFlow,
-		getFlow,
 		reset,
-		isLoading,
 		error,
 		isTestRunning,
 		testResult,
@@ -78,18 +75,6 @@ export default function FlowPage() {
 		}
 	}, [saveFlow]);
 
-	const handleLoadFlow = useCallback(
-		async (flowId: string) => {
-			const result = await getFlow(flowId);
-			if (result.success) {
-				console.log("Flow loaded successfully");
-			} else {
-				console.error("Failed to load flow:", result.error);
-			}
-		},
-		[getFlow],
-	);
-
 	const handleRunCurrentTest = useCallback(async () => {
 		if (currentTest) {
 			await runTest(currentTest.id);
@@ -99,20 +84,11 @@ export default function FlowPage() {
 	// Generate YAML preview
 	const yamlPreview = flowToYaml(storeNodes, storeEdges);
 
-	const isSaveDisabled =
-		isLoading || (validationResult && !validationResult.isValid);
-
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
 			<FlowHeader
 				name={name}
 				id={id}
-				isLoading={isLoading}
-				isSaveDisabled={isSaveDisabled}
-				error={error}
-				validationResult={validationResult}
-				onNameChange={setFlowName}
-				onLoadFlow={handleLoadFlow}
 				onSaveFlow={handleSaveFlow}
 				onNewFlow={reset}
 			/>

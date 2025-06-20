@@ -1,7 +1,7 @@
 "use client";
 
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { Plus, Search, X } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { useFlowContext } from "~/components/flow/flow-context";
 import { Button } from "~/components/ui/button";
@@ -27,7 +27,7 @@ export function PolicyNode({ data, id }: NodeProps) {
 		(data as unknown as PolicyNodeData).policyName || "",
 	);
 	const [showPolicySearch, setShowPolicySearch] = useState(false);
-	const { policies, isLoading, searchPolicies } = usePolicySearch();
+	const { policies, isLoading } = usePolicySearch();
 	const { addConnectedNode, getConnectedNodes, deleteNode } = useFlowContext();
 	const connectedNodes = getConnectedNodes(id);
 
@@ -43,8 +43,13 @@ export function PolicyNode({ data, id }: NodeProps) {
 		setIsEditing(false);
 	};
 
+	const returnValue = (data as unknown as PolicyNodeData).truePath;
+	const bgColor = returnValue ? "border-green-500" : "border-red-500";
+
 	return (
-		<Card className="min-h-32 w-96 rounded-xl border border-border bg-card shadow-sm">
+		<Card
+			className={`min-h-32 w-96 rounded-xl border border-border bg-card shadow-sm ${bgColor}`}
+		>
 			<CardHeader className="pb-3">
 				<CardTitle className="flex items-center justify-between font-medium text-sm">
 					<div className="flex items-center gap-2">
@@ -63,21 +68,15 @@ export function PolicyNode({ data, id }: NodeProps) {
 			</CardHeader>
 			<CardContent className="space-y-3">
 				{!isEditing ? (
-					<div className="space-y-2">
-						<div>
-							<Label className="font-medium text-xs">Policy:</Label>
-							<div className="text-muted-foreground text-xs">
-								{policyName || policyId || "Not selected"}
-							</div>
+					// biome-ignore lint/a11y: intentionally using click-only
+					<div
+						className=" cursor-pointer space-y-2"
+						onClick={() => setIsEditing(true)}
+					>
+						<Label className="font-medium text-xs">Policy:</Label>
+						<div className="text-muted-foreground text-xs">
+							{policyName || policyId || "Not selected"}
 						</div>
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={() => setIsEditing(true)}
-							className="w-full"
-						>
-							Edit
-						</Button>
 					</div>
 				) : (
 					<div className="space-y-3">
@@ -91,14 +90,14 @@ export function PolicyNode({ data, id }: NodeProps) {
 										placeholder="Policy ID"
 										className="text-xs"
 									/>
-									<Button
-										size="sm"
-										variant="outline"
-										onClick={() => setShowPolicySearch(!showPolicySearch)}
-										disabled={!policyId.trim()}
-									>
-										<Search className="h-3 w-3" />
-									</Button>
+									{/*<Button*/}
+									{/*	size="sm"*/}
+									{/*	variant="outline"*/}
+									{/*	onClick={() => setShowPolicySearch(!showPolicySearch)}*/}
+									{/*	disabled={!policyId.trim()}*/}
+									{/*>*/}
+									{/*	<Search className="h-3 w-3" />*/}
+									{/*</Button>*/}
 								</div>
 								{showPolicySearch && (
 									<Select
@@ -185,12 +184,14 @@ export function PolicyNode({ data, id }: NodeProps) {
 			/>
 
 			{/* Keep handles for visual connection lines but make them invisible */}
+			{/** biome-ignore lint/nursery/useUniqueElementIds: needed for visual */}
 			<Handle
 				type="source"
 				position={Position.Right}
 				id="true"
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
+			{/** biome-ignore lint/nursery/useUniqueElementIds: needed for visual */}
 			<Handle
 				type="source"
 				position={Position.Right}

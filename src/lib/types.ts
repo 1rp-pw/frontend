@@ -3,7 +3,7 @@ export interface PolicySpec {
 	id: string;
 	name: string;
 	rule: string;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	schema: any;
 	schemaVersion: string;
 	version: number | string;
@@ -15,6 +15,7 @@ export interface PolicySpec {
 	description?: string;
 	tags?: string[];
 	hasDraft: boolean;
+	error: string | null;
 }
 
 export interface PolicyVersion {
@@ -49,6 +50,11 @@ export interface FlowNodeData extends Record<string, unknown> {
 	id: string;
 	type: "start" | "policy" | "return" | "custom";
 	label: string;
+	position: {
+		x: number;
+		y: number;
+	};
+	data: FlowNodeData | null;
 }
 
 export interface StartNodeData extends FlowNodeData {
@@ -87,6 +93,7 @@ export interface FlowSpec {
 	tags?: string[];
 	nodes: FlowNodeData[];
 	edges: FlowEdgeData[];
+	tests?: FlowTest[];
 	version: number | string;
 	draft: boolean;
 	status: string;
@@ -94,6 +101,8 @@ export interface FlowSpec {
 	updatedAt: Date;
 	lastPublishedAt?: Date;
 	hasDraft: boolean;
+	flow: string;
+	error: string | null;
 }
 
 export interface FlowEdgeData {

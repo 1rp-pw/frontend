@@ -50,18 +50,15 @@ export function CustomNode({ data, id }: NodeProps) {
 					<div className="space-y-2">
 						<div>
 							<Label className="font-medium text-xs">Outcome:</Label>
-							<div className="rounded bg-gray-100 p-2 text-gray-600 text-xs">
+							{/** biome-ignore lint/a11y/noStaticElementInteractions: cleaner */}
+							{/** biome-ignore lint/a11y/useKeyWithClickEvents: cleaner*/}
+							<div
+								className="cursor-context-menu rounded bg-gray-300 p-2 text-gray-600 text-xs"
+								onClick={() => setIsEditing(true)}
+							>
 								{outcome || "No outcome set"}
 							</div>
 						</div>
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={() => setIsEditing(true)}
-							className="w-full"
-						>
-							Edit
-						</Button>
 					</div>
 				) : (
 					<div className="space-y-3">

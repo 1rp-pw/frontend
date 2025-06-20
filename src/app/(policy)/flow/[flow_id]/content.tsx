@@ -1,14 +1,9 @@
 "use client";
 
-import {
-	Clock,
-	FilePenLine,
-	FilePlus2,
-	FileText,
-	PackageCheck,
-} from "lucide-react";
+import { Clock, FilePenLine, FilePlus2, FileText } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { FlowVersionPreview } from "~/components/flow/FlowVersionPreview";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -18,13 +13,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "~/components/ui/card";
-import { highlightText } from "~/components/ui/highlight";
-import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea } from "~/components/ui/scroll-area";
-import type { PolicySpec } from "~/lib/types";
+import type { FlowSpec } from "~/lib/types";
 
-async function getPolicyVersions(policy_id: string) {
-	const resp = await fetch(`/api/policy/versions?policy_id=${policy_id}`, {
+async function getFlowVersions(flow_id: string) {
+	const resp = await fetch(`/api/flow/versions?flow_id=${flow_id}`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
@@ -33,11 +26,10 @@ async function getPolicyVersions(policy_id: string) {
 	return await resp.json();
 }
 
-export default function PolicyInfo({ policy_id }: { policy_id: string }) {
-	const [versions, setVersions] = useState<PolicySpec[]>([]);
-	const [selectedVersion, setSelectedVersion] = useState<PolicySpec | null>(
-		null,
-	);
+export default function FlowInfo({ flow_id }: { flow_id: string }) {
+	const [versions, setVersions] = useState<FlowSpec[]>([]);
+	const [selectedVersion, setSelectedVersion] = useState<FlowSpec | null>(null);
+	const [loadError, setLoadError] = useState<Error | null>(null);
 
 	const getStatusVariant = (status: string) => {
 		switch (status) {
@@ -48,22 +40,28 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 		}
 	};
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: dont ned others
+	// biome-ignore lint/correctness/useExhaustiveDependencies: only update when the flow_id changes
 	useEffect(() => {
-		getPolicyVersions(policy_id).then((respVersions) => {
-			// console.info("respVersions", respVersions);
+		getFlowVersions(flow_id).then((respVersions) => {
+			console.info("respVersions", respVersions);
+			if (respVersions.error !== null) {
+				setLoadError(respVersions.error);
+				return;
+			}
 
 			setVersions(respVersions);
+
 			// Auto-select the first version if available
 			if (respVersions.length > 0 && !selectedVersion) {
 				setSelectedVersion(respVersions[0]);
 			}
 		});
-	}, [policy_id]);
-
-	// console.info("versions", versions);
+	}, [flow_id]);
 
 	if (versions.length === 0) {
+		return null;
+	}
+	if (loadError !== null) {
 		return null;
 	}
 
@@ -82,7 +80,7 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 					<div className={"p-2"}>
 						{versions.map((version) => (
 							<Card
-								key={version.id}
+								key={`card-${version.id}`}
 								className={`mb-2 cursor-pointer transition-colors hover:bg-muted/50 ${selectedVersion?.id === version.id ? "bg-muted/30 ring-2 ring-primary" : ""}`}
 								onClick={() => setSelectedVersion(version)}
 							>
@@ -151,7 +149,7 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 							{selectedVersion &&
 								(selectedVersion?.draft ? (
 									<Button variant={"outline"} size={"sm"} asChild>
-										<Link href={`/policy/${selectedVersion.id}/edit`}>
+										<Link href={`/flow/${selectedVersion.id}/edit`}>
 											<FilePenLine className={"mr-2 h-4 w-4"} />
 											Edit Draft
 										</Link>
@@ -159,13 +157,13 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 								) : (
 									<div className={"flex gap-2"}>
 										<Button variant={"outline"} size={"sm"} asChild>
-											<Link href={`/policy/${selectedVersion.id}/draft`}>
+											<Link href={`/flow/${selectedVersion.id}/draft`}>
 												<FilePlus2 className={"mr-2 h-4 w-4"} />
 												Create Draft
 											</Link>
 										</Button>
 										<Button variant={"outline"} size={"sm"} asChild>
-											<Link href={`/policy/${selectedVersion.id}/view`}>
+											<Link href={`/flow/${selectedVersion.id}/view`}>
 												<FileText className={"mr-2 h-4 w-4"} />
 												View Details
 											</Link>
@@ -176,64 +174,55 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 					</div>
 
 					<div className={"min-h-0 flex-1"}>
-						<ScrollArea className={"h-full"}>
-							<div className={"p-6"}>
-								{selectedVersion ? (
-									<pre className={"whitespace-pre-wrap"}>
-										<div
-											// biome-ignore lint/security/noDangerouslySetInnerHtml: its fine
-											dangerouslySetInnerHTML={{
-												__html: highlightText(
-													selectedVersion.rule || "No rule content available",
-												),
-											}}
-										/>
-									</pre>
-								) : (
-									<div
-										className={
-											"flex h-32 items-center justify-center text-muted-foreground"
-										}
-									>
-										Select a version to view its rule
-									</div>
-								)}
+						{selectedVersion ? (
+							<FlowVersionPreview
+								nodes={selectedVersion.nodes}
+								edges={selectedVersion.edges}
+								className="h-full"
+							/>
+						) : (
+							<div
+								className={
+									"flex h-32 items-center justify-center text-muted-foreground"
+								}
+							>
+								Select a version to view its flow
 							</div>
-						</ScrollArea>
+						)}
 					</div>
 				</div>
 
-				<div className={"flex h-[33vh] flex-col border-t bg-muted/5"}>
-					<div className={"flex-shrink-0 border-b bg-muted/10 p-4"}>
-						<h3 className={"flex items-center gap-2 font-semibold text-lg"}>
-							<PackageCheck className={"h-4 w-4"} />
-							Configuration
-						</h3>
-						<p className={"text-muted-foreground text-sm"}>
-							Version Configuration and metadata
-						</p>
-					</div>
-					<div className={"min-h-0 flex-1"}>
-						<ScrollArea className={"h-full"}>
-							<div className={"p-4"}>
-								{selectedVersion && (
-									<pre
-										className={
-											"overflow-x-auto rounded-lg bg-background text-xs"
-										}
-									>
-										<code>
-											<RainbowBraces
-												json={selectedVersion?.schema}
-												className={"text-sm"}
-											/>
-										</code>
-									</pre>
-								)}
-							</div>
-						</ScrollArea>
-					</div>
-				</div>
+				{/*<div className={"flex h-[33vh] flex-col border-t bg-muted/5"}>*/}
+				{/*	<div className={"flex-shrink-0 border-b bg-muted/10 p-4"}>*/}
+				{/*		<h3 className={"flex items-center gap-2 font-semibold text-lg"}>*/}
+				{/*			<PackageCheck className={"h-4 w-4"} />*/}
+				{/*			Configuration*/}
+				{/*		</h3>*/}
+				{/*		<p className={"text-muted-foreground text-sm"}>*/}
+				{/*			Version Configuration and metadata*/}
+				{/*		</p>*/}
+				{/*	</div>*/}
+				{/*	<div className={"min-h-0 flex-1"}>*/}
+				{/*		<ScrollArea className={"h-full"}>*/}
+				{/*			<div className={"p-4"}>*/}
+				{/*				{selectedVersion && (*/}
+				{/*					<pre*/}
+				{/*						className={*/}
+				{/*							"overflow-x-auto rounded-lg bg-background text-xs"*/}
+				{/*						}*/}
+				{/*					>*/}
+				{/*						<code>*/}
+				{/*							<RainbowBraces*/}
+				{/*								json={selectedVersion?.metadata}*/}
+				{/*								className={"text-sm"}*/}
+				{/*							/>*/}
+				{/*						</code>*/}
+				{/*					</pre>*/}
+				{/*				)}*/}
+				{/*			</div>*/}
+				{/*		</ScrollArea>*/}
+				{/*	</div>*/}
+				{/*</div>*/}
 			</div>
 		</div>
 	);

@@ -12,11 +12,6 @@ import {
 import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import {
-	Tooltip,
-	TooltipContent,
-	TooltipTrigger,
-} from "~/components/ui/tooltip";
 import type { FlowTestResult } from "~/lib/state/flow";
 
 interface FlowExecutionModalProps {
