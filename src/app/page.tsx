@@ -46,8 +46,10 @@ function isValidPublishDate(date: Date | string | undefined): boolean {
 export default function PolicyList() {
 	const [policies, setPolicies] = useState<PolicySpec[]>([]);
 	const [flows, setFlows] = useState<FlowSpec[]>([]);
-	const [loadPoliciesError, setLoadPoliciesError] = useState<Error | null>(null)
-	const [loadFlowsError, setLoadFlowsError] = useState<Error | null>(null)
+	const [loadPoliciesError, setLoadPoliciesError] = useState<Error | null>(
+		null,
+	);
+	const [loadFlowsError, setLoadFlowsError] = useState<Error | null>(null);
 
 	useEffect(() => {
 		getPolicyList().then((policyData) => {
