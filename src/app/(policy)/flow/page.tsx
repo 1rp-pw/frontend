@@ -22,10 +22,8 @@ export default function FlowPage() {
 		name,
 		id,
 		updateNodesAndEdges,
-		setFlowName,
 		saveFlow,
 		reset,
-		isLoading,
 		error,
 		isTestRunning,
 		testResult,
@@ -86,18 +84,11 @@ export default function FlowPage() {
 	// Generate YAML preview
 	const yamlPreview = flowToYaml(storeNodes, storeEdges);
 
-	const isSaveDisabled =
-		isLoading || (validationResult && !validationResult.isValid);
-
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
 			<FlowHeader
 				name={name}
 				id={id}
-				isLoading={isLoading}
-				isSaveDisabled={isSaveDisabled}
-				validationResult={validationResult}
-				onNameChange={setFlowName}
 				onSaveFlow={handleSaveFlow}
 				onNewFlow={reset}
 			/>

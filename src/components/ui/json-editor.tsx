@@ -36,7 +36,7 @@ export function JsonEditor({
 			const parsed = JSON.parse(value);
 			setParsedJson(parsed);
 			setParseError(null);
-		} catch (error) {
+		} catch (_) {
 			setParsedJson(null);
 			setParseError("Invalid JSON");
 		}

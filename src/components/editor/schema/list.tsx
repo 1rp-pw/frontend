@@ -29,7 +29,7 @@ interface PropertyListProps {
 		newName: string,
 		type: string,
 		required: boolean,
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: many options
 		options?: any,
 	) => void;
 	onRemoveProperty: (name: string) => void;
@@ -86,7 +86,7 @@ export function PropertyList({
 
 	const saveEdit = () => {
 		if (!editingProperty || !editingName.trim()) return;
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: can be anything
 		const propertyOptions: any = {};
 
 		switch (editingType) {
@@ -147,7 +147,7 @@ export function PropertyList({
 		);
 	};
 
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: can be antyhing
 	const getPropertyDisplayInfo = (propDetails: any) => {
 		let displayInfo = `(${propDetails.type})`;
 		if (propDetails.type === "string") {

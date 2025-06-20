@@ -1,13 +1,13 @@
 import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
 
-interface YamlNode {
-	id: string;
-	type: string;
-	policyId?: string;
-	returnValue?: boolean | string;
-	true?: string;
-	false?: string;
-}
+// interface YamlNode {
+// 	id: string;
+// 	type: string;
+// 	policyId?: string;
+// 	returnValue?: boolean | string;
+// 	true?: string;
+// 	false?: string;
+// }
 
 export function flowToYaml(
 	nodes: FlowNodeData[],
@@ -16,7 +16,6 @@ export function flowToYaml(
 	// Build adjacency map
 	const adjacencyMap: Record<string, { true?: string; false?: string }> = {};
 
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	edges.forEach((edge) => {
 		if (!adjacencyMap[edge.source]) {
 			adjacencyMap[edge.source] = {};
@@ -54,7 +53,7 @@ export function flowToYaml(
 		if (!node) return;
 
 		const indentStr = "  ".repeat(indent);
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: node data can be anything
 		const nodeData = node as any;
 
 		// Add node to YAML
@@ -122,9 +121,8 @@ export function flowToFlatYaml(
 
 	// List all nodes
 	yamlLines.push("  nodes:");
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	nodes.forEach((node) => {
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: node data can be anything
 		const nodeData = node as any;
 		yamlLines.push(`    - id: ${node.id}`);
 		yamlLines.push(`      type: ${node.type}`);
@@ -150,7 +148,6 @@ export function flowToFlatYaml(
 
 	// List all edges
 	yamlLines.push("  edges:");
-	// biome-ignore lint/complexity/noForEach: <explanation>
 	edges.forEach((edge) => {
 		yamlLines.push(`    - from: ${edge.source}`);
 		yamlLines.push(`      to: ${edge.target}`);

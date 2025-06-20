@@ -38,8 +38,7 @@ export function PublishPolicy() {
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
-	const { tests, savePolicy, updatePolicySpec, policySpec, id } =
-		usePolicyStore();
+	const { tests, savePolicy, updatePolicySpec, id } = usePolicyStore();
 
 	const formSchema = z.object({
 		policyVersion: z.number().min(0.1, "Policy version must be at least 0.1"),

@@ -48,7 +48,7 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 		}
 	};
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: dont ned others
 	useEffect(() => {
 		getPolicyVersions(policy_id).then((respVersions) => {
 			// console.info("respVersions", respVersions);
@@ -181,7 +181,7 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 								{selectedVersion ? (
 									<pre className={"whitespace-pre-wrap"}>
 										<div
-											// biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+											// biome-ignore lint/security/noDangerouslySetInnerHtml: its fine
 											dangerouslySetInnerHTML={{
 												__html: highlightText(
 													selectedVersion.rule || "No rule content available",

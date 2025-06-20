@@ -1,10 +1,8 @@
 "use client";
 
 import { EditIcon, FileJsonIcon, FileTextIcon } from "lucide-react";
-import { onNavigationIntent } from "next/dist/client/components/links";
 import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
-import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { Textarea } from "~/components/ui/textarea";
@@ -83,7 +81,7 @@ export function SchemaBuilder({
 		name: string,
 		type: string,
 		required: boolean,
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: lots of options
 		options?: any,
 	) => {
 		const currentSchema = getCurrentSchema();
@@ -130,7 +128,7 @@ export function SchemaBuilder({
 		newName: string,
 		type: string,
 		required: boolean,
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: many options
 		options?: any,
 	) => {
 		const currentSchema = getCurrentSchema();

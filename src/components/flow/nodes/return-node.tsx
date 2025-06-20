@@ -12,13 +12,13 @@ export function ReturnNode({ data, id }: NodeProps) {
 	const returnValue = (data as unknown as ReturnNodeData).returnValue;
 	const { changeNodeType, deleteNode } = useFlowContext();
 
-	const bgColor = returnValue
-		? "bg-green-50 border-green-500"
-		: "bg-red-50 border-red-500";
+	const bgColor = returnValue ? "border-green-500" : "border-red-500";
 	const dotColor = returnValue ? "bg-green-500" : "bg-red-500";
 
 	return (
-		<Card className="min-h-24 w-48 rounded-xl border border-border bg-card shadow-sm">
+		<Card
+			className={`min-h-24 w-48 rounded-xl border border-border bg-card shadow-sm ${bgColor}`}
+		>
 			<CardHeader className="pb-3">
 				<CardTitle className="flex items-center justify-between font-medium text-sm">
 					<div className="flex items-center gap-2">

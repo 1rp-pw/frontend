@@ -1,7 +1,7 @@
 "use client";
 
 import { Handle, type NodeProps, Position } from "@xyflow/react";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useFlowContext } from "~/components/flow/flow-context";
 import { Button } from "~/components/ui/button";
@@ -27,7 +27,7 @@ export function StartNode({ data, id }: NodeProps) {
 		(data as unknown as StartNodeData)?.policyName || "",
 	);
 	const [showPolicySearch, setShowPolicySearch] = useState(false);
-	const { policies, isLoading, searchPolicies } = usePolicySearch();
+	const { policies, isLoading } = usePolicySearch();
 	const { addConnectedNode, getConnectedNodes } = useFlowContext();
 	const connectedNodes = getConnectedNodes(id);
 
@@ -169,12 +169,14 @@ export function StartNode({ data, id }: NodeProps) {
 			</CardContent>
 
 			{/* Keep handles for visual connection lines but make them invisible */}
+			{/** biome-ignore lint/nursery/useUniqueElementIds: needed for visual */}
 			<Handle
 				type="source"
 				position={Position.Right}
 				id="true"
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
+			{/** biome-ignore lint/nursery/useUniqueElementIds: needed for visual */}
 			<Handle
 				type="source"
 				position={Position.Right}

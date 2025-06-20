@@ -282,11 +282,12 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 		);
 	};
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: shadcn
 	useEffect(() => {
 		checkPreset();
 	}, [range, rangeCompare]);
 
+	// biome-ignore lint/nursery/noNestedComponentDefinitions: shadcn
 	const PresetButton = ({
 		preset,
 		label,
@@ -303,12 +304,10 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 				setPreset(preset);
 			}}
 		>
-			<>
-				<span className={cn("pr-2 opacity-0", isSelected && "opacity-70")}>
-					<CheckIcon className="h-4 w-4" />
-				</span>
-				{label}
-			</>
+			<span className={cn("pr-2 opacity-0", isSelected && "opacity-70")}>
+				<CheckIcon className="h-4 w-4" />
+			</span>
+			{label}
 		</Button>
 	);
 
@@ -349,12 +348,10 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 						</div>
 						{rangeCompare != null && (
 							<div className="-mt-1 text-xs opacity-60">
-								<>
-									vs. {formatDate(rangeCompare.from, locale)}
-									{rangeCompare.to != null
-										? ` - ${formatDate(rangeCompare.to, locale)}`
-										: ""}
-								</>
+								vs. {formatDate(rangeCompare.from, locale)}
+								{rangeCompare.to != null
+									? ` - ${formatDate(rangeCompare.to, locale)}`
+									: ""}
 							</div>
 						)}
 					</div>
@@ -406,7 +403,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 													setRangeCompare(undefined);
 												}
 											}}
-											id="compare-mode"
+											name="compare-mode"
 										/>
 										<Label htmlFor="compare-mode">Compare</Label>
 									</div>

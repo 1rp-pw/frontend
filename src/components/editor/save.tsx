@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { SaveIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -88,7 +89,10 @@ export function SavePolicy() {
 	return (
 		<Dialog open={formOpen} onOpenChange={setFormOpen}>
 			<DialogTrigger asChild>
-				<Button className={"rounded text-sm"}>{id ? "Update" : "Save"}</Button>
+				<Button className={"rounded text-sm"}>
+					<SaveIcon />
+					{id ? "Update" : "Save"}
+				</Button>
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>

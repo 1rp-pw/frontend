@@ -15,7 +15,7 @@ export interface Outcome {
 }
 
 export interface TestResultSet {
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	errors: any | null;
 	result: boolean;
 	trace: {
@@ -23,30 +23,30 @@ export interface TestResultSet {
 			conditions: Array<{
 				evaluation_details?: {
 					comparison_result: boolean;
-					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+					// biome-ignore lint/suspicious/noExplicitAny: can be anything
 					left_value: { type: string; value: any };
-					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+					// biome-ignore lint/suspicious/noExplicitAny: can be anything
 					right_value: { type: string; value: any };
 				};
 				operator?: string;
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				// biome-ignore lint/suspicious/noExplicitAny: can be anything
 				property?: { path: string; value: any };
 				result: boolean;
 				selector?: { value: string };
-				// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+				// biome-ignore lint/suspicious/noExplicitAny: can be anything
 				value?: { pos: any; type: string; value: any };
 				referenced_rule_outcome?: string;
 				rule_name?: string;
 			}>;
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			// biome-ignore lint/suspicious/noExplicitAny: can be anything
 			outcome: { pos: any; value: string };
 			result: boolean;
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			// biome-ignore lint/suspicious/noExplicitAny: can be anything
 			selector: { pos: any; value: string };
 		}>;
 	};
 	rule: string[];
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	data: any | null;
 }
 
@@ -86,10 +86,10 @@ interface PolicyStore {
 	// Schema
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	setSchema: (schema: any) => void;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	schema: any;
 	schemaVersion: string;
-	// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	getDefaultSchema: () => any;
 	initializeSchemaIfEmpty: () => void;
 
@@ -391,6 +391,7 @@ const createDefaultPolicySpec = (): PolicySpec => ({
 	status: "draft",
 	baseId: "",
 	hasDraft: true,
+	error: null,
 });
 
 const defaultTests: Test[] = [
@@ -764,7 +765,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			});
 
 			try {
-				// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+				// biome-ignore lint/suspicious/noImplicitAnyLet: needs to be redefined at runtime
 				let response;
 
 				if (version) {
@@ -815,6 +816,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					status: result.status,
 					draft: result.status === "draft",
 					hasDraft: result.hasDraft,
+					error: null,
 				};
 
 				// console.info("Policy spec", policySpec, result);
@@ -828,7 +830,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 					rule: policySpec.rule,
 					name: policySpec.name,
 					id: policySpec.id,
-					// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+					// biome-ignore lint/suspicious/noExplicitAny: can be anything
 					tests: tests.map((test: any) => ({
 						...test,
 						createdAt: new Date(test.createdAt),

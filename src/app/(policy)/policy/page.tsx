@@ -28,7 +28,7 @@ export default function IDEPage() {
 		reset,
 	} = usePolicyStore();
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: at launch
 	useEffect(() => {
 		reset();
 	}, []);

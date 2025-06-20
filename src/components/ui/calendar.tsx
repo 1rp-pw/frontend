@@ -5,13 +5,12 @@ import {
 	ChevronLeftIcon,
 	ChevronRightIcon,
 } from "lucide-react";
+import { type ComponentProps, useEffect, useRef } from "react";
 import {
 	type DayButton,
 	DayPicker,
 	getDefaultClassNames,
 } from "react-day-picker";
-
-import { type ComponentProps, useEffect, useRef } from "react";
 import { Button, buttonVariants } from "~/components/ui/button";
 import { cn } from "~/lib/utils";
 
@@ -126,6 +125,7 @@ function Calendar({
 				...classNames,
 			}}
 			components={{
+				// biome-ignore lint/nursery/noNestedComponentDefinitions: shadcn
 				Root: ({ className, rootRef, ...props }) => {
 					return (
 						<div
@@ -136,6 +136,7 @@ function Calendar({
 						/>
 					);
 				},
+				// biome-ignore lint/nursery/noNestedComponentDefinitions: shadcn
 				Chevron: ({ className, orientation, ...props }) => {
 					if (orientation === "left") {
 						return (
@@ -157,6 +158,7 @@ function Calendar({
 					);
 				},
 				DayButton: CalendarDayButton,
+				// biome-ignore lint/nursery/noNestedComponentDefinitions: shadcn
 				WeekNumber: ({ children, ...props }) => {
 					return (
 						<td {...props}>

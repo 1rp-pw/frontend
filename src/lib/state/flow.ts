@@ -139,6 +139,7 @@ const createDefaultFlowSpec = (): FlowSpec => ({
 	updatedAt: new Date(),
 	hasDraft: true,
 	flow: "",
+	error: null,
 });
 
 const defaultTests: FlowTest[] = [
@@ -419,7 +420,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 			});
 
 			try {
-				// biome-ignore lint/suspicious/noImplicitAnyLet: <explanation>
+				// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
 				let response;
 
 				if (version) {
@@ -479,6 +480,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					draft: result.status === "draft",
 					hasDraft: result.hasDraft,
 					flow: result.flow || result.yaml || "",
+					error: null,
 				};
 
 				set({

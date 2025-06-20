@@ -55,7 +55,7 @@ export function TestForm({
 		Array<{
 			name: string;
 			path: string;
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			// biome-ignore lint/suspicious/noExplicitAny: many details
 			details: any;
 			isRequired: boolean;
 		}>
@@ -63,7 +63,7 @@ export function TestForm({
 
 	// Flatten nested schema into a list of fields for pagination
 	const flattenSchema = (
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: can be anything
 		schemaObj: any,
 		parentPath = "",
 		parentRequired: string[] = [],
@@ -71,16 +71,15 @@ export function TestForm({
 		const fields: Array<{
 			name: string;
 			path: string;
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			// biome-ignore lint/suspicious/noExplicitAny: can be anything
 			details: any;
 			isRequired: boolean;
 		}> = [];
 
 		if (!schemaObj.properties) return fields;
 
-		// biome-ignore lint/complexity/noForEach: prop details can be anything
 		Object.entries(schemaObj.properties).forEach(
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			// biome-ignore lint/suspicious/noExplicitAny: can be anything
 			([propName, propDetails]: [string, any]) => {
 				const fieldPath = parentPath ? `${parentPath}.${propName}` : propName;
 				const isRequired = parentRequired.includes(propName);
@@ -117,7 +116,7 @@ export function TestForm({
 	};
 
 	// Initialize form data when schema or current test changes
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+	// biome-ignore lint/correctness/useExhaustiveDependencies: yep
 	useEffect(() => {
 		if (currentTest) {
 			setFormData(currentTest.data || {});
@@ -138,15 +137,14 @@ export function TestForm({
 	}, [schema, currentTest]);
 
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
-	const initializeDataFromSchema = (schemaObj: any, parentPath = ""): any => {
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+	const initializeDataFromSchema = (schemaObj: any, _parentPath = ""): any => {
+		// biome-ignore lint/suspicious/noExplicitAny: can be antyhing
 		const initialData: any = {};
 
 		if (!schemaObj.properties) return initialData;
 
-		// biome-ignore lint/complexity/noForEach: <explanation>
 		Object.entries(schemaObj.properties).forEach(
-			// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+			// biome-ignore lint/suspicious/noExplicitAny: can be anything
 			([propName, propDetails]: [string, any]) => {
 				switch (propDetails.type) {
 					case "string":
@@ -196,7 +194,7 @@ export function TestForm({
 	const renderFormField = (field: {
 		name: string;
 		path: string;
-		// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+		// biome-ignore lint/suspicious/noExplicitAny: can be anything
 		details: any;
 		isRequired: boolean;
 	}) => {
@@ -379,7 +377,7 @@ export function TestForm({
 								Test Name
 							</Label>
 							<Input
-								id="test-name"
+								name="test-name"
 								value={testName}
 								onChange={(e) => setTestName(e.target.value)}
 								placeholder="Enter test name..."
@@ -388,7 +386,7 @@ export function TestForm({
 						</div>
 						<div className="flex items-center space-x-2 pb-1">
 							<Switch
-								id="expect-pass"
+								name="expect-pass"
 								checked={expectPass}
 								onCheckedChange={setExpectPass}
 							/>

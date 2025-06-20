@@ -1,15 +1,14 @@
 "use client";
 
 import {
+	addEdge,
 	Background,
 	type Connection,
 	Controls,
 	type Edge,
 	MiniMap,
-	type Node,
 	type NodeTypes,
 	ReactFlow,
-	addEdge,
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
@@ -25,7 +24,6 @@ import type {
 	FlowNodeData,
 	PolicyNodeData,
 	ReturnNodeData,
-	StartNodeData,
 } from "~/lib/types";
 
 import "@xyflow/react/dist/style.css";
@@ -132,16 +130,14 @@ export function FlowEditor({
 
 			const position = {
 				x: 100 + sourceNode.position.x + 320,
-				y: sourceNode.position.y
+				y: sourceNode.position.y,
 			};
 
 			if (outputType === "true") {
-				position.y -= 125
+				position.y -= 125;
 			} else {
-				position.y += 175
+				position.y += 175;
 			}
-
-
 
 			let data: PolicyNodeData | ReturnNodeData | CustomNodeData;
 

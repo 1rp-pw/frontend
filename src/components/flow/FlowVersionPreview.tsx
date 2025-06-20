@@ -18,14 +18,7 @@ import {
 	ReturnNodeReadonly,
 	StartNodeReadonly,
 } from "~/components/flow/nodes/readonly";
-import type {
-	CustomNodeData,
-	FlowEdgeData,
-	FlowNodeData,
-	PolicyNodeData,
-	ReturnNodeData,
-	StartNodeData,
-} from "~/lib/types";
+import type { FlowEdgeData, FlowNodeData, ReturnNodeData } from "~/lib/types";
 
 import "@xyflow/react/dist/style.css";
 

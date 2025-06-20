@@ -46,19 +46,29 @@ function isValidPublishDate(date: Date | string | undefined): boolean {
 export default function PolicyList() {
 	const [policies, setPolicies] = useState<PolicySpec[]>([]);
 	const [flows, setFlows] = useState<FlowSpec[]>([]);
+	const [loadError, setLoadError] = useState<string | null>(null);
 
 	useEffect(() => {
 		getPolicyList().then((policyData) => {
+			if (policyData.error) {
+				setLoadError(policyData.error);
+				return;
+			}
 			setPolicies(policyData);
 		});
 		getFlowList().then((flowData) => {
+			if (flowData.error) {
+				setLoadError(flowData.error);
+				return;
+			}
+
 			setFlows(flowData);
 		});
 	}, []);
 
 	const getPolicies = () => {
 		if (policies.length === 0) return null;
-		if (policies.error !== undefined) return null
+		if (loadError !== null) return null;
 
 		return (
 			<div>
@@ -112,7 +122,7 @@ export default function PolicyList() {
 
 	const getFlows = () => {
 		if (flows.length === 0) return null;
-		if (flows.error !== undefined) return null
+		if (loadError) return null;
 
 		return (
 			<div>
