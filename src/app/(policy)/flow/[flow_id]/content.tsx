@@ -43,10 +43,8 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: only update when the flow_id changes
 	useEffect(() => {
 		getFlowVersions(flow_id).then((respVersions) => {
-			console.info("respVersions", respVersions);
 			if (respVersions.error !== null) {
 				setLoadError(respVersions.error);
-				return;
 			}
 
 			setVersions(respVersions);
@@ -61,7 +59,8 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 	if (versions.length === 0) {
 		return null;
 	}
-	if (loadError !== null) {
+	if (loadError !== null && loadError !== undefined) {
+		console.info("loadError", loadError);
 		return null;
 	}
 
