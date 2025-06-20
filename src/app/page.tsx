@@ -58,6 +58,7 @@ export default function PolicyList() {
 
 	const getPolicies = () => {
 		if (policies.length === 0) return null;
+		if (policies.error !== undefined) return null
 
 		return (
 			<div>
@@ -111,6 +112,7 @@ export default function PolicyList() {
 
 	const getFlows = () => {
 		if (flows.length === 0) return null;
+		if (flows.error !== undefined) return null
 
 		return (
 			<div>
