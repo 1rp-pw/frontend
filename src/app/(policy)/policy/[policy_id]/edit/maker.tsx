@@ -12,11 +12,7 @@ import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { usePolicyStore } from "~/lib/state/policy";
 
-export default function Maker({
-	policy_id,
-}: {
-	policy_id: string;
-}) {
+export default function Maker({ policy_id }: { policy_id: string }) {
 	const {
 		schema,
 		tests,

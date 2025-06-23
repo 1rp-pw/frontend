@@ -66,9 +66,7 @@ interface FlowStore {
 		version?: number;
 		error?: string;
 	}>;
-	getFlow: (
-		flowId?: string,
-	) => Promise<{
+	getFlow: (flowId?: string) => Promise<{
 		success: boolean;
 		error?: string;
 	}>;
@@ -420,9 +418,9 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 
 			try {
 				const response = await fetch(`/api/flow?id=${currentId}`, {
-						method: "GET",
-						headers: { "Content-Type": "application/json" },
-					});
+					method: "GET",
+					headers: { "Content-Type": "application/json" },
+				});
 
 				if (!response.ok) {
 					const errorData = await response.json().catch(() => ({}));

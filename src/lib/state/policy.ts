@@ -109,9 +109,7 @@ interface PolicyStore {
 		version?: number;
 		error?: string;
 	}>;
-	getPolicy: (
-		policyId?: string,
-	) => Promise<{
+	getPolicy: (policyId?: string) => Promise<{
 		success: boolean;
 		error?: string;
 	}>;
