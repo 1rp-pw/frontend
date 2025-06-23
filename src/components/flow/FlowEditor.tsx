@@ -58,7 +58,7 @@ export function FlowEditor({
 		initialNodes.map((node, index) => ({
 			id: node.id,
 			type: node.type,
-			position: {
+			position: node.position || {
 				x: 100 + (index % 3) * 350,
 				y: 100 + Math.floor(index / 3) * 200,
 			},
