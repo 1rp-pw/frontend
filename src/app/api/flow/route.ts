@@ -112,17 +112,15 @@ export async function GET(request: NextRequest) {
 					createdAt: resp.createdAt,
 					updatedAt: resp.updatedAt,
 					hasDraft: resp.hasDraft,
+					tests: resp.tests,
 				},
 				{ status: 200 },
 			);
 		}
 
-		console.info("resp", resp, request);
-
 		return NextResponse.json({ error: "failed request" }, { status: 404 });
 	} catch (error) {
 		console.error("Error while creating route", error);
-		console.info("request", request);
 
 		return NextResponse.json({ error: error }, { status: 500 });
 	}

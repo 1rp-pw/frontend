@@ -280,6 +280,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 		},
 
 		selectTest: (test) => {
+			console.log("Selecting test:", test);
 			set({
 				currentTest: test,
 				testData: test?.data || '{\n  "example": "data"\n}',
@@ -467,6 +468,8 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					error: null,
 				};
 
+				console.log("Loading flow tests from API:", flowSpec.tests);
+
 				set({
 					flowSpec: flowSpec,
 					nodes: flowSpec.nodes,
@@ -477,6 +480,12 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					isLoading: false,
 					error: null,
 				});
+
+				// Auto-select the first test if there are any tests
+				const tests = flowSpec.tests || [];
+				if (tests.length > 0 && tests[0]) {
+					get().selectTest(tests[0]);
+				}
 
 				return {
 					success: true,
