@@ -10,13 +10,7 @@ import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { usePolicyStore } from "~/lib/state/policy";
 
-export default function Maker({
-	policy_id,
-	version,
-}: {
-	policy_id: string;
-	version: string | undefined;
-}) {
+export default function Maker({ policy_id }: { policy_id: string }) {
 	const {
 		schema,
 		tests,
@@ -46,10 +40,10 @@ export default function Maker({
 
 	useEffect(() => {
 		const loadPolicy = async () => {
-			await getPolicy(policy_id, version);
+			await getPolicy(policy_id);
 		};
 		loadPolicy();
-	}, [policy_id, version, getPolicy]);
+	}, [policy_id, getPolicy]);
 
 	if (isLoading) {
 		return (
