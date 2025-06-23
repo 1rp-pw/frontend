@@ -68,7 +68,6 @@ interface FlowStore {
 	}>;
 	getFlow: (
 		flowId?: string,
-		version?: string,
 	) => Promise<{
 		success: boolean;
 		error?: string;
@@ -402,7 +401,7 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 			}
 		},
 
-		getFlow: async (flowId?: string, version?: string) => {
+		getFlow: async (flowId?: string) => {
 			const currentId = flowId || get().id;
 
 			if (!currentId) {
@@ -420,23 +419,10 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 			});
 
 			try {
-				// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
-				let response;
-
-				if (version) {
-					response = await fetch(
-						`/api/flow?id=${currentId}&version=${version}`,
-						{
-							method: "GET",
-							headers: { "Content-Type": "application/json" },
-						},
-					);
-				} else {
-					response = await fetch(`/api/flow?id=${currentId}`, {
+				const response = await fetch(`/api/flow?id=${currentId}`, {
 						method: "GET",
 						headers: { "Content-Type": "application/json" },
 					});
-				}
 
 				if (!response.ok) {
 					const errorData = await response.json().catch(() => ({}));

@@ -78,15 +78,8 @@ export async function GET(request: NextRequest) {
 	try {
 		const searchParams = request.nextUrl.searchParams;
 		const id = searchParams.get("id");
-		const version = searchParams.get("version");
 
-		// biome-ignore lint/suspicious/noImplicitAnyLet: runtime
-		let response;
-		if (version) {
-			response = await fetch(`${env.API_SERVER}/policy/${id}/${version}`);
-		} else {
-			response = await fetch(`${env.API_SERVER}/policy/${id}`);
-		}
+		const response = await fetch(`${env.API_SERVER}/policy/${id}`);
 
 		const resp = await response.json();
 		if (resp.id) {

@@ -93,15 +93,8 @@ export async function GET(request: NextRequest) {
 	try {
 		const searchParams = request.nextUrl.searchParams;
 		const id = searchParams.get("id");
-		const version = searchParams.get("version");
 
-		// biome-ignore lint/suspicious/noImplicitAnyLet: needs to be redefined at runtime
-		let response;
-		if (version) {
-			response = await fetch(`${env.API_SERVER}/flow/${id}/${version}`);
-		} else {
-			response = await fetch(`${env.API_SERVER}/flow/${id}`);
-		}
+		const response = await fetch(`${env.API_SERVER}/flow/${id}`);
 
 		const resp = await response.json();
 		if (resp.id) {
@@ -124,9 +117,13 @@ export async function GET(request: NextRequest) {
 			);
 		}
 
-		return NextResponse.json({ error: "failed request" }, { status: 500 });
+		console.info("resp", resp, request)
+
+
+		return NextResponse.json({ error: "failed request" }, { status: 404 });
 	} catch (error) {
-		console.error("Error while creating route", error, request);
+		console.error("Error while creating route", error);
+		console.info("request", request)
 
 		return NextResponse.json({ error: error }, { status: 500 });
 	}

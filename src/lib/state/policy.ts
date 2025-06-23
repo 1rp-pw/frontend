@@ -111,7 +111,6 @@ interface PolicyStore {
 	}>;
 	getPolicy: (
 		policyId?: string,
-		version?: string,
 	) => Promise<{
 		success: boolean;
 		error?: string;
@@ -748,7 +747,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 		setLoading: (loading) => set({ isLoading: loading }),
 		setError: (error) => set({ error }),
 
-		getPolicy: async (policyId?: string, version?: string) => {
+		getPolicy: async (policyId?: string) => {
 			const currentId = policyId || get().id;
 
 			if (!currentId) {
@@ -765,25 +764,10 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 			});
 
 			try {
-				// biome-ignore lint/suspicious/noImplicitAnyLet: needs to be redefined at runtime
-				let response;
-
-				if (version) {
-					response = await fetch(
-						`/api/policy?id=${currentId}&version=${version}`,
-						{
-							method: "GET",
-							headers: { "Content-Type": "application/json" },
-							body: null,
-						},
-					);
-				} else {
-					response = await fetch(`/api/policy?id=${currentId}`, {
-						method: "GET",
-						headers: { "Content-Type": "application/json" },
-						body: null,
-					});
-				}
+				const response = await fetch(`/api/policy?id=${currentId}`, {
+					method: "GET",
+					headers: { "Content-Type": "application/json" },
+				});
 
 				if (!response.ok) {
 					const errorData = await response.json().catch(() => ({}));

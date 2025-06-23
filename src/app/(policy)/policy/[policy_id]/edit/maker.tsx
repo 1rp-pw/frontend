@@ -14,10 +14,8 @@ import { usePolicyStore } from "~/lib/state/policy";
 
 export default function Maker({
 	policy_id,
-	version,
 }: {
 	policy_id: string;
-	version: string | undefined;
 }) {
 	const {
 		schema,
@@ -50,10 +48,10 @@ export default function Maker({
 	// biome-ignore lint/correctness/useExhaustiveDependencies: dont need others
 	useEffect(() => {
 		const loadPolicy = async () => {
-			await getPolicy(policy_id, version);
+			await getPolicy(policy_id);
 		};
 		loadPolicy();
-	}, [policy_id, version]);
+	}, [policy_id]);
 
 	if (isLoading) {
 		return (
