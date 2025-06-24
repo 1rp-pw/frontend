@@ -11,6 +11,7 @@ import {
 	TableRow,
 } from "~/components/ui/table";
 import type { FlowSpec, PolicySpec } from "~/lib/types";
+import {Skeleton} from "~/components/ui/skeleton";
 
 async function getPolicyList() {
 	const resp = await fetch("/api/policies", {
@@ -45,10 +46,13 @@ function isValidPublishDate(date: Date | string | undefined): boolean {
 
 export default function PolicyList() {
 	const [policies, setPolicies] = useState<PolicySpec[]>([]);
-	const [flows, setFlows] = useState<FlowSpec[]>([]);
+	const [policiesLoading, setPoliciesLoading] = useState(true);
 	const [loadPoliciesError, setLoadPoliciesError] = useState<Error | null>(
 		null,
 	);
+
+	const [flows, setFlows] = useState<FlowSpec[]>([]);
+	const [flowsLoading, setFlowsLoading] = useState(true);
 	const [loadFlowsError, setLoadFlowsError] = useState<Error | null>(null);
 
 	useEffect(() => {
@@ -58,6 +62,9 @@ export default function PolicyList() {
 				return;
 			}
 			setPolicies(policyData);
+			setPoliciesLoading(false);
+		}).catch((e) => {
+			setLoadPoliciesError(e)
 		});
 		getFlowList().then((flowData) => {
 			if (flowData.error) {
@@ -66,12 +73,33 @@ export default function PolicyList() {
 			}
 
 			setFlows(flowData);
+			setFlowsLoading(false);
+		}).catch((e) => {
+			setLoadFlowsError(e)
 		});
 	}, []);
 
 	const getPolicies = () => {
+		if (loadPoliciesError !== null) {
+			if (loadPoliciesError) {
+				console.error("loadPoliciesError", loadPoliciesError);
+			}
+		}
+
+		if (policiesLoading) {
+			return (
+				<div className="flex flex-col space-y-3">
+					<h2>Policies</h2>
+					<Skeleton className="h-[30vh] w-full rounded-xl" />
+					<div className="space-y-2">
+						<Skeleton className="h-4 w-[50vw]" />
+						<Skeleton className="h-4 w-[25vw]" />
+					</div>
+				</div>
+			)
+		}
+
 		if (policies.length === 0) return null;
-		if (loadPoliciesError !== null) return null;
 
 		return (
 			<div>
@@ -124,11 +152,24 @@ export default function PolicyList() {
 	};
 
 	const getFlows = () => {
-		if (flows.length === 0) return null;
 		if (loadFlowsError) {
-			console.info("loadFlowsError", loadFlowsError);
-			return null;
+			console.error("loadFlowsError", loadFlowsError);
 		}
+
+		if (flowsLoading) {
+			return (
+				<div className="flex flex-col space-y-3">
+					<h2>Flows</h2>
+					<Skeleton className="h-[30vh] w-full rounded-xl" />
+					<div className="space-y-2">
+						<Skeleton className="h-4 w-[50vw]" />
+						<Skeleton className="h-4 w-[25vw]" />
+					</div>
+				</div>
+			)
+		}
+
+		if (flows.length === 0) return null;
 
 		return (
 			<div>

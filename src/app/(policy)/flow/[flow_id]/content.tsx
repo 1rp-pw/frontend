@@ -15,6 +15,7 @@ import {
 } from "~/components/ui/card";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import type { FlowSpec } from "~/lib/types";
+import {Skeleton} from "~/components/ui/skeleton";
 
 async function getFlowVersions(flow_id: string) {
 	const resp = await fetch(`/api/flow/versions?flow_id=${flow_id}`, {
@@ -27,6 +28,7 @@ async function getFlowVersions(flow_id: string) {
 }
 
 export default function FlowInfo({ flow_id }: { flow_id: string }) {
+	const [versionsLoading, setVersionsLoading] = useState<boolean>(true);
 	const [versions, setVersions] = useState<FlowSpec[]>([]);
 	const [selectedVersion, setSelectedVersion] = useState<FlowSpec | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
@@ -53,8 +55,22 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 			if (respVersions.length > 0 && !selectedVersion) {
 				setSelectedVersion(respVersions[0]);
 			}
+			setVersionsLoading(false);
 		});
 	}, [flow_id]);
+
+	if (versionsLoading) {
+		return (
+			<div className="flex flex-col space-y-3">
+				<h2>Loading Flow</h2>
+				<Skeleton className="h-[30vh] w-full rounded-xl" />
+				<div className="space-y-2">
+					<Skeleton className="h-4 w-[50vw]" />
+					<Skeleton className="h-4 w-[25vw]" />
+				</div>
+			</div>
+		)
+	}
 
 	if (versions.length === 0) {
 		return null;
