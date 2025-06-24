@@ -1,6 +1,7 @@
 "use client";
 
-import { CopyIcon, FilePlusIcon, PlayIcon } from "lucide-react";
+import { ArrowBigLeft, CopyIcon, FilePlusIcon, PlayIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect } from "react";
 import { Editor } from "~/components/policy/editor";
 import { PublishPolicy } from "~/components/policy/publish";
@@ -31,6 +32,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		repairTest,
 		runAllTests,
 		getPolicy,
+		policySpec,
 	} = usePolicyStore();
 
 	// Check if all tests have been run and passed
@@ -73,6 +75,13 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 		<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
 			<header className="flex border-zinc-700 border-b p-4">
 				<div className="flex items-center gap-2">
+					{policySpec?.baseId && (
+						<Button variant={"outline"} size={"sm"} asChild>
+							<Link href={`/policy/${policySpec?.baseId}`}>
+								<ArrowBigLeft className={"h-4 w-4"} />
+							</Link>
+						</Button>
+					)}
 					<h1 className="font-bold text-xl">{name}</h1>
 					<Button
 						variant="ghost"

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { FlowFooter } from "~/components/flow/FlowFooter";
 import { FlowHeader } from "~/components/flow/FlowHeader";
 import { FlowTestList } from "~/components/flow/FlowTestList";
 import { FlowTestPanel } from "~/components/flow/FlowTestPanel";
@@ -13,7 +12,6 @@ import {
 } from "~/components/ui/resizable";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useFlowStore } from "~/lib/state/flow";
-import { flowToYaml } from "~/lib/utils/flow-to-yaml";
 
 export default function Maker({ flow_id }: { flow_id: string }) {
 	const {
@@ -33,10 +31,10 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 		deleteTest,
 		runTest,
 		runAllTests,
-		validationResult,
 		validateFlow,
 		getFlow,
 		isLoading,
+		flowSpec,
 	} = useFlowStore();
 
 	// Run initial validation when component loads
@@ -58,9 +56,6 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 		}
 	}, [currentTest, runTest]);
 
-	// Generate YAML preview
-	const yamlPreview = flowToYaml(storeNodes, storeEdges);
-
 	if (isLoading) {
 		return (
 			<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
@@ -73,7 +68,7 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
-			<FlowHeader name={name} readonly={true} />
+			<FlowHeader name={name} readonly={true} baseId={flowSpec?.baseId} />
 
 			<ResizablePanelGroup direction="vertical" className="flex-1">
 				<ResizablePanel defaultSize={75} minSize={50}>
@@ -120,13 +115,6 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 							</ResizablePanel>
 						</ResizablePanelGroup>
 					</main>
-				</ResizablePanel>
-				<ResizableHandle withHandle />
-				<ResizablePanel defaultSize={25} minSize={15} maxSize={50}>
-					<FlowFooter
-						validationResult={validationResult}
-						yamlPreview={yamlPreview}
-					/>
 				</ResizablePanel>
 			</ResizablePanelGroup>
 		</div>

@@ -49,7 +49,7 @@ export function FlowTestPanel({
 	onTestDataChange,
 	onRunTest,
 	onSaveTest,
-	readonly
+	readonly,
 }: FlowTestPanelProps) {
 	const [jsonError, setJsonError] = useState<string | null>(null);
 	const [testName, setTestName] = useState(currentTest?.name || "");

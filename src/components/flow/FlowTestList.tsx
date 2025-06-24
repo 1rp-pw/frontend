@@ -36,7 +36,7 @@ export function FlowTestList({
 	onRunTest,
 	onRunAllTests,
 	isRunning,
-	readonly
+	readonly,
 }: FlowTestListProps) {
 	const [executionModalOpen, setExecutionModalOpen] = useState(false);
 	const [selectedTestForModal, setSelectedTestForModal] =
