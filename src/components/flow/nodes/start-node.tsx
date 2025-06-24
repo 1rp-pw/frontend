@@ -81,7 +81,7 @@ export function StartNode({ data, id }: NodeProps) {
 										onChange={(e) => setPolicyId(e.target.value)}
 										onKeyUp={(e) => {
 											if (e.key === "Enter" || e.key === "Return") {
-												handleSave()
+												handleSave();
 											}
 										}}
 										placeholder="Policy ID"

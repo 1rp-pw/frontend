@@ -78,8 +78,6 @@ export async function PUT(request: Request) {
 			dataModel.version = `${version}`;
 		}
 
-		console.info("dataModel", dataModel);
-
 		await fetch(`${env.API_SERVER}/flow/${id}`, {
 			method: "PUT",
 			body: JSON.stringify(dataModel),

@@ -72,7 +72,7 @@ export function CustomNode({ data, id }: NodeProps) {
 								onChange={(e) => setOutcome(e.target.value)}
 								onKeyUp={(e) => {
 									if (e.key === "Enter" || e.key === "Return") {
-										handleSave()
+										handleSave();
 									}
 								}}
 								placeholder="Enter custom outcome"

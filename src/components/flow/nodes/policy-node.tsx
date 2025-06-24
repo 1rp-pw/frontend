@@ -91,7 +91,7 @@ export function PolicyNode({ data, id }: NodeProps) {
 										className="text-xs"
 										onKeyUp={(e) => {
 											if (e.key === "Enter" || e.key === "Return") {
-												handleSave()
+												handleSave();
 											}
 										}}
 									/>
