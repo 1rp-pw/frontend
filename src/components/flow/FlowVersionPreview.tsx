@@ -193,10 +193,6 @@ export function FlowVersionPreview({
 					maskColor="rgb(50, 50, 50, 0.8)"
 				/>
 			</ReactFlow>
-			{/* Readonly indicator */}
-			<div className="pointer-events-none absolute top-2 right-2 rounded-md bg-muted/80 px-2 py-1 text-muted-foreground text-xs backdrop-blur-sm">
-				Read-only view
-			</div>
 		</div>
 	);
 }

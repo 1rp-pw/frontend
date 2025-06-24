@@ -1,26 +1,25 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { FlowEditor } from "~/components/flow/FlowEditor";
 import { FlowFooter } from "~/components/flow/FlowFooter";
 import { FlowHeader } from "~/components/flow/FlowHeader";
 import { FlowTestList } from "~/components/flow/FlowTestList";
 import { FlowTestPanel } from "~/components/flow/FlowTestPanel";
+import { FlowVersionPreview } from "~/components/flow/FlowVersionPreview";
 import {
 	ResizableHandle,
 	ResizablePanel,
 	ResizablePanelGroup,
 } from "~/components/ui/resizable";
+import { Skeleton } from "~/components/ui/skeleton";
 import { useFlowStore } from "~/lib/state/flow";
-import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
 import { flowToYaml } from "~/lib/utils/flow-to-yaml";
 
-export default function FlowPage() {
+export default function Maker({ flow_id }: { flow_id: string }) {
 	const {
 		nodes: storeNodes,
 		edges: storeEdges,
 		name,
-		updateNodesAndEdges,
 		error,
 		isTestRunning,
 		testResult,
@@ -36,6 +35,8 @@ export default function FlowPage() {
 		runAllTests,
 		validationResult,
 		validateFlow,
+		getFlow,
+		isLoading,
 	} = useFlowStore();
 
 	// Run initial validation when component loads
@@ -43,24 +44,13 @@ export default function FlowPage() {
 		validateFlow();
 	}, [validateFlow]);
 
-	// Handle node and edge changes from the FlowEditor
-	const handleNodesChange = useCallback(
-		(newNodes: FlowNodeData[]) => {
-			updateNodesAndEdges(newNodes, storeEdges);
-			// Trigger validation after nodes change
-			setTimeout(() => validateFlow(), 0);
-		},
-		[storeEdges, updateNodesAndEdges, validateFlow],
-	);
-
-	const handleEdgesChange = useCallback(
-		(newEdges: FlowEdgeData[]) => {
-			updateNodesAndEdges(storeNodes, newEdges);
-			// Trigger validation after edges change
-			setTimeout(() => validateFlow(), 0);
-		},
-		[storeNodes, updateNodesAndEdges, validateFlow],
-	);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: dont need the others
+	useEffect(() => {
+		const loadFlow = async () => {
+			await getFlow(flow_id);
+		};
+		loadFlow();
+	}, [flow_id]);
 
 	const handleRunCurrentTest = useCallback(async () => {
 		if (currentTest) {
@@ -71,21 +61,29 @@ export default function FlowPage() {
 	// Generate YAML preview
 	const yamlPreview = flowToYaml(storeNodes, storeEdges);
 
+	if (isLoading) {
+		return (
+			<div className="flex h-screen flex-col bg-zinc-900 text-zinc-100">
+				<div className="flex flex-1 items-center justify-center">
+					<Skeleton />
+				</div>
+			</div>
+		);
+	}
+
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
-			<FlowHeader name={name} />
+			<FlowHeader name={name} readonly={true} />
 
 			<ResizablePanelGroup direction="vertical" className="flex-1">
 				<ResizablePanel defaultSize={75} minSize={50}>
 					<main className="h-full bg-muted/10">
 						<ResizablePanelGroup direction="horizontal">
 							<ResizablePanel defaultSize={70} minSize={50}>
-								<FlowEditor
+								<FlowVersionPreview
 									nodes={storeNodes}
 									edges={storeEdges}
-									onNodesChange={handleNodesChange}
-									onEdgesChange={handleEdgesChange}
-									validationResult={validationResult}
+									className="h-full"
 								/>
 							</ResizablePanel>
 							<ResizableHandle withHandle />

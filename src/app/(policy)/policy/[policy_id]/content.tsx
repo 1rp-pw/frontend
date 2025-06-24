@@ -35,6 +35,7 @@ async function getPolicyVersions(policy_id: string) {
 }
 
 export default function PolicyInfo({ policy_id }: { policy_id: string }) {
+	const [hasDraft, setHasDraft] = useState<boolean>(false);
 	const [versionsLoading, setVersionsLoading] = useState<boolean>(true);
 	const [versions, setVersions] = useState<PolicySpec[]>([]);
 	const [selectedVersion, setSelectedVersion] = useState<PolicySpec | null>(
@@ -56,6 +57,8 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 			// console.info("respVersions", respVersions);
 
 			setVersions(respVersions);
+			setHasDraft(respVersions.some((v: PolicySpec) => v.draft));
+
 			// Auto-select the first version if available
 			if (respVersions.length > 0 && !selectedVersion) {
 				setSelectedVersion(respVersions[0]);
@@ -172,12 +175,14 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 									</Button>
 								) : (
 									<div className={"flex gap-2"}>
-										<Button variant={"outline"} size={"sm"} asChild>
-											<Link href={`/policy/${selectedVersion.id}/draft`}>
-												<FilePlus2 className={"mr-2 h-4 w-4"} />
-												Create Draft
-											</Link>
-										</Button>
+										{!hasDraft && (
+											<Button variant={"outline"} size={"sm"} asChild>
+												<Link href={`/policy/${selectedVersion.id}/draft`}>
+													<FilePlus2 className={"mr-2 h-4 w-4"} />
+													Create Draft
+												</Link>
+											</Button>
+										)}
 										<Button variant={"outline"} size={"sm"} asChild>
 											<Link href={`/policy/${selectedVersion.id}/view`}>
 												<FileText className={"mr-2 h-4 w-4"} />
