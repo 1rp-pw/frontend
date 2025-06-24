@@ -467,11 +467,22 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					error: null,
 				};
 
+				// Clear test results when loading a draft flow
+				// This ensures publish button requires re-running tests
+				const tests = flowSpec.tests || [];
+				const processedTests = flowSpec.draft
+					? tests.map(test => ({
+							...test,
+							result: undefined,
+							lastRun: undefined
+						}))
+					: tests;
+
 				set({
 					flowSpec: flowSpec,
 					nodes: flowSpec.nodes,
 					edges: flowSpec.edges,
-					tests: flowSpec.tests || [],
+					tests: processedTests,
 					name: flowSpec.name,
 					id: flowSpec.id,
 					isLoading: false,
@@ -479,9 +490,8 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				});
 
 				// Auto-select the first test if there are any tests
-				const tests = flowSpec.tests || [];
-				if (tests.length > 0 && tests[0]) {
-					get().selectTest(tests[0]);
+				if (processedTests.length > 0 && processedTests[0]) {
+					get().selectTest(processedTests[0]);
 				}
 
 				return {
