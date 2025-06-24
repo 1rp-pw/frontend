@@ -1,5 +1,4 @@
 import { fireEvent, render, waitFor } from "@testing-library/react";
-import { Button } from "~/components/ui/button";
 import { SchemaBuilder } from "./builder";
 
 // Mock the policy store
@@ -12,7 +11,8 @@ jest.mock("~/lib/state/policy", () => ({
 jest.mock("~/components/ui/button", () => ({
 	// biome-ignore lint/suspicious/noExplicitAny: any
 	Button: ({ children, onClick, disabled, variant, size }: any) => (
-		<Button
+		<button
+			type="button"
 			onClick={onClick}
 			disabled={disabled}
 			data-variant={variant}
@@ -20,7 +20,7 @@ jest.mock("~/components/ui/button", () => ({
 			data-testid="button"
 		>
 			{children}
-		</Button>
+		</button>
 	),
 }));
 
@@ -48,9 +48,13 @@ jest.mock("~/components/ui/tabs", () => ({
 	),
 	// biome-ignore lint/suspicious/noExplicitAny: any
 	TabsTrigger: ({ children, value }: any) => (
-		<Button data-testid={`tab-trigger-${value}`} data-value={value}>
+		<button
+			type="button"
+			data-testid={`tab-trigger-${value}`}
+			data-value={value}
+		>
 			{children}
-		</Button>
+		</button>
 	),
 	// biome-ignore lint/suspicious/noExplicitAny: any
 	TabsContent: ({ children, value }: any) => (
@@ -88,21 +92,27 @@ jest.mock("./list", () => ({
 				{Object.keys(properties || {}).length}
 			</div>
 			<div data-testid="required-count">{(required || []).length}</div>
-			<Button
+			<button
+				type="button"
 				onClick={() => onEditProperty("test", "test", "string", false)}
 				data-testid="edit-property"
 			>
 				Edit Property
-			</Button>
-			<Button
+			</button>
+			<button
+				type="button"
 				onClick={() => onRemoveProperty("test")}
 				data-testid="remove-property"
 			>
 				Remove Property
-			</Button>
-			<Button onClick={() => onEditObject("test")} data-testid="edit-object">
+			</button>
+			<button
+				type="button"
+				onClick={() => onEditObject("test")}
+				data-testid="edit-object"
+			>
 				Edit Object
-			</Button>
+			</button>
 		</div>
 	),
 }));
@@ -112,15 +122,20 @@ jest.mock("./navigate", () => ({
 	BreadcrumbNav: ({ editingObject, onNavigateTo }: any) => (
 		<div data-testid="breadcrumb-nav">
 			<div data-testid="editing-object">{editingObject || "root"}</div>
-			<Button onClick={() => onNavigateTo(null)} data-testid="navigate-root">
+			<button
+				type="button"
+				onClick={() => onNavigateTo(null)}
+				data-testid="navigate-root"
+			>
 				Root
-			</Button>
-			<Button
+			</button>
+			<button
+				type="button"
 				onClick={() => onNavigateTo("test")}
 				data-testid="navigate-nested"
 			>
 				Navigate
-			</Button>
+			</button>
 		</div>
 	),
 }));
@@ -138,14 +153,15 @@ jest.mock("./properties", () => ({
 	// biome-ignore lint/suspicious/noExplicitAny: any
 	PropertyForm: ({ onAddProperty }: any) => (
 		<div data-testid="property-form">
-			<Button
+			<button
+				type="button"
 				onClick={() =>
 					onAddProperty("newProp", "string", true, { description: "test" })
 				}
 				data-testid="add-property"
 			>
 				Add Property
-			</Button>
+			</button>
 		</div>
 	),
 }));
@@ -400,7 +416,9 @@ describe("SchemaBuilder", () => {
 		fireEvent.click(loadButton);
 
 		const textarea = getByTestId("textarea");
-		expect(textarea.value).toBe(JSON.stringify(mockSchema, null, 2));
+		expect((textarea as HTMLInputElement).value).toBe(
+			JSON.stringify(mockSchema, null, 2),
+		);
 	});
 
 	it("should clear schema input", () => {
@@ -414,7 +432,7 @@ describe("SchemaBuilder", () => {
 		const clearButton = getByText("Clear");
 		fireEvent.click(clearButton);
 
-		expect(textarea.value).toBe("");
+		expect((textarea as HTMLInputElement).value).toBe("");
 	});
 
 	it("should handle object type properties correctly", () => {

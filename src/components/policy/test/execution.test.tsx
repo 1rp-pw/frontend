@@ -108,14 +108,15 @@ jest.mock("lucide-react", () => ({
 describe("PolicyExecutionModal", () => {
 	const mockExecutionData: TestResultSet = {
 		result: true,
-		outcome: "pass",
+		errors: null,
+		data: null,
 		rule: ["First rule line", "Second rule line"],
 		trace: {
 			execution: [
 				{
-					rule_name: "Test Rule",
-					outcome: { value: "pass" },
-					selector: { value: "test-selector" },
+					outcome: { pos: null, value: "pass" },
+					selector: { pos: null, value: "test-selector" },
+					result: true,
 					conditions: [
 						{
 							result: true,
@@ -123,8 +124,11 @@ describe("PolicyExecutionModal", () => {
 							operator: "greaterThan",
 							property: {
 								path: "$.user.age",
+								value: null,
 							},
 							value: {
+								pos: null,
+								type: "number",
 								value: 18,
 							},
 							evaluation_details: {
@@ -145,8 +149,11 @@ describe("PolicyExecutionModal", () => {
 							operator: "equals",
 							property: {
 								path: "$.user.name",
+								value: null,
 							},
 							value: {
+								pos: null,
+								type: "string",
 								value: "John",
 							},
 							evaluation_details: {
@@ -326,15 +333,15 @@ describe("PolicyExecutionModal", () => {
 			trace: {
 				execution: [
 					{
-						rule_name: "Array Test",
-						outcome: { value: "pass" },
-						selector: { value: "array-selector" },
+						outcome: { pos: null, value: "pass" },
+						selector: { pos: null, value: "array-selector" },
+						result: true,
 						conditions: [
 							{
 								result: true,
 								operator: "contains",
-								property: { path: "$.tags" },
-								value: { value: ["tag1", "tag2"] },
+								property: { path: "$.tags", value: null },
+								value: { pos: null, type: "array", value: ["tag1", "tag2"] },
 								evaluation_details: {
 									left_value: {
 										value: ["tag1", "tag2", "tag3"],
@@ -368,14 +375,15 @@ describe("PolicyExecutionModal", () => {
 			trace: {
 				execution: [
 					{
-						outcome: { value: "pass" },
-						selector: { value: "no-rule-selector" },
+						outcome: { pos: null, value: "pass" },
+						selector: { pos: null, value: "no-rule-selector" },
+						result: true,
 						conditions: [
 							{
 								result: true,
 								operator: "equals",
-								property: { path: "$.test" },
-								value: { value: "test" },
+								property: { path: "$.test", value: null },
+								value: { pos: null, type: "string", value: "test" },
 							},
 						],
 					},
@@ -400,8 +408,9 @@ describe("PolicyExecutionModal", () => {
 			trace: {
 				execution: [
 					{
-						outcome: { value: "pass" },
-						selector: { value: "minimal-selector" },
+						outcome: { pos: null, value: "pass" },
+						selector: { pos: null, value: "minimal-selector" },
+						result: true,
 						conditions: [
 							{
 								result: true,
@@ -429,15 +438,16 @@ describe("PolicyExecutionModal", () => {
 			trace: {
 				execution: [
 					{
-						outcome: { value: "pass" },
-						selector: { value: "no-eval-selector" },
+						outcome: { pos: null, value: "pass" },
+						selector: { pos: null, value: "no-eval-selector" },
+						result: true,
 						conditions: [
 							{
 								result: true,
 								rule_name: "No Evaluation",
 								operator: "equals",
-								property: { path: "$.test" },
-								value: { value: "test" },
+								property: { path: "$.test", value: null },
+								value: { pos: null, type: "string", value: "test" },
 							},
 						],
 					},
@@ -473,11 +483,21 @@ describe("PolicyExecutionModal", () => {
 			...mockExecutionData,
 			trace: {
 				execution: [
-					mockExecutionData.trace.execution[0],
 					{
-						rule_name: "Second Rule",
-						outcome: { value: "pass" },
-						selector: { value: "second-selector" },
+						outcome: { pos: null, value: "pass" },
+						selector: { pos: null, value: "first-selector" },
+						result: true,
+						conditions: [
+							{
+								result: true,
+								rule_name: "First Condition",
+							},
+						],
+					},
+					{
+						outcome: { pos: null, value: "pass" },
+						selector: { pos: null, value: "second-selector" },
+						result: true,
 						conditions: [
 							{
 								result: true,
