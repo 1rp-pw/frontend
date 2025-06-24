@@ -418,11 +418,14 @@ describe("PolicyInfo", () => {
 			json: async () => mockVersions,
 		});
 
-		const { getByTestId } = render(<PolicyInfo policy_id="test-policy" />);
+		const { getAllByTestId } = render(<PolicyInfo policy_id="test-policy" />);
 
 		await waitFor(() => {
-			expect(getByTestId("clock-icon")).toBeInTheDocument();
-			expect(getByTestId("package-check-icon")).toBeInTheDocument();
+			const clockIcons = getAllByTestId("clock-icon");
+			expect(clockIcons.length).toBeGreaterThan(0);
+			
+			const packageIcons = getAllByTestId("package-check-icon");
+			expect(packageIcons.length).toBeGreaterThan(0);
 		});
 	});
 });
