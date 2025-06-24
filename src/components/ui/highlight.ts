@@ -186,22 +186,17 @@ export const highlightText = (text: string) => {
 	html = html.replace(/\b(\d+)\b/g, (_match, p1) => {
 		return createPlaceholder(`<span class="${numberColor}">${p1}</span>`);
 	});
-	html = html.replace(
-		/\b((?:year|day|week|month)s?)\b/g,
-		(_match, p1) => {
-			return createPlaceholder(
-				`<span class="${numberColor}">${p1}</span>`
-			);
-		}
-	);
+	html = html.replace(/\b((?:year|day|week|month)s?)\b/g, (_match, p1) => {
+		return createPlaceholder(`<span class="${numberColor}">${p1}</span>`);
+	});
 
 	// highlight bools
 	html = html.replace(/\b(false)\b/g, (_match, p1) => {
 		return createPlaceholder(`<span class="${falseColor}">${p1}</span>`);
-	})
+	});
 	html = html.replace(/\b(true)\b/g, (_match, p1) => {
 		return createPlaceholder(`<span class="${trueColor}">${p1}</span>`);
-	})
+	});
 
 	// Highlight comparison phrases (functions)
 	const comparisonPhrases = [
