@@ -471,10 +471,10 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				// This ensures publish button requires re-running tests
 				const tests = flowSpec.tests || [];
 				const processedTests = flowSpec.draft
-					? tests.map(test => ({
+					? tests.map((test) => ({
 							...test,
 							result: undefined,
-							lastRun: undefined
+							lastRun: undefined,
 						}))
 					: tests;
 

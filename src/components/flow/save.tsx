@@ -37,7 +37,8 @@ export function SaveFlow({
 	const [isLoading, setIsLoading] = useState(false);
 	const router = useRouter();
 
-	const { id, name, setFlowName, saveFlow, validationResult, updateFlowSpec } = useFlowStore();
+	const { id, name, setFlowName, saveFlow, validationResult, updateFlowSpec } =
+		useFlowStore();
 
 	const formSchema = z.object({
 		flowName: z.string().min(2, "Flow name needs to be more than 2 chars"),
@@ -59,7 +60,7 @@ export function SaveFlow({
 			updateFlowSpec({
 				draft: true,
 				status: "draft",
-			})
+			});
 			const result = await saveFlow();
 			if (result.success) {
 				toast("Flow Saved!");

@@ -1,7 +1,7 @@
 "use client";
 
+import { PublishFlow } from "~/components/flow/publsh";
 import { SaveFlow } from "~/components/flow/save";
-import {PublishFlow} from "~/components/flow/publsh";
 
 interface FlowHeaderProps {
 	name: string;

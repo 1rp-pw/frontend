@@ -14,8 +14,8 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { Skeleton } from "~/components/ui/skeleton";
 import type { FlowSpec } from "~/lib/types";
-import {Skeleton} from "~/components/ui/skeleton";
 
 async function getFlowVersions(flow_id: string) {
 	const resp = await fetch(`/api/flow/versions?flow_id=${flow_id}`, {
@@ -69,7 +69,7 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 					<Skeleton className="h-4 w-[25vw]" />
 				</div>
 			</div>
-		)
+		);
 	}
 
 	if (versions.length === 0) {

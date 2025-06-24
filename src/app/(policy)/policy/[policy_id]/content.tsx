@@ -21,8 +21,8 @@ import {
 import { highlightText } from "~/components/ui/highlight";
 import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { Skeleton } from "~/components/ui/skeleton";
 import type { PolicySpec } from "~/lib/types";
-import {Skeleton} from "~/components/ui/skeleton";
 
 async function getPolicyVersions(policy_id: string) {
 	const resp = await fetch(`/api/policy/versions?policy_id=${policy_id}`, {
@@ -74,7 +74,7 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 					<Skeleton className="h-4 w-[25vw]" />
 				</div>
 			</div>
-		)
+		);
 	}
 
 	if (versions.length === 0) {

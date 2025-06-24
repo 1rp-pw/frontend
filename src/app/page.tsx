@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -11,7 +12,6 @@ import {
 	TableRow,
 } from "~/components/ui/table";
 import type { FlowSpec, PolicySpec } from "~/lib/types";
-import {Skeleton} from "~/components/ui/skeleton";
 
 async function getPolicyList() {
 	const resp = await fetch("/api/policies", {
@@ -56,27 +56,31 @@ export default function PolicyList() {
 	const [loadFlowsError, setLoadFlowsError] = useState<Error | null>(null);
 
 	useEffect(() => {
-		getPolicyList().then((policyData) => {
-			if (policyData.error) {
-				setLoadPoliciesError(policyData.error);
-				return;
-			}
-			setPolicies(policyData);
-			setPoliciesLoading(false);
-		}).catch((e) => {
-			setLoadPoliciesError(e)
-		});
-		getFlowList().then((flowData) => {
-			if (flowData.error) {
-				setLoadFlowsError(flowData.error);
-				return;
-			}
+		getPolicyList()
+			.then((policyData) => {
+				if (policyData.error) {
+					setLoadPoliciesError(policyData.error);
+					return;
+				}
+				setPolicies(policyData);
+				setPoliciesLoading(false);
+			})
+			.catch((e) => {
+				setLoadPoliciesError(e);
+			});
+		getFlowList()
+			.then((flowData) => {
+				if (flowData.error) {
+					setLoadFlowsError(flowData.error);
+					return;
+				}
 
-			setFlows(flowData);
-			setFlowsLoading(false);
-		}).catch((e) => {
-			setLoadFlowsError(e)
-		});
+				setFlows(flowData);
+				setFlowsLoading(false);
+			})
+			.catch((e) => {
+				setLoadFlowsError(e);
+			});
 	}, []);
 
 	const getPolicies = () => {
@@ -96,7 +100,7 @@ export default function PolicyList() {
 						<Skeleton className="h-4 w-[25vw]" />
 					</div>
 				</div>
-			)
+			);
 		}
 
 		if (policies.length === 0) return null;
@@ -166,7 +170,7 @@ export default function PolicyList() {
 						<Skeleton className="h-4 w-[25vw]" />
 					</div>
 				</div>
-			)
+			);
 		}
 
 		if (flows.length === 0) return null;
