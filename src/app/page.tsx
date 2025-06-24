@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
 	Table,
 	TableBody,
@@ -45,33 +46,64 @@ function isValidPublishDate(date: Date | string | undefined): boolean {
 
 export default function PolicyList() {
 	const [policies, setPolicies] = useState<PolicySpec[]>([]);
-	const [flows, setFlows] = useState<FlowSpec[]>([]);
+	const [policiesLoading, setPoliciesLoading] = useState(true);
 	const [loadPoliciesError, setLoadPoliciesError] = useState<Error | null>(
 		null,
 	);
+
+	const [flows, setFlows] = useState<FlowSpec[]>([]);
+	const [flowsLoading, setFlowsLoading] = useState(true);
 	const [loadFlowsError, setLoadFlowsError] = useState<Error | null>(null);
 
 	useEffect(() => {
-		getPolicyList().then((policyData) => {
-			if (policyData.error) {
-				setLoadPoliciesError(policyData.error);
-				return;
-			}
-			setPolicies(policyData);
-		});
-		getFlowList().then((flowData) => {
-			if (flowData.error) {
-				setLoadFlowsError(flowData.error);
-				return;
-			}
+		getPolicyList()
+			.then((policyData) => {
+				if (policyData.error) {
+					setLoadPoliciesError(policyData.error);
+					return;
+				}
+				setPolicies(policyData);
+				setPoliciesLoading(false);
+			})
+			.catch((e) => {
+				setLoadPoliciesError(e);
+			});
+		getFlowList()
+			.then((flowData) => {
+				if (flowData.error) {
+					setLoadFlowsError(flowData.error);
+					return;
+				}
 
-			setFlows(flowData);
-		});
+				setFlows(flowData);
+				setFlowsLoading(false);
+			})
+			.catch((e) => {
+				setLoadFlowsError(e);
+			});
 	}, []);
 
 	const getPolicies = () => {
+		if (loadPoliciesError !== null) {
+			if (loadPoliciesError) {
+				console.error("loadPoliciesError", loadPoliciesError);
+			}
+		}
+
+		if (policiesLoading) {
+			return (
+				<div className="flex flex-col space-y-3">
+					<h2>Policies</h2>
+					<Skeleton className="h-[30vh] w-full rounded-xl" />
+					<div className="space-y-2">
+						<Skeleton className="h-4 w-[50vw]" />
+						<Skeleton className="h-4 w-[25vw]" />
+					</div>
+				</div>
+			);
+		}
+
 		if (policies.length === 0) return null;
-		if (loadPoliciesError !== null) return null;
 
 		return (
 			<div>
@@ -124,11 +156,24 @@ export default function PolicyList() {
 	};
 
 	const getFlows = () => {
-		if (flows.length === 0) return null;
 		if (loadFlowsError) {
-			console.info("loadFlowsError", loadFlowsError);
-			return null;
+			console.error("loadFlowsError", loadFlowsError);
 		}
+
+		if (flowsLoading) {
+			return (
+				<div className="flex flex-col space-y-3">
+					<h2>Flows</h2>
+					<Skeleton className="h-[30vh] w-full rounded-xl" />
+					<div className="space-y-2">
+						<Skeleton className="h-4 w-[50vw]" />
+						<Skeleton className="h-4 w-[25vw]" />
+					</div>
+				</div>
+			);
+		}
+
+		if (flows.length === 0) return null;
 
 		return (
 			<div>

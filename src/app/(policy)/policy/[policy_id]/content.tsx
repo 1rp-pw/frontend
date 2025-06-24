@@ -21,6 +21,7 @@ import {
 import { highlightText } from "~/components/ui/highlight";
 import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea } from "~/components/ui/scroll-area";
+import { Skeleton } from "~/components/ui/skeleton";
 import type { PolicySpec } from "~/lib/types";
 
 async function getPolicyVersions(policy_id: string) {
@@ -34,6 +35,7 @@ async function getPolicyVersions(policy_id: string) {
 }
 
 export default function PolicyInfo({ policy_id }: { policy_id: string }) {
+	const [versionsLoading, setVersionsLoading] = useState<boolean>(true);
 	const [versions, setVersions] = useState<PolicySpec[]>([]);
 	const [selectedVersion, setSelectedVersion] = useState<PolicySpec | null>(
 		null,
@@ -58,10 +60,22 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 			if (respVersions.length > 0 && !selectedVersion) {
 				setSelectedVersion(respVersions[0]);
 			}
+			setVersionsLoading(false);
 		});
 	}, [policy_id]);
 
-	// console.info("versions", versions);
+	if (versionsLoading) {
+		return (
+			<div className="flex flex-col space-y-3">
+				<h2>Loading Policy</h2>
+				<Skeleton className="h-[30vh] w-full rounded-xl" />
+				<div className="space-y-2">
+					<Skeleton className="h-4 w-[50vw]" />
+					<Skeleton className="h-4 w-[25vw]" />
+				</div>
+			</div>
+		);
+	}
 
 	if (versions.length === 0) {
 		return null;
