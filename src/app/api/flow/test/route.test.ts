@@ -34,7 +34,7 @@ describe("/api/flow/test", () => {
 				policyId: "policy-123",
 			},
 			{
-				id: "policy-1", 
+				id: "policy-1",
 				type: "policy",
 				label: "Policy Node",
 				position: { x: 100, y: 0 },
@@ -54,7 +54,7 @@ describe("/api/flow/test", () => {
 
 		it("should execute flow test successfully", async () => {
 			const testData = { userId: "user-123", action: "read" };
-			
+
 			const serverResponse = {
 				result: true,
 				nodeResponse: [
@@ -82,7 +82,6 @@ describe("/api/flow/test", () => {
 				}),
 				headers: { "Content-Type": "application/json" },
 			});
-
 			const response = await POST(request);
 			const responseData = await response.json();
 
