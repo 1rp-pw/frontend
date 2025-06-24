@@ -52,12 +52,13 @@ export async function PUT(request: Request) {
 			nodes,
 			edges,
 			tests,
-			yaml,
 			yamlFlat,
 			version,
 			status,
 			baseId,
 		} = await request.json();
+
+		const yaml = flowToYaml(nodes, edges);
 
 		const dataModel = {
 			id,
@@ -69,7 +70,7 @@ export async function PUT(request: Request) {
 			edges,
 			tests,
 			yaml,
-			yamlFlat,
+			flowFlat: yamlFlat || "",
 			version: "",
 			status,
 		};
