@@ -32,6 +32,7 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 	const [versions, setVersions] = useState<FlowSpec[]>([]);
 	const [selectedVersion, setSelectedVersion] = useState<FlowSpec | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
+	const [hasDraft, setHasDraft] = useState<boolean>(false);
 
 	const getStatusVariant = (status: string) => {
 		switch (status) {
@@ -50,6 +51,7 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 			}
 
 			setVersions(respVersions);
+			setHasDraft(respVersions.some((v: FlowSpec) => v.draft));
 
 			// Auto-select the first version if available
 			if (respVersions.length > 0 && !selectedVersion) {
@@ -171,12 +173,14 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 									</Button>
 								) : (
 									<div className={"flex gap-2"}>
-										<Button variant={"outline"} size={"sm"} asChild>
-											<Link href={`/flow/${selectedVersion.id}/draft`}>
-												<FilePlus2 className={"mr-2 h-4 w-4"} />
-												Create Draft
-											</Link>
-										</Button>
+										{!hasDraft && (
+											<Button variant={"outline"} size={"sm"} asChild>
+												<Link href={`/flow/${selectedVersion.id}/draft`}>
+													<FilePlus2 className={"mr-2 h-4 w-4"} />
+													Create Draft
+												</Link>
+											</Button>
+										)}
 										<Button variant={"outline"} size={"sm"} asChild>
 											<Link href={`/flow/${selectedVersion.id}/view`}>
 												<FileText className={"mr-2 h-4 w-4"} />
@@ -206,38 +210,6 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 						)}
 					</div>
 				</div>
-
-				{/*<div className={"flex h-[33vh] flex-col border-t bg-muted/5"}>*/}
-				{/*	<div className={"flex-shrink-0 border-b bg-muted/10 p-4"}>*/}
-				{/*		<h3 className={"flex items-center gap-2 font-semibold text-lg"}>*/}
-				{/*			<PackageCheck className={"h-4 w-4"} />*/}
-				{/*			Configuration*/}
-				{/*		</h3>*/}
-				{/*		<p className={"text-muted-foreground text-sm"}>*/}
-				{/*			Version Configuration and metadata*/}
-				{/*		</p>*/}
-				{/*	</div>*/}
-				{/*	<div className={"min-h-0 flex-1"}>*/}
-				{/*		<ScrollArea className={"h-full"}>*/}
-				{/*			<div className={"p-4"}>*/}
-				{/*				{selectedVersion && (*/}
-				{/*					<pre*/}
-				{/*						className={*/}
-				{/*							"overflow-x-auto rounded-lg bg-background text-xs"*/}
-				{/*						}*/}
-				{/*					>*/}
-				{/*						<code>*/}
-				{/*							<RainbowBraces*/}
-				{/*								json={selectedVersion?.metadata}*/}
-				{/*								className={"text-sm"}*/}
-				{/*							/>*/}
-				{/*						</code>*/}
-				{/*					</pre>*/}
-				{/*				)}*/}
-				{/*			</div>*/}
-				{/*		</ScrollArea>*/}
-				{/*	</div>*/}
-				{/*</div>*/}
 			</div>
 		</div>
 	);

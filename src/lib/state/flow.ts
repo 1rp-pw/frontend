@@ -545,8 +545,6 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 				updatedAt: new Date(),
 			};
 
-			console.info("Saving flow", updatedFlowSpec);
-
 			try {
 				// Generate YAML representations
 				const yamlNested = flowToYaml(nodes, edges);

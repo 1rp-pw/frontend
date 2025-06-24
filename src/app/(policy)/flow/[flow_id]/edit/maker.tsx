@@ -21,10 +21,7 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 		nodes: storeNodes,
 		edges: storeEdges,
 		name,
-		id,
 		updateNodesAndEdges,
-		saveFlow,
-		reset,
 		error,
 		isTestRunning,
 		testResult,
@@ -76,16 +73,6 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 		[storeNodes, updateNodesAndEdges, validateFlow],
 	);
 
-	// Handler functions for header
-	const handleSaveFlow = useCallback(async () => {
-		const result = await saveFlow();
-		if (result.success) {
-			console.log("Flow saved successfully", result.returnId);
-		} else {
-			console.error("Failed to save flow:", result.error);
-		}
-	}, [saveFlow]);
-
 	const handleRunCurrentTest = useCallback(async () => {
 		if (currentTest) {
 			await runTest(currentTest.id);
@@ -107,12 +94,7 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
-			<FlowHeader
-				name={name}
-				id={id}
-				onSaveFlow={handleSaveFlow}
-				onNewFlow={reset}
-			/>
+			<FlowHeader name={name} />
 
 			<ResizablePanelGroup direction="vertical" className="flex-1">
 				<ResizablePanel defaultSize={75} minSize={50}>
