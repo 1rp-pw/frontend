@@ -6,6 +6,8 @@ export const functionColor = "text-purple-500";
 export const referenceColor = "text-teal-500"; // Color for references (e.g., "passes the practical driving test" in if clause)
 export const referencedColor = "text-fuchsia-500"; // Color for definitions that ARE referenced elsewhere
 export const labelColor = "text-yellow-500";
+export const falseColor = "text-red-500";
+export const trueColor = "text-emerald-500";
 
 export const highlightText = (text: string) => {
 	// Escape &, <, >
@@ -184,6 +186,22 @@ export const highlightText = (text: string) => {
 	html = html.replace(/\b(\d+)\b/g, (_match, p1) => {
 		return createPlaceholder(`<span class="${numberColor}">${p1}</span>`);
 	});
+	html = html.replace(
+		/\b((?:year|day|week|month)s?)\b/g,
+		(_match, p1) => {
+			return createPlaceholder(
+				`<span class="${numberColor}">${p1}</span>`
+			);
+		}
+	);
+
+	// highlight bools
+	html = html.replace(/\b(false)\b/g, (_match, p1) => {
+		return createPlaceholder(`<span class="${falseColor}">${p1}</span>`);
+	})
+	html = html.replace(/\b(true)\b/g, (_match, p1) => {
+		return createPlaceholder(`<span class="${trueColor}">${p1}</span>`);
+	})
 
 	// Highlight comparison phrases (functions)
 	const comparisonPhrases = [
