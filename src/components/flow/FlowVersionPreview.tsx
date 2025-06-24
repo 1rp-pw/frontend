@@ -65,7 +65,7 @@ export function FlowVersionPreview({
 	};
 
 	// Initialize nodes with positions
-	const [nodes] = useNodesState(
+	const [nodes, setNodes] = useNodesState(
 		parsedNodes.map((node, index) => ({
 			id: node.id,
 			type: node.type,
@@ -82,7 +82,7 @@ export function FlowVersionPreview({
 	);
 
 	// Initialize edges with styles
-	const [edges] = useEdgesState<RequiredStyleEdge>(
+	const [edges, setEdges] = useEdgesState<RequiredStyleEdge>(
 		parsedEdges.map((edge) => ({
 			...edge,
 			style: edge.style || {},
@@ -92,6 +92,36 @@ export function FlowVersionPreview({
 			deletable: false,
 		})) as RequiredStyleEdge[],
 	);
+
+	// Update nodes and edges when props change
+	useEffect(() => {
+		const newNodes = parsedNodes.map((node, index) => ({
+			id: node.id,
+			type: node.type,
+			position: node.position || {
+				x: 100 + (index % 3) * 350,
+				y: 100 + Math.floor(index / 3) * 200,
+			},
+			data: node,
+			// Make nodes non-draggable for readonly view
+			draggable: false,
+			connectable: false,
+			deletable: false,
+		}));
+		setNodes(newNodes);
+	}, [parsedNodes, setNodes]);
+
+	useEffect(() => {
+		const newEdges = parsedEdges.map((edge) => ({
+			...edge,
+			style: edge.style || {},
+			labelStyle: edge.labelStyle || {},
+			// Make edges non-updatable for readonly view
+			updatable: false,
+			deletable: false,
+		})) as RequiredStyleEdge[];
+		setEdges(newEdges);
+	}, [parsedEdges, setEdges]);
 
 	// Define node types using readonly components
 	const nodeTypes: NodeTypes = useMemo(
