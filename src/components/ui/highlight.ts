@@ -15,7 +15,7 @@ export const highlightText = (text: string) => {
 		.replace(/>/g, "&gt;");
 
 	// Step 1: Find all defined rules (action parts) and their full definition lines
-	const lines = text.split("\n");
+	const lines = html.split("\n");
 	const allDefinedRuleActions = new Set<string>(); // All unique action parts
 	// Maps original full definition line to its action part
 	const definitionLineToActionMap = new Map<string, string>();
