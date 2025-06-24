@@ -141,20 +141,22 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 						<div className={"flex items-start justify-between"}>
 							<div>
 								<h1 className={"font-bold text-2xl"}>
-									{selectedVersion?.version ?? ""}
+									{selectedVersion?.draft
+										? "Draft"
+										: (selectedVersion?.version ?? "")}
 								</h1>
 								<div className={"mt-2 flex items-center gap-3"}>
 									{selectedVersion && (
 										<>
 											<span className={"text-muted-foreground text-sm"}>
-												Created{" "}
+												Created{": "}
 												{selectedVersion &&
 													new Date(
 														selectedVersion?.createdAt,
 													).toLocaleDateString()}
 											</span>
 											<span className={"text-muted-foreground text-sm"}>
-												Updated{" "}
+												Updated{": "}
 												{new Date(
 													selectedVersion?.updatedAt,
 												).toLocaleDateString()}
