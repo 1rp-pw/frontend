@@ -79,6 +79,11 @@ export function StartNode({ data, id }: NodeProps) {
 									<Input
 										value={policyId}
 										onChange={(e) => setPolicyId(e.target.value)}
+										onKeyUp={(e) => {
+											if (e.key === "Enter" || e.key === "Return") {
+												handleSave()
+											}
+										}}
 										placeholder="Policy ID"
 										className="text-xs"
 									/>

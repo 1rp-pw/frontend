@@ -89,6 +89,11 @@ export function PolicyNode({ data, id }: NodeProps) {
 										onChange={(e) => setPolicyId(e.target.value)}
 										placeholder="Policy ID"
 										className="text-xs"
+										onKeyUp={(e) => {
+											if (e.key === "Enter" || e.key === "Return") {
+												handleSave()
+											}
+										}}
 									/>
 									{/*<Button*/}
 									{/*	size="sm"*/}

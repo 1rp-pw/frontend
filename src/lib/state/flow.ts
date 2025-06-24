@@ -280,7 +280,6 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 		},
 
 		selectTest: (test) => {
-			console.log("Selecting test:", test);
 			set({
 				currentTest: test,
 				testData: test?.data || '{\n  "example": "data"\n}',
@@ -467,8 +466,6 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					flow: result.flow || result.yaml || "",
 					error: null,
 				};
-
-				console.log("Loading flow tests from API:", flowSpec.tests);
 
 				set({
 					flowSpec: flowSpec,
