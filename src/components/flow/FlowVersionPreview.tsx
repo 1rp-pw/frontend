@@ -75,9 +75,9 @@ export function FlowVersionPreview({
 			},
 			data: node,
 			// Make nodes non-draggable for readonly view
-			draggable: false,
-			connectable: false,
-			deletable: false,
+			draggable: false as const,
+			connectable: false as const,
+			deletable: false as const,
 		})),
 	);
 
@@ -88,8 +88,8 @@ export function FlowVersionPreview({
 			style: edge.style || {},
 			labelStyle: edge.labelStyle || {},
 			// Make edges non-updatable for readonly view
-			updatable: false,
-			deletable: false,
+			updatable: false as const,
+			deletable: false as const,
 		})) as RequiredStyleEdge[],
 	);
 
@@ -104,9 +104,9 @@ export function FlowVersionPreview({
 			},
 			data: node,
 			// Make nodes non-draggable for readonly view
-			draggable: false,
-			connectable: false,
-			deletable: false,
+			draggable: false as const,
+			connectable: false as const,
+			deletable: false as const,
 		}));
 		setNodes(newNodes);
 	}, [parsedNodes, setNodes]);
@@ -117,8 +117,8 @@ export function FlowVersionPreview({
 			style: edge.style || {},
 			labelStyle: edge.labelStyle || {},
 			// Make edges non-updatable for readonly view
-			updatable: false,
-			deletable: false,
+			updatable: false as const,
+			deletable: false as const,
 		})) as RequiredStyleEdge[];
 		setEdges(newEdges);
 	}, [parsedEdges, setEdges]);
