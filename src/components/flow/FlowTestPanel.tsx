@@ -38,6 +38,7 @@ interface FlowTestPanelProps {
 		name: string,
 		expectedOutcome: string | boolean,
 	) => void;
+	readonly?: boolean;
 }
 
 export function FlowTestPanel({
@@ -48,6 +49,7 @@ export function FlowTestPanel({
 	onTestDataChange,
 	onRunTest,
 	onSaveTest,
+	readonly
 }: FlowTestPanelProps) {
 	const [jsonError, setJsonError] = useState<string | null>(null);
 	const [testName, setTestName] = useState(currentTest?.name || "");
@@ -102,15 +104,17 @@ export function FlowTestPanel({
 					</p>
 				</div>
 				<div className="flex gap-2">
-					<Button
-						onClick={handleSave}
-						disabled={!isValid || !testName.trim()}
-						size="sm"
-						variant="outline"
-					>
-						<Save className="mr-2 h-4 w-4" />
-						Save
-					</Button>
+					{!readonly && (
+						<Button
+							onClick={handleSave}
+							disabled={!isValid || !testName.trim()}
+							size="sm"
+							variant="outline"
+						>
+							<Save className="mr-2 h-4 w-4" />
+							Save
+						</Button>
+					)}
 					<Button
 						onClick={onRunTest}
 						disabled={!isValid || isRunning}
@@ -143,6 +147,7 @@ export function FlowTestPanel({
 							onChange={(e) => setTestName(e.target.value)}
 							placeholder="Enter test name"
 							className="text-sm"
+							disabled={readonly}
 						/>
 					</div>
 					<div>
@@ -155,6 +160,7 @@ export function FlowTestPanel({
 							onChange={(e) => setExpectedOutcome(e.target.value)}
 							placeholder="true, false, or custom value like 'beep'"
 							className="text-sm"
+							disabled={readonly}
 						/>
 						<p className="mt-1 text-muted-foreground text-xs">
 							Enter true/false for boolean results or a custom string value
@@ -170,6 +176,7 @@ export function FlowTestPanel({
 						onChange={handleDataChange}
 						placeholder='{\n  "example": "data",\n  "nested": {\n    "value": 123\n  }\n}'
 						className="flex-1"
+						disabled={readonly}
 					/>
 				</div>
 

@@ -99,6 +99,7 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 											onRunTest={runTest}
 											onRunAllTests={runAllTests}
 											isRunning={isTestRunning}
+											readonly={true}
 										/>
 									</ResizablePanel>
 									<ResizableHandle withHandle />
@@ -112,6 +113,7 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 											onTestDataChange={setTestData}
 											onRunTest={handleRunCurrentTest}
 											onSaveTest={saveTest}
+											readonly={true}
 										/>
 									</ResizablePanel>
 								</ResizablePanelGroup>
