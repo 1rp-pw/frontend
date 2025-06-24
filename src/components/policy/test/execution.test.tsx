@@ -1,9 +1,12 @@
+/** biome-ignore-all lint/a11y/useKeyWithClickEvents: key click */
 import { fireEvent, render } from "@testing-library/react";
-import { PolicyExecutionModal } from "./execution";
+import { Button } from "~/components/ui/button";
 import type { TestResultSet } from "~/lib/state/policy";
+import { PolicyExecutionModal } from "./execution";
 
 // Mock UI components
 jest.mock("~/components/ui/badge", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	Badge: ({ children, variant }: any) => (
 		<span data-testid="badge" data-variant={variant}>
 			{children}
@@ -12,36 +15,46 @@ jest.mock("~/components/ui/badge", () => ({
 }));
 
 jest.mock("~/components/ui/dialog", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	Dialog: ({ children, open, onOpenChange }: any) => (
-		<div data-testid="dialog" data-open={open} onClick={() => onOpenChange(false)}>
+		// biome-ignore lint/a11y/noStaticElementInteractions: static
+		<div
+			data-testid="dialog"
+			data-open={open}
+			onClick={() => onOpenChange(false)}
+		>
 			{open && children}
 		</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	DialogContent: ({ children, className }: any) => (
 		<div data-testid="dialog-content" className={className}>
 			{children}
 		</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	DialogHeader: ({ children }: any) => (
 		<div data-testid="dialog-header">{children}</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	DialogTitle: ({ children }: any) => (
 		<h2 data-testid="dialog-title">{children}</h2>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	DialogDescription: ({ children }: any) => (
 		<div data-testid="dialog-description">{children}</div>
 	),
 }));
 
 jest.mock("~/components/ui/rainbow", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	RainbowBraces: ({ json }: any) => (
-		<div data-testid="rainbow-braces">
-			{JSON.stringify(json, null, 2)}
-		</div>
+		<div data-testid="rainbow-braces">{JSON.stringify(json, null, 2)}</div>
 	),
 }));
 
 jest.mock("~/components/ui/scroll-area", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	ScrollArea: ({ children }: any) => (
 		<div data-testid="scroll-area">{children}</div>
 	),
@@ -49,19 +62,23 @@ jest.mock("~/components/ui/scroll-area", () => ({
 }));
 
 jest.mock("~/components/ui/tabs", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	Tabs: ({ children, defaultValue }: any) => (
 		<div data-testid="tabs" data-default-value={defaultValue}>
 			{children}
 		</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	TabsList: ({ children }: any) => (
 		<div data-testid="tabs-list">{children}</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	TabsTrigger: ({ children, value }: any) => (
-		<button data-testid={`tab-trigger-${value}`} data-value={value}>
+		<Button data-testid={`tab-trigger-${value}`} data-value={value}>
 			{children}
-		</button>
+		</Button>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	TabsContent: ({ children, value }: any) => (
 		<div data-testid={`tab-content-${value}`} data-value={value}>
 			{children}
@@ -70,10 +87,13 @@ jest.mock("~/components/ui/tabs", () => ({
 }));
 
 jest.mock("~/components/ui/tooltip", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	Tooltip: ({ children }: any) => <div data-testid="tooltip">{children}</div>,
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	TooltipContent: ({ children }: any) => (
 		<div data-testid="tooltip-content">{children}</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	TooltipTrigger: ({ children }: any) => (
 		<div data-testid="tooltip-trigger">{children}</div>
 	),
@@ -160,7 +180,7 @@ describe("PolicyExecutionModal", () => {
 
 	it("should not render when executionData is null", () => {
 		const { queryByTestId } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={null} />
+			<PolicyExecutionModal {...defaultProps} executionData={null} />,
 		);
 
 		expect(queryByTestId("dialog")).not.toBeInTheDocument();
@@ -170,10 +190,14 @@ describe("PolicyExecutionModal", () => {
 		const dataWithoutTrace = {
 			...mockExecutionData,
 			trace: undefined,
+			// biome-ignore lint/suspicious/noExplicitAny: any
 		} as any;
 
 		const { queryByTestId } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={dataWithoutTrace} />
+			<PolicyExecutionModal
+				{...defaultProps}
+				executionData={dataWithoutTrace}
+			/>,
 		);
 
 		expect(queryByTestId("dialog")).not.toBeInTheDocument();
@@ -183,10 +207,14 @@ describe("PolicyExecutionModal", () => {
 		const dataWithoutExecution = {
 			...mockExecutionData,
 			trace: { execution: undefined },
+			// biome-ignore lint/suspicious/noExplicitAny: any
 		} as any;
 
 		const { queryByTestId } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={dataWithoutExecution} />
+			<PolicyExecutionModal
+				{...defaultProps}
+				executionData={dataWithoutExecution}
+			/>,
 		);
 
 		expect(queryByTestId("dialog")).not.toBeInTheDocument();
@@ -201,7 +229,7 @@ describe("PolicyExecutionModal", () => {
 
 	it("should not render content when open is false", () => {
 		const { getByTestId } = render(
-			<PolicyExecutionModal {...defaultProps} open={false} />
+			<PolicyExecutionModal {...defaultProps} open={false} />,
 		);
 
 		expect(getByTestId("dialog")).toHaveAttribute("data-open", "false");
@@ -215,12 +243,15 @@ describe("PolicyExecutionModal", () => {
 	});
 
 	it("should display overall result badge", () => {
-		const { getAllByTestId } = render(<PolicyExecutionModal {...defaultProps} />);
+		const { getAllByTestId } = render(
+			<PolicyExecutionModal {...defaultProps} />,
+		);
 
 		const badges = getAllByTestId("badge");
-		const resultBadge = badges.find(badge => 
-			badge.textContent === "PASSED" && 
-			badge.getAttribute("data-variant") === "default"
+		const resultBadge = badges.find(
+			(badge) =>
+				badge.textContent === "PASSED" &&
+				badge.getAttribute("data-variant") === "default",
 		);
 		expect(resultBadge).toBeInTheDocument();
 	});
@@ -232,19 +263,22 @@ describe("PolicyExecutionModal", () => {
 		};
 
 		const { getAllByTestId } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={failedData} />
+			<PolicyExecutionModal {...defaultProps} executionData={failedData} />,
 		);
 
 		const badges = getAllByTestId("badge");
-		const resultBadge = badges.find(badge => 
-			badge.textContent === "FAILED" && 
-			badge.getAttribute("data-variant") === "destructive"
+		const resultBadge = badges.find(
+			(badge) =>
+				badge.textContent === "FAILED" &&
+				badge.getAttribute("data-variant") === "destructive",
 		);
 		expect(resultBadge).toBeInTheDocument();
 	});
 
 	it("should render conditions with correct icons", () => {
-		const { getAllByTestId } = render(<PolicyExecutionModal {...defaultProps} />);
+		const { getAllByTestId } = render(
+			<PolicyExecutionModal {...defaultProps} />,
+		);
 
 		// Should have check circle for passed condition
 		const checkIcons = getAllByTestId("check-circle");
@@ -261,7 +295,7 @@ describe("PolicyExecutionModal", () => {
 		// Since we're using mocked components, we can't easily test for specific text
 		// Let's test that the component renders and has the expected structure
 		expect(container.firstChild).toBeInTheDocument();
-		
+
 		// Check that badges are rendered (which indicate conditions)
 		const badges = container.querySelectorAll('[data-testid="badge"]');
 		expect(badges.length).toBeGreaterThan(0);
@@ -272,13 +306,15 @@ describe("PolicyExecutionModal", () => {
 
 		// Test that component renders with evaluation data
 		expect(container.firstChild).toBeInTheDocument();
-		
+
 		// Since we have mocked components, we verify structure instead of specific text
 		const badges = container.querySelectorAll('[data-testid="badge"]');
 		expect(badges.length).toBeGreaterThan(0);
-		
+
 		// Verify we have both passed and failed conditions
-		const checkIcons = container.querySelectorAll('[data-testid="check-circle"]');
+		const checkIcons = container.querySelectorAll(
+			'[data-testid="check-circle"]',
+		);
 		const xIcons = container.querySelectorAll('[data-testid="x-circle"]');
 		expect(checkIcons.length).toBeGreaterThan(0);
 		expect(xIcons.length).toBeGreaterThan(0);
@@ -300,7 +336,10 @@ describe("PolicyExecutionModal", () => {
 								property: { path: "$.tags" },
 								value: { value: ["tag1", "tag2"] },
 								evaluation_details: {
-									left_value: { value: ["tag1", "tag2", "tag3"], type: "array" },
+									left_value: {
+										value: ["tag1", "tag2", "tag3"],
+										type: "array",
+									},
 									right_value: { value: ["tag1", "tag2"], type: "array" },
 									comparison_result: true,
 								},
@@ -312,12 +351,12 @@ describe("PolicyExecutionModal", () => {
 		};
 
 		const { container } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={dataWithArrays} />
+			<PolicyExecutionModal {...defaultProps} executionData={dataWithArrays} />,
 		);
 
 		// Test that component renders with array data
 		expect(container.firstChild).toBeInTheDocument();
-		
+
 		// Check that at least one condition is rendered
 		const badges = container.querySelectorAll('[data-testid="badge"]');
 		expect(badges.length).toBeGreaterThan(0);
@@ -345,7 +384,10 @@ describe("PolicyExecutionModal", () => {
 		};
 
 		const { container } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={dataWithoutRuleName} />
+			<PolicyExecutionModal
+				{...defaultProps}
+				executionData={dataWithoutRuleName}
+			/>,
 		);
 
 		// Should still render the condition
@@ -372,7 +414,10 @@ describe("PolicyExecutionModal", () => {
 		};
 
 		const { getByText } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={dataWithMinimalCondition} />
+			<PolicyExecutionModal
+				{...defaultProps}
+				executionData={dataWithMinimalCondition}
+			/>,
 		);
 
 		expect(getByText("Simple Rule")).toBeInTheDocument();
@@ -401,7 +446,10 @@ describe("PolicyExecutionModal", () => {
 		};
 
 		const { getByText, queryByText } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={dataWithoutEvaluation} />
+			<PolicyExecutionModal
+				{...defaultProps}
+				executionData={dataWithoutEvaluation}
+			/>,
 		);
 
 		expect(getByText("No Evaluation")).toBeInTheDocument();
@@ -411,7 +459,7 @@ describe("PolicyExecutionModal", () => {
 	it("should call onOpenChange when dialog is clicked", () => {
 		const onOpenChange = jest.fn();
 		const { getByTestId } = render(
-			<PolicyExecutionModal {...defaultProps} onOpenChange={onOpenChange} />
+			<PolicyExecutionModal {...defaultProps} onOpenChange={onOpenChange} />,
 		);
 
 		const dialog = getByTestId("dialog");
@@ -442,7 +490,10 @@ describe("PolicyExecutionModal", () => {
 		};
 
 		const { container } = render(
-			<PolicyExecutionModal {...defaultProps} executionData={dataWithMultipleExecutions} />
+			<PolicyExecutionModal
+				{...defaultProps}
+				executionData={dataWithMultipleExecutions}
+			/>,
 		);
 
 		// Should render both executions
@@ -451,7 +502,7 @@ describe("PolicyExecutionModal", () => {
 
 	it("should work without testName", () => {
 		const { getByTestId } = render(
-			<PolicyExecutionModal {...defaultProps} testName={undefined} />
+			<PolicyExecutionModal {...defaultProps} testName={undefined} />,
 		);
 
 		const title = getByTestId("dialog-title");

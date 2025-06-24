@@ -1,91 +1,114 @@
 import { fireEvent, render } from "@testing-library/react";
-import { FlowEditor } from "./FlowEditor";
+import { Button } from "~/components/ui/button";
 import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
+import { FlowEditor } from "./FlowEditor";
 
 // Mock ReactFlow dependencies
 jest.mock("@xyflow/react", () => ({
-	ReactFlow: ({ children, nodes, edges, onNodesChange, onEdgesChange, onConnect, nodeTypes }: any) => (
+	ReactFlow: ({
+		children,
+		nodes,
+		edges,
+		onNodesChange,
+		onEdgesChange,
+		onConnect,
+		// biome-ignore lint/suspicious/noExplicitAny: any
+	}: any) => (
 		<div data-testid="react-flow">
 			<div data-testid="nodes-count">{nodes.length}</div>
 			<div data-testid="edges-count">{edges.length}</div>
 			{children}
-			<button 
+			<Button
 				onClick={() => {
 					// Simulate node connection
 					onConnect({
 						source: "start-1",
-						target: "policy-1", 
-						sourceHandle: "true"
+						target: "policy-1",
+						sourceHandle: "true",
 					});
 				}}
 				data-testid="connect-nodes"
 			>
 				Connect Nodes
-			</button>
-			<button
+			</Button>
+			<Button
 				onClick={() => {
 					// Simulate node change
-					onNodesChange([{
-						id: "new-node",
-						type: "add",
-						position: { x: 0, y: 0 },
-						data: { id: "new-node", type: "policy" }
-					}]);
+					onNodesChange([
+						{
+							id: "new-node",
+							type: "add",
+							position: { x: 0, y: 0 },
+							data: { id: "new-node", type: "policy" },
+						},
+					]);
 				}}
 				data-testid="change-nodes"
 			>
 				Change Nodes
-			</button>
-			<button
+			</Button>
+			<Button
 				onClick={() => {
 					// Simulate edge change
-					onEdgesChange([{
-						id: "new-edge",
-						type: "add",
-						source: "start-1",
-						target: "policy-1"
-					}]);
+					onEdgesChange([
+						{
+							id: "new-edge",
+							type: "add",
+							source: "start-1",
+							target: "policy-1",
+						},
+					]);
 				}}
 				data-testid="change-edges"
 			>
 				Change Edges
-			</button>
+			</Button>
 		</div>
 	),
 	Background: () => <div data-testid="background">Background</div>,
 	Controls: () => <div data-testid="controls">Controls</div>,
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	MiniMap: ({ nodeStrokeColor, nodeColor }: any) => (
 		<div data-testid="minimap">
 			<div data-testid="minimap-stroke">{typeof nodeStrokeColor}</div>
 			<div data-testid="minimap-color">{typeof nodeColor}</div>
 		</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	useNodesState: (initialNodes: any) => [
 		initialNodes,
+		// biome-ignore lint/suspicious/noExplicitAny: any
 		(setter: any) => {
 			if (typeof setter === "function") {
 				setter(initialNodes);
 			}
 		},
-		jest.fn()
+		jest.fn(),
 	],
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	useEdgesState: (initialEdges: any) => [
 		initialEdges,
+		// biome-ignore lint/suspicious/noExplicitAny: any
 		(setter: any) => {
 			if (typeof setter === "function") {
 				setter(initialEdges);
 			}
 		},
-		jest.fn()
+		jest.fn(),
 	],
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	addEdge: (edge: any, edges: any) => [...edges, edge],
 }));
 
 // Mock flow context
 jest.mock("~/components/flow/flow-context", () => ({
 	FlowContext: {
+		// biome-ignore lint/suspicious/noExplicitAny: any
 		Provider: ({ children, value }: any) => (
-			<div data-testid="flow-context" data-value={JSON.stringify(Object.keys(value))}>
+			<div
+				data-testid="flow-context"
+				data-value={JSON.stringify(Object.keys(value))}
+			>
 				{children}
 			</div>
 		),
@@ -173,7 +196,7 @@ describe("FlowEditor", () => {
 
 		const context = getByTestId("flow-context");
 		expect(context).toBeInTheDocument();
-		
+
 		const contextValue = JSON.parse(context.getAttribute("data-value") || "[]");
 		expect(contextValue).toContain("addConnectedNode");
 		expect(contextValue).toContain("changeNodeType");
@@ -194,7 +217,7 @@ describe("FlowEditor", () => {
 	it("should handle nodes change callback", () => {
 		const onNodesChange = jest.fn();
 		const { getByTestId } = render(
-			<FlowEditor {...defaultProps} onNodesChange={onNodesChange} />
+			<FlowEditor {...defaultProps} onNodesChange={onNodesChange} />,
 		);
 
 		const changeButton = getByTestId("change-nodes");
@@ -206,7 +229,7 @@ describe("FlowEditor", () => {
 	it("should handle edges change callback", () => {
 		const onEdgesChange = jest.fn();
 		const { getByTestId } = render(
-			<FlowEditor {...defaultProps} onEdgesChange={onEdgesChange} />
+			<FlowEditor {...defaultProps} onEdgesChange={onEdgesChange} />,
 		);
 
 		const changeButton = getByTestId("change-edges");
@@ -221,7 +244,7 @@ describe("FlowEditor", () => {
 		};
 
 		const { getByTestId } = render(
-			<FlowEditor {...defaultProps} validationResult={validationResult} />
+			<FlowEditor {...defaultProps} validationResult={validationResult} />,
 		);
 
 		expect(getByTestId("react-flow")).toBeInTheDocument();
@@ -265,7 +288,7 @@ describe("FlowEditor", () => {
 
 		const minimap = getByTestId("minimap");
 		expect(minimap).toBeInTheDocument();
-		
+
 		// Check that color functions are provided
 		expect(getByTestId("minimap-stroke")).toHaveTextContent("function");
 		expect(getByTestId("minimap-color")).toHaveTextContent("function");

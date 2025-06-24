@@ -1,4 +1,5 @@
 import { fireEvent, render, waitFor } from "@testing-library/react";
+import { Button } from "~/components/ui/button";
 import { SchemaBuilder } from "./builder";
 
 // Mock the policy store
@@ -9,8 +10,9 @@ jest.mock("~/lib/state/policy", () => ({
 
 // Mock UI components
 jest.mock("~/components/ui/button", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	Button: ({ children, onClick, disabled, variant, size }: any) => (
-		<button
+		<Button
 			onClick={onClick}
 			disabled={disabled}
 			data-variant={variant}
@@ -18,11 +20,12 @@ jest.mock("~/components/ui/button", () => ({
 			data-testid="button"
 		>
 			{children}
-		</button>
+		</Button>
 	),
 }));
 
 jest.mock("~/components/ui/scroll-area", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	ScrollArea: ({ children, className }: any) => (
 		<div data-testid="scroll-area" className={className}>
 			{children}
@@ -31,21 +34,25 @@ jest.mock("~/components/ui/scroll-area", () => ({
 }));
 
 jest.mock("~/components/ui/tabs", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	Tabs: ({ children, defaultValue }: any) => (
 		<div data-testid="tabs" data-default-value={defaultValue}>
 			{children}
 		</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	TabsList: ({ children, className }: any) => (
 		<div data-testid="tabs-list" className={className}>
 			{children}
 		</div>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	TabsTrigger: ({ children, value }: any) => (
-		<button data-testid={`tab-trigger-${value}`} data-value={value}>
+		<Button data-testid={`tab-trigger-${value}`} data-value={value}>
 			{children}
-		</button>
+		</Button>
 	),
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	TabsContent: ({ children, value }: any) => (
 		<div data-testid={`tab-content-${value}`} data-value={value}>
 			{children}
@@ -54,6 +61,7 @@ jest.mock("~/components/ui/tabs", () => ({
 }));
 
 jest.mock("~/components/ui/textarea", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	Textarea: ({ value, onChange, placeholder, className }: any) => (
 		<textarea
 			data-testid="textarea"
@@ -67,38 +75,58 @@ jest.mock("~/components/ui/textarea", () => ({
 
 // Mock child components
 jest.mock("./list", () => ({
-	PropertyList: ({ properties, required, onEditProperty, onRemoveProperty, onEditObject }: any) => (
+	PropertyList: ({
+		properties,
+		required,
+		onEditProperty,
+		onRemoveProperty,
+		onEditObject,
+		// biome-ignore lint/suspicious/noExplicitAny: stuffs
+	}: any) => (
 		<div data-testid="property-list">
-			<div data-testid="properties-count">{Object.keys(properties || {}).length}</div>
+			<div data-testid="properties-count">
+				{Object.keys(properties || {}).length}
+			</div>
 			<div data-testid="required-count">{(required || []).length}</div>
-			<button onClick={() => onEditProperty("test", "test", "string", false)} data-testid="edit-property">
+			<Button
+				onClick={() => onEditProperty("test", "test", "string", false)}
+				data-testid="edit-property"
+			>
 				Edit Property
-			</button>
-			<button onClick={() => onRemoveProperty("test")} data-testid="remove-property">
+			</Button>
+			<Button
+				onClick={() => onRemoveProperty("test")}
+				data-testid="remove-property"
+			>
 				Remove Property
-			</button>
-			<button onClick={() => onEditObject("test")} data-testid="edit-object">
+			</Button>
+			<Button onClick={() => onEditObject("test")} data-testid="edit-object">
 				Edit Object
-			</button>
+			</Button>
 		</div>
 	),
 }));
 
 jest.mock("./navigate", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	BreadcrumbNav: ({ editingObject, onNavigateTo }: any) => (
 		<div data-testid="breadcrumb-nav">
 			<div data-testid="editing-object">{editingObject || "root"}</div>
-			<button onClick={() => onNavigateTo(null)} data-testid="navigate-root">
+			<Button onClick={() => onNavigateTo(null)} data-testid="navigate-root">
 				Root
-			</button>
-			<button onClick={() => onNavigateTo("test")} data-testid="navigate-nested">
+			</Button>
+			<Button
+				onClick={() => onNavigateTo("test")}
+				data-testid="navigate-nested"
+			>
 				Navigate
-			</button>
+			</Button>
 		</div>
 	),
 }));
 
 jest.mock("./preview", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
 	SchemaPreview: ({ schema }: any) => (
 		<div data-testid="schema-preview">
 			<div data-testid="schema-type">{schema?.type || "unknown"}</div>
@@ -107,14 +135,17 @@ jest.mock("./preview", () => ({
 }));
 
 jest.mock("./properties", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: any
 	PropertyForm: ({ onAddProperty }: any) => (
 		<div data-testid="property-form">
-			<button
-				onClick={() => onAddProperty("newProp", "string", true, { description: "test" })}
+			<Button
+				onClick={() =>
+					onAddProperty("newProp", "string", true, { description: "test" })
+				}
 				data-testid="add-property"
 			>
 				Add Property
-			</button>
+			</Button>
 		</div>
 	),
 }));
@@ -174,7 +205,7 @@ describe("SchemaBuilder", () => {
 
 	it("should render without import tab when newImportAllowed is false", () => {
 		const { getByTestId, queryByTestId } = render(
-			<SchemaBuilder {...defaultProps} newImportAllowed={false} />
+			<SchemaBuilder {...defaultProps} newImportAllowed={false} />,
 		);
 
 		expect(getByTestId("tab-trigger-edit")).toBeInTheDocument();
@@ -184,7 +215,11 @@ describe("SchemaBuilder", () => {
 
 	it("should render only preview tab when disabled", () => {
 		const { getByTestId, queryByTestId } = render(
-			<SchemaBuilder {...defaultProps} disabled={true} newImportAllowed={false} />
+			<SchemaBuilder
+				{...defaultProps}
+				disabled={true}
+				newImportAllowed={false}
+			/>,
 		);
 
 		expect(queryByTestId("tab-trigger-edit")).not.toBeInTheDocument();
@@ -231,7 +266,7 @@ describe("SchemaBuilder", () => {
 	it("should handle adding properties", () => {
 		const setSchema = jest.fn();
 		const { getByTestId } = render(
-			<SchemaBuilder {...defaultProps} setSchema={setSchema} />
+			<SchemaBuilder {...defaultProps} setSchema={setSchema} />,
 		);
 
 		const addButton = getByTestId("add-property");
@@ -247,7 +282,7 @@ describe("SchemaBuilder", () => {
 	it("should handle editing properties", () => {
 		const setSchema = jest.fn();
 		const { getByTestId } = render(
-			<SchemaBuilder {...defaultProps} setSchema={setSchema} />
+			<SchemaBuilder {...defaultProps} setSchema={setSchema} />,
 		);
 
 		const editButton = getByTestId("edit-property");
@@ -259,7 +294,7 @@ describe("SchemaBuilder", () => {
 	it("should handle removing properties", () => {
 		const setSchema = jest.fn();
 		const { getByTestId } = render(
-			<SchemaBuilder {...defaultProps} setSchema={setSchema} />
+			<SchemaBuilder {...defaultProps} setSchema={setSchema} />,
 		);
 
 		const removeButton = getByTestId("remove-property");
@@ -296,7 +331,7 @@ describe("SchemaBuilder", () => {
 	it("should handle schema import", async () => {
 		const setSchema = jest.fn();
 		const { getByTestId, getAllByText } = render(
-			<SchemaBuilder {...defaultProps} setSchema={setSchema} />
+			<SchemaBuilder {...defaultProps} setSchema={setSchema} />,
 		);
 
 		const textarea = getByTestId("textarea");
@@ -309,11 +344,12 @@ describe("SchemaBuilder", () => {
 
 		// Get all "Import Schema" buttons and click the one that's not a tab trigger
 		const importButtons = getAllByText("Import Schema");
-		const importButton = importButtons.find(button => 
-			!button.hasAttribute("data-testid") || 
-			!button.getAttribute("data-testid")?.includes("tab-trigger")
+		const importButton = importButtons.find(
+			(button) =>
+				!button.hasAttribute("data-testid") ||
+				!button.getAttribute("data-testid")?.includes("tab-trigger"),
 		);
-		
+
 		if (importButton) {
 			fireEvent.click(importButton);
 		}
@@ -330,7 +366,7 @@ describe("SchemaBuilder", () => {
 	it("should handle invalid schema import", async () => {
 		const setSchema = jest.fn();
 		const { getByTestId, getAllByText } = render(
-			<SchemaBuilder {...defaultProps} setSchema={setSchema} />
+			<SchemaBuilder {...defaultProps} setSchema={setSchema} />,
 		);
 
 		const textarea = getByTestId("textarea");
@@ -338,11 +374,12 @@ describe("SchemaBuilder", () => {
 
 		// Get all "Import Schema" buttons and click the one that's not a tab trigger
 		const importButtons = getAllByText("Import Schema");
-		const importButton = importButtons.find(button => 
-			!button.hasAttribute("data-testid") || 
-			!button.getAttribute("data-testid")?.includes("tab-trigger")
+		const importButton = importButtons.find(
+			(button) =>
+				!button.hasAttribute("data-testid") ||
+				!button.getAttribute("data-testid")?.includes("tab-trigger"),
 		);
-		
+
 		if (importButton) {
 			fireEvent.click(importButton);
 		}
@@ -355,7 +392,9 @@ describe("SchemaBuilder", () => {
 	});
 
 	it("should load current schema into textarea", () => {
-		const { getByTestId, getByText } = render(<SchemaBuilder {...defaultProps} />);
+		const { getByTestId, getByText } = render(
+			<SchemaBuilder {...defaultProps} />,
+		);
 
 		const loadButton = getByText("Load Current Schema");
 		fireEvent.click(loadButton);
@@ -365,7 +404,9 @@ describe("SchemaBuilder", () => {
 	});
 
 	it("should clear schema input", () => {
-		const { getByTestId, getByText } = render(<SchemaBuilder {...defaultProps} />);
+		const { getByTestId, getByText } = render(
+			<SchemaBuilder {...defaultProps} />,
+		);
 
 		const textarea = getByTestId("textarea");
 		fireEvent.change(textarea, { target: { value: "test content" } });
@@ -379,14 +420,17 @@ describe("SchemaBuilder", () => {
 	it("should handle object type properties correctly", () => {
 		const setSchema = jest.fn();
 		const { getByTestId } = render(
-			<SchemaBuilder {...defaultProps} setSchema={setSchema} />
+			<SchemaBuilder {...defaultProps} setSchema={setSchema} />,
 		);
 
 		// Mock adding an object type property
 		const propertyForm = getByTestId("property-form");
-		const mockOnAddProperty = propertyForm.querySelector('[data-testid="add-property"]');
-		
+		const mockOnAddProperty = propertyForm.querySelector(
+			'[data-testid="add-property"]',
+		);
+
 		// Simulate adding object type
+		// biome-ignore lint/style/noNonNullAssertion: null
 		fireEvent.click(mockOnAddProperty!);
 
 		expect(setSchema).toHaveBeenCalled();
@@ -395,7 +439,7 @@ describe("SchemaBuilder", () => {
 	it("should handle empty schema", () => {
 		const emptySchema = {};
 		const { getByTestId } = render(
-			<SchemaBuilder {...defaultProps} schema={emptySchema} />
+			<SchemaBuilder {...defaultProps} schema={emptySchema} />,
 		);
 
 		expect(getByTestId("properties-count")).toHaveTextContent("0");
@@ -404,7 +448,9 @@ describe("SchemaBuilder", () => {
 
 	it("should display correct grid layout classes", () => {
 		// Test all import allowed
-		const { getByTestId, rerender } = render(<SchemaBuilder {...defaultProps} />);
+		const { getByTestId, rerender } = render(
+			<SchemaBuilder {...defaultProps} />,
+		);
 		expect(getByTestId("tabs-list")).toHaveClass("grid-cols-3");
 
 		// Test import not allowed
@@ -412,17 +458,28 @@ describe("SchemaBuilder", () => {
 		expect(getByTestId("tabs-list")).toHaveClass("grid-cols-2");
 
 		// Test disabled (should also disable import)
-		rerender(<SchemaBuilder {...defaultProps} disabled={true} newImportAllowed={false} />);
+		rerender(
+			<SchemaBuilder
+				{...defaultProps}
+				disabled={true}
+				newImportAllowed={false}
+			/>,
+		);
 		expect(getByTestId("tabs-list")).toHaveClass("grid-cols-1");
 	});
 
 	it("should set correct default tab", () => {
 		// Default for enabled
-		const { getByTestId, rerender } = render(<SchemaBuilder {...defaultProps} />);
+		const { getByTestId, rerender } = render(
+			<SchemaBuilder {...defaultProps} />,
+		);
 		expect(getByTestId("tabs")).toHaveAttribute("data-default-value", "edit");
 
 		// Default for disabled
 		rerender(<SchemaBuilder {...defaultProps} disabled={true} />);
-		expect(getByTestId("tabs")).toHaveAttribute("data-default-value", "preview");
+		expect(getByTestId("tabs")).toHaveAttribute(
+			"data-default-value",
+			"preview",
+		);
 	});
 });

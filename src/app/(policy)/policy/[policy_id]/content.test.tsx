@@ -205,7 +205,9 @@ describe("PolicyInfo", () => {
 			json: async () => mockVersions,
 		});
 
-		const { getAllByTestId, getAllByText } = render(<PolicyInfo policy_id="test-policy" />);
+		const { getAllByTestId, getAllByText } = render(
+			<PolicyInfo policy_id="test-policy" />,
+		);
 
 		await waitFor(() => {
 			const cards = getAllByTestId("card");
@@ -423,7 +425,7 @@ describe("PolicyInfo", () => {
 		await waitFor(() => {
 			const clockIcons = getAllByTestId("clock-icon");
 			expect(clockIcons.length).toBeGreaterThan(0);
-			
+
 			const packageIcons = getAllByTestId("package-check-icon");
 			expect(packageIcons.length).toBeGreaterThan(0);
 		});
