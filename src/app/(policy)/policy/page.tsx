@@ -2,11 +2,11 @@
 
 import { FilePlusIcon, PlayIcon } from "lucide-react";
 import { useEffect } from "react";
-import { Editor } from "~/components/editor/editor";
-import { SavePolicy } from "~/components/editor/save";
-import { SchemaBuilder } from "~/components/editor/schema/builder";
-import { TestForm } from "~/components/editor/test/form";
-import { TestList } from "~/components/editor/test/list";
+import { Editor } from "~/components/policy/editor";
+import { SavePolicy } from "~/components/policy/save";
+import { SchemaBuilder } from "~/components/policy/schema/builder";
+import { TestForm } from "~/components/policy/test/form";
+import { TestList } from "~/components/policy/test/list";
 import { Button } from "~/components/ui/button";
 import { usePolicyStore } from "~/lib/state/policy";
 

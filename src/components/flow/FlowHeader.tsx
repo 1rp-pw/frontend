@@ -1,6 +1,7 @@
 "use client";
 
 import { SaveFlow } from "~/components/flow/save";
+import {PublishFlow} from "~/components/flow/publsh";
 
 interface FlowHeaderProps {
 	name: string;
@@ -18,6 +19,7 @@ export function FlowHeader({ name }: FlowHeaderProps) {
 				</div>
 				<div className="flex items-center gap-2">
 					<SaveFlow />
+					<PublishFlow />
 				</div>
 			</div>
 		</header>

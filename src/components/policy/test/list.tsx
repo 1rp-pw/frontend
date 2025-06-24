@@ -14,7 +14,7 @@ import {
 	XIcon,
 } from "lucide-react";
 import { useState } from "react";
-import { PolicyExecutionModal } from "~/components/editor/test/execution";
+import { PolicyExecutionModal } from "~/components/policy/test/execution";
 import {
 	AlertDialog,
 	AlertDialogAction,

@@ -88,7 +88,7 @@ ReactFlow-based visual designer with:
 
 ### Component Organization
 - `src/components/ui/` - Base design system (shadcn/ui pattern)
-- `src/components/editor/` - Policy editing functionality
+- `src/components/policy/` - Policy editing functionality
 - `src/components/flow/` - Workflow builder components
 - `src/lib/state/` - Zustand stores
 - `src/lib/types.ts` - TypeScript definitions
