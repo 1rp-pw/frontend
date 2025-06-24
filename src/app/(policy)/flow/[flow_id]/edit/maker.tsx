@@ -39,6 +39,7 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 		validateFlow,
 		getFlow,
 		isLoading,
+		flowSpec,
 	} = useFlowStore();
 
 	// Run initial validation when component loads
@@ -94,7 +95,7 @@ export default function Maker({ flow_id }: { flow_id: string }) {
 
 	return (
 		<div className="flex h-screen flex-col bg-background text-foreground">
-			<FlowHeader name={name} />
+			<FlowHeader name={name} baseId={flowSpec?.baseId} />
 
 			<ResizablePanelGroup direction="vertical" className="flex-1">
 				<ResizablePanel defaultSize={75} minSize={50}>

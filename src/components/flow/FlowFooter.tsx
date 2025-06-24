@@ -1,6 +1,6 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import type { FlowValidationResult } from "~/lib/utils/flow-validation";
@@ -14,9 +14,6 @@ export function FlowFooter({ validationResult, yamlPreview }: FlowFooterProps) {
 	return (
 		<div className="h-full overflow-auto border-border border-t bg-card p-4">
 			<Card className="h-full rounded-lg border-border bg-card shadow-sm">
-				<CardHeader className="pb-3">
-					<CardTitle className="font-medium text-sm">Flow Designer</CardTitle>
-				</CardHeader>
 				<CardContent className="h-[calc(100%-4rem)] overflow-auto">
 					<Tabs defaultValue="instructions" className="w-full">
 						<TabsList className="grid w-full grid-cols-3">

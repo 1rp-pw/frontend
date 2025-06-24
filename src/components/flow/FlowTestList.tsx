@@ -24,6 +24,7 @@ interface FlowTestListProps {
 	onRunTest: (testId: string) => void;
 	onRunAllTests: () => void;
 	isRunning: boolean;
+	readonly?: boolean;
 }
 
 export function FlowTestList({
@@ -35,6 +36,7 @@ export function FlowTestList({
 	onRunTest,
 	onRunAllTests,
 	isRunning,
+	readonly,
 }: FlowTestListProps) {
 	const [executionModalOpen, setExecutionModalOpen] = useState(false);
 	const [selectedTestForModal, setSelectedTestForModal] =
@@ -84,10 +86,12 @@ export function FlowTestList({
 							<Play className="mr-1 h-3 w-3" />
 							Run All
 						</Button>
-						<Button size="sm" onClick={onCreateTest}>
-							<Plus className="mr-1 h-3 w-3" />
-							New Test
-						</Button>
+						{!readonly && (
+							<Button size="sm" onClick={onCreateTest}>
+								<Plus className="mr-1 h-3 w-3" />
+								New Test
+							</Button>
+						)}
 					</div>
 				</div>
 			</CardHeader>
@@ -169,13 +173,15 @@ export function FlowTestList({
 											>
 												<Play className="h-3 w-3" />
 											</Button>
-											<Button
-												size="sm"
-												variant="ghost"
-												onClick={() => onDeleteTest(test.id)}
-											>
-												<Trash2 className="h-3 w-3" />
-											</Button>
+											{!readonly && (
+												<Button
+													size="sm"
+													variant="ghost"
+													onClick={() => onDeleteTest(test.id)}
+												>
+													<Trash2 className="h-3 w-3" />
+												</Button>
+											)}
 										</div>
 									</div>
 								);
