@@ -567,8 +567,6 @@ export const useFlowStore = create<FlowStore>((set, get) => {
 					baseId: updatedFlowSpec.baseId,
 				};
 
-				console.info("Saving flow to API", apiData);
-
 				const response = await fetch("/api/flow", {
 					method: flowSpec.id ? "PUT" : "POST",
 					headers: { "Content-Type": "application/json" },
