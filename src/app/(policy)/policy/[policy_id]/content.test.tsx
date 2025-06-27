@@ -107,6 +107,18 @@ jest.mock("lucide-react", () => ({
 	FilePlus2: () => <span data-testid="file-plus-icon">📄+</span>,
 	FileText: () => <span data-testid="file-text-icon">📄</span>,
 	PackageCheck: () => <span data-testid="package-check-icon">📦✓</span>,
+	GitCompareArrows: () => <span data-testid="git-compare-icon">⇄</span>,
+}));
+
+// Mock DiffModal component
+jest.mock("~/components/policy/diff-modal", () => ({
+	// biome-ignore lint/suspicious/noExplicitAny: Mock component
+	DiffModal: ({ open, children, ...props }: any) =>
+		open ? (
+			<div data-testid="diff-modal" {...props}>
+				{children}
+			</div>
+		) : null,
 }));
 
 // Mock fetch
