@@ -93,6 +93,12 @@ ReactFlow-based visual designer with:
 - `src/lib/state/` - Zustand stores
 - `src/lib/types.ts` - TypeScript definitions
 
+### Import Path Convention
+- **ALWAYS use `~` alias** for imports instead of `@`
+- Example: `import { Button } from "~/components/ui/button"`
+- The `~` alias is configured to point to the `src` directory
+- Never use `@/components` or similar `@` prefixed imports
+
 ### Form Handling
 - Use **React Hook Form** with **Zod** validation
 - Dynamic form generation from JSON schemas
