@@ -250,12 +250,6 @@ export function DiffModal({
 							/>
 						</div>
 					);
-				case "tests":
-					return (
-						<div className="flex h-64 items-center justify-center text-muted-foreground">
-							Tests comparison is not available in this version
-						</div>
-					);
 			}
 		};
 
@@ -299,10 +293,9 @@ export function DiffModal({
 						onValueChange={(v) => setDiffType(v as DiffType)}
 						className="h-full"
 					>
-						<TabsList className="grid w-full grid-cols-3">
+						<TabsList className="grid w-full grid-cols-2">
 							<TabsTrigger value="policy-text">Policy Text</TabsTrigger>
 							<TabsTrigger value="schema">Data Model</TabsTrigger>
-							<TabsTrigger value="tests">Tests</TabsTrigger>
 						</TabsList>
 						<TabsContent value={diffType} className="mt-4 h-full">
 							{renderDiff()}
