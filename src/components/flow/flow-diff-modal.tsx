@@ -76,6 +76,11 @@ function getEdgeEssentials(edge: FlowEdgeData) {
 	};
 }
 
+// Helper function to check if two strings have any differences
+function hasNoDifferences(oldText: string, newText: string): boolean {
+	return oldText.trim() === newText.trim();
+}
+
 // Helper component for side-by-side diff with highlighting
 function SideBySideDiff({
 	oldText,
@@ -249,6 +254,32 @@ export function FlowDiffModal({
 						compareVersion.nodes as unknown as string,
 					).map(getNodeEssentials);
 
+					const currentNodesText = JSON.stringify(currentNodes, null, 2);
+					const compareNodesText = JSON.stringify(compareNodes, null, 2);
+
+					if (hasNoDifferences(compareNodesText, currentNodesText)) {
+						return (
+							<div className="h-full">
+								<div className="mb-4 flex items-center justify-between">
+									<h3 className="font-semibold text-lg">
+										Flow Nodes Comparison
+									</h3>
+									<div className="flex gap-4 text-muted-foreground text-sm">
+										<span>Comparing: type, policyId, returnValue, outcome</span>
+									</div>
+								</div>
+								<div className="flex h-64 items-center justify-center text-muted-foreground">
+									<div className="text-center">
+										<div className="mb-2 text-lg">✓ Nothing different</div>
+										<div className="text-sm">
+											The flow nodes are identical between these versions
+										</div>
+									</div>
+								</div>
+							</div>
+						);
+					}
+
 					return (
 						<div className="h-full">
 							<div className="mb-4 flex items-center justify-between">
@@ -268,8 +299,8 @@ export function FlowDiffModal({
 								</span>
 							</div>
 							<SideBySideDiff
-								oldText={JSON.stringify(compareNodes, null, 2)}
-								newText={JSON.stringify(currentNodes, null, 2)}
+								oldText={compareNodesText}
+								newText={currentNodesText}
 							/>
 						</div>
 					);
@@ -282,6 +313,32 @@ export function FlowDiffModal({
 					const compareEdges = JSON.parse(
 						compareVersion.edges as unknown as string,
 					).map(getEdgeEssentials);
+
+					const currentEdgesText = JSON.stringify(currentEdges, null, 2);
+					const compareEdgesText = JSON.stringify(compareEdges, null, 2);
+
+					if (hasNoDifferences(compareEdgesText, currentEdgesText)) {
+						return (
+							<div className="h-full">
+								<div className="mb-4 flex items-center justify-between">
+									<h3 className="font-semibold text-lg">
+										Flow Connections Comparison
+									</h3>
+									<div className="flex gap-4 text-muted-foreground text-sm">
+										<span>Comparing: source, target, labels</span>
+									</div>
+								</div>
+								<div className="flex h-64 items-center justify-center text-muted-foreground">
+									<div className="text-center">
+										<div className="mb-2 text-lg">✓ Nothing different</div>
+										<div className="text-sm">
+											The flow connections are identical between these versions
+										</div>
+									</div>
+								</div>
+							</div>
+						);
+					}
 
 					return (
 						<div className="h-full">
@@ -304,36 +361,57 @@ export function FlowDiffModal({
 								</span>
 							</div>
 							<SideBySideDiff
-								oldText={JSON.stringify(compareEdges, null, 2)}
-								newText={JSON.stringify(currentEdges, null, 2)}
+								oldText={compareEdgesText}
+								newText={currentEdgesText}
 							/>
 						</div>
 					);
 				}
-				case "description":
+				case "description": {
+					const currentDesc = currentVersion.description || "No description";
+					const compareDesc = compareVersion.description || "No description";
+
+					if (hasNoDifferences(compareDesc, currentDesc)) {
+						return (
+							<div className="h-full">
+								<div className="mb-4 flex items-center justify-between">
+									<h3 className="font-semibold text-lg">
+										Description Comparison
+									</h3>
+								</div>
+								<div className="flex h-64 items-center justify-center text-muted-foreground">
+									<div className="text-center">
+										<div className="mb-2 text-lg">✓ Nothing different</div>
+										<div className="text-sm">
+											The descriptions are identical between these versions
+										</div>
+									</div>
+								</div>
+							</div>
+						);
+					}
+
 					return (
 						<div className="h-full">
 							<div className="mb-4 flex items-center justify-between">
 								<h3 className="font-semibold text-lg">
 									Description Comparison
 								</h3>
-								<div className="flex gap-4 text-sm">
-									<span className="flex items-center gap-1">
-										<div className="h-3 w-3 rounded border border-red-300 bg-red-100 dark:border-red-700 dark:bg-red-900/30" />
-										Removed
-									</span>
-									<span className="flex items-center gap-1">
-										<div className="h-3 w-3 rounded border border-green-300 bg-green-100 dark:border-green-700 dark:bg-green-900/30" />
-										Added
-									</span>
-								</div>
 							</div>
-							<SideBySideDiff
-								oldText={compareVersion.description || "No description"}
-								newText={currentVersion.description || "No description"}
-							/>
+							<div className="mb-2 flex gap-4 text-sm">
+								<span className="flex items-center gap-1">
+									<div className="h-3 w-3 rounded border border-red-300 bg-red-100 dark:border-red-700 dark:bg-red-900/30" />
+									Removed
+								</span>
+								<span className="flex items-center gap-1">
+									<div className="h-3 w-3 rounded border border-green-300 bg-green-100 dark:border-green-700 dark:bg-green-900/30" />
+									Added
+								</span>
+							</div>
+							<SideBySideDiff oldText={compareDesc} newText={currentDesc} />
 						</div>
 					);
+				}
 			}
 		};
 
