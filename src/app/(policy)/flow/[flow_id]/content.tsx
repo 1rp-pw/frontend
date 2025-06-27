@@ -1,9 +1,16 @@
 "use client";
 
-import { Clock, FilePenLine, FilePlus2, FileText } from "lucide-react";
+import {
+	Clock,
+	FilePenLine,
+	FilePlus2,
+	FileText,
+	GitCompareArrows,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { FlowVersionPreview } from "~/components/flow/FlowVersionPreview";
+import { FlowDiffModal } from "~/components/flow/flow-diff-modal";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -33,6 +40,10 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 	const [selectedVersion, setSelectedVersion] = useState<FlowSpec | null>(null);
 	const [loadError, setLoadError] = useState<Error | null>(null);
 	const [hasDraft, setHasDraft] = useState<boolean>(false);
+	const [diffModalOpen, setDiffModalOpen] = useState(false);
+	const [diffModalVersion, setDiffModalVersion] = useState<FlowSpec | null>(
+		null,
+	);
 
 	const getStatusVariant = (status: string) => {
 		switch (status) {
@@ -111,12 +122,28 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 												{version.description}
 											</CardDescription>
 										</div>
-										<Badge
-											variant={getStatusVariant(version.status)}
-											className={"text-xs"}
-										>
-											{version.status === "draft" ? "Draft" : "Published"}
-										</Badge>
+										<div className="flex items-center gap-2">
+											<Badge
+												variant={getStatusVariant(version.status)}
+												className={"text-xs"}
+											>
+												{version.status === "draft" ? "Draft" : "Published"}
+											</Badge>
+											{versions.length > 1 && (
+												<Button
+													variant="ghost"
+													size="sm"
+													className="h-6 w-6 p-0"
+													onClick={(e) => {
+														e.stopPropagation();
+														setDiffModalVersion(version);
+														setDiffModalOpen(true);
+													}}
+												>
+													<GitCompareArrows className="h-3 w-3" />
+												</Button>
+											)}
+										</div>
 									</div>
 								</CardHeader>
 								<CardContent className={"pt-0"}>
@@ -213,6 +240,15 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 					</div>
 				</div>
 			</div>
+
+			{diffModalVersion && (
+				<FlowDiffModal
+					open={diffModalOpen}
+					onOpenChange={setDiffModalOpen}
+					versions={versions}
+					currentVersion={diffModalVersion}
+				/>
+			)}
 		</div>
 	);
 }

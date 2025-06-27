@@ -5,10 +5,12 @@ import {
 	FilePenLine,
 	FilePlus2,
 	FileText,
+	GitCompareArrows,
 	PackageCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { DiffModal } from "~/components/policy/diff-modal";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -39,6 +41,10 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 	const [versionsLoading, setVersionsLoading] = useState<boolean>(true);
 	const [versions, setVersions] = useState<PolicySpec[]>([]);
 	const [selectedVersion, setSelectedVersion] = useState<PolicySpec | null>(
+		null,
+	);
+	const [diffModalOpen, setDiffModalOpen] = useState(false);
+	const [diffModalVersion, setDiffModalVersion] = useState<PolicySpec | null>(
 		null,
 	);
 
@@ -113,12 +119,28 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 												{version.description}
 											</CardDescription>
 										</div>
-										<Badge
-											variant={getStatusVariant(version.status)}
-											className={"text-xs"}
-										>
-											{version.status === "draft" ? "Draft" : "Published"}
-										</Badge>
+										<div className="flex items-center gap-2">
+											<Badge
+												variant={getStatusVariant(version.status)}
+												className={"text-xs"}
+											>
+												{version.status === "draft" ? "Draft" : "Published"}
+											</Badge>
+											{versions.length > 1 && (
+												<Button
+													variant="ghost"
+													size="sm"
+													className="h-6 w-6 p-0"
+													onClick={(e) => {
+														e.stopPropagation();
+														setDiffModalVersion(version);
+														setDiffModalOpen(true);
+													}}
+												>
+													<GitCompareArrows className="h-3 w-3" />
+												</Button>
+											)}
+										</div>
 									</div>
 								</CardHeader>
 								<CardContent className={"pt-0"}>
@@ -256,6 +278,15 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 					</div>
 				</div>
 			</div>
+
+			{diffModalVersion && (
+				<DiffModal
+					open={diffModalOpen}
+					onOpenChange={setDiffModalOpen}
+					versions={versions}
+					currentVersion={diffModalVersion}
+				/>
+			)}
 		</div>
 	);
 }
