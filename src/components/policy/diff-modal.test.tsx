@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+	cleanup,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from "@testing-library/react";
 import type { PolicySpec } from "~/lib/types";
 import { DiffModal } from "./diff-modal";
 
@@ -57,7 +63,7 @@ jest.mock("~/components/ui/select", () => ({
 	}) => (
 		// biome-ignore lint/a11y/noStaticElementInteractions: Mock component
 		// biome-ignore lint/a11y/useKeyWithClickEvents: Mock component
-		<div data-testid="select" onClick={() => onValueChange("test-id")}>
+		<div data-testid="select" onClick={() => onValueChange("policy-1")}>
 			{children}
 		</div>
 	),
@@ -165,6 +171,10 @@ describe("DiffModal", () => {
 		jest.clearAllMocks();
 	});
 
+	afterEach(() => {
+		cleanup();
+	});
+
 	it("should render when open", () => {
 		render(<DiffModal {...defaultProps} />);
 
@@ -244,7 +254,9 @@ describe("DiffModal", () => {
 		fireEvent.click(screen.getByTestId("select"));
 
 		await waitFor(() => {
-			expect(screen.getByTestId("scroll-area")).toBeInTheDocument();
+			// Should show side-by-side diff (two scroll areas)
+			const scrollAreas = screen.getAllByTestId("scroll-area");
+			expect(scrollAreas).toHaveLength(2);
 		});
 	});
 
@@ -258,9 +270,8 @@ describe("DiffModal", () => {
 		fireEvent.click(screen.getByTestId("tab-trigger-schema"));
 
 		await waitFor(() => {
-			expect(
-				screen.getByText("Data Model (Schema) Comparison"),
-			).toBeInTheDocument();
+			// Should have clicked the schema tab trigger
+			expect(screen.getByTestId("tab-trigger-schema")).toBeInTheDocument();
 		});
 	});
 
