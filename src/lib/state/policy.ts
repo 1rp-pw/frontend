@@ -985,6 +985,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 						rule: resp.rule,
 						errors: resp.errors,
 						result: resp.result,
+						labels: resp.labels,
 					},
 				});
 			} catch (e) {
