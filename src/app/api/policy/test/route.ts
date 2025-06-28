@@ -28,6 +28,7 @@ export async function POST(request: Request) {
 				trace: resp.trace,
 				rule: resp.rule,
 				data: resp.data,
+				labels: resp.labels,
 			},
 			{ status: 200 },
 		);
