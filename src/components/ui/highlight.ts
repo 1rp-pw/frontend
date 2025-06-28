@@ -88,7 +88,7 @@ export const highlightText = (text: string) => {
 		}
 
 		// Also check for label references (§label) in this line
-		const labelReferencePattern = /§(\w+)/g;
+		const labelReferencePattern = /§([\w.]+)/g;
 		// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
 		let labelMatch;
 		// biome-ignore lint/suspicious/noAssignInExpressions: its fine
@@ -274,7 +274,7 @@ export const highlightText = (text: string) => {
 	});
 
 	// Highlight label references (§label)
-	html = html.replace(/§(\w+)/g, (match, labelName) => {
+	html = html.replace(/§([\w.]+)/g, (match, labelName) => {
 		// Check if this label has a corresponding rule
 		if (labeledRules.has(labelName)) {
 			return createPlaceholder(

@@ -224,6 +224,22 @@ A **driver** gets a licence if §driver passes and the **driver** passes the age
 				);
 			});
 
+			it("should handle compound label references (§label.sublabel)", () => {
+				const input = `driver.bob. A **driver** passes the age test
+A **driver** gets a licence if §driver.bob is valid`;
+				const result = highlightText(input);
+
+				// The compound label reference should be highlighted
+				expect(result).toContain(
+					`<span class="${referenceColor}">§driver.bob</span>`,
+				);
+
+				// The labeled rule should be highlighted as referenced
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes the age test</span>`,
+				);
+			});
+
 			it("should handle complex example with multiple labeled rules", () => {
 				const input = `# Driving Test Example
 driver. A **driver** passes the age test
