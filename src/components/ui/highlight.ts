@@ -21,18 +21,25 @@ export const highlightText = (text: string) => {
 	const allDefinedRuleActions = new Set<string>(); // All unique action parts
 	// Maps original full definition line to its action part
 	const definitionLineToActionMap = new Map<string, string>();
+	// Track labeled rules (e.g., "driver. A **driver** passes the age test")
+	const labeledRules = new Map<string, string>(); // label -> action
 
 	lines.forEach((line) => {
 		const trimmedLine = line.trim();
 		// Patterns to match:
 		// 1. With labels: "bob. A **Person** gets a full driving license"
 		// 2. Without labels: "A **Person** passes the practical driving test"
-		const matchWithLabel = line.match(/^([\w.]+\.\s+A\s+\*\*\w+\*\*\s+)(.+)$/);
+		const matchWithLabel = line.match(/^([\w.]+)\.\s+A\s+\*\*\w+\*\*\s+(.+)$/);
 		const matchWithoutLabel = line.match(/^(A\s+\*\*\w+\*\*\s+)(.+)$/);
 
-		const match = matchWithLabel || matchWithoutLabel;
-		if (match && match[2] !== undefined) {
-			const ruleAction = match[2].trim();
+		if (matchWithLabel?.[1] && matchWithLabel[2] !== undefined) {
+			const label = matchWithLabel[1];
+			const ruleAction = matchWithLabel[2].trim();
+			allDefinedRuleActions.add(ruleAction);
+			definitionLineToActionMap.set(trimmedLine, ruleAction);
+			labeledRules.set(label, ruleAction);
+		} else if (matchWithoutLabel && matchWithoutLabel[2] !== undefined) {
+			const ruleAction = matchWithoutLabel[2].trim();
 			allDefinedRuleActions.add(ruleAction);
 			definitionLineToActionMap.set(trimmedLine, ruleAction);
 		}
@@ -76,6 +83,22 @@ export const highlightText = (text: string) => {
 					)
 				) {
 					rulesWithExternalReferences.add(definedAction);
+				}
+			}
+		}
+
+		// Also check for label references (§label) in this line
+		const labelReferencePattern = /§([\w.]+)/g;
+		// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
+		let labelMatch;
+		// biome-ignore lint/suspicious/noAssignInExpressions: its fine
+		while ((labelMatch = labelReferencePattern.exec(currentLine)) !== null) {
+			const referencedLabel = labelMatch[1];
+			// If this label has a corresponding rule, mark that rule as referenced
+			if (referencedLabel && labeledRules.has(referencedLabel)) {
+				const labeledAction = labeledRules.get(referencedLabel);
+				if (labeledAction) {
+					rulesWithExternalReferences.add(labeledAction);
 				}
 			}
 		}
@@ -230,9 +253,9 @@ export const highlightText = (text: string) => {
 	// This needs careful placement. If the line structure is "LABEL. A **Object** Action",
 	// we want to highlight LABEL.
 	// This regex should still work on the HTML string with placeholders as it looks for raw text structure.
-	html = html.replace(/^([\w.]+\.)\s+(?=A\s)/gm, (_match, p1) => {
-		// We captured the full match including the space, so just return the placeholder and the space.
-		return `${createPlaceholder(`<span class="${labelColor}">${p1}</span>`)}`;
+	html = html.replace(/^([\w.]+\.)(\s+)(?=A\s)/gm, (_match, p1, p2) => {
+		// We captured the label and the spaces separately, so return both
+		return `${createPlaceholder(`<span class="${labelColor}">${p1}</span>`)}${p2}`;
 	});
 
 	// Highlight lines starting with # (comments)
@@ -248,6 +271,17 @@ export const highlightText = (text: string) => {
 	// Highlight double underscores (selectors) - non-greedy
 	html = html.replace(/(__.+?__)/g, (match) => {
 		return createPlaceholder(`<span class="${selectorColor}">${match}</span>`);
+	});
+
+	// Highlight label references (§label)
+	html = html.replace(/§([\w.]+)/g, (match, labelName) => {
+		// Check if this label has a corresponding rule
+		if (labeledRules.has(labelName)) {
+			return createPlaceholder(
+				`<span class="${referenceColor}">${match}</span>`,
+			);
+		}
+		return match; // Don't highlight if no matching label exists
 	});
 
 	// Step 6: Replace all placeholders with their actual HTML

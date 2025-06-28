@@ -151,6 +151,127 @@ A **Person** can drink if the **Person** is an adult`;
 			});
 		});
 
+		describe("label reference highlighting", () => {
+			it("should highlight label references (§label)", () => {
+				const input = `driver. A **driver** passes the age test
+A **driver** gets a driving licence if §driver passes`;
+				const result = highlightText(input);
+
+				// The label reference should be highlighted
+				expect(result).toContain(
+					`<span class="${referenceColor}">§driver</span>`,
+				);
+			});
+
+			it("should highlight labeled rule as referenced when used with §", () => {
+				const input = `driver. A **driver** passes the age test
+A **driver** gets a driving licence if §driver passes`;
+				const result = highlightText(input);
+
+				// The labeled rule should be highlighted as referenced
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes the age test</span>`,
+				);
+			});
+
+			it("should not highlight label references for non-existent labels", () => {
+				const input = "A **driver** gets a licence if §nonexistent passes";
+				const result = highlightText(input);
+
+				// Should not highlight non-existent label references
+				expect(result).not.toContain(
+					`<span class="${referenceColor}">§nonexistent</span>`,
+				);
+				expect(result).toContain("§nonexistent"); // But the text should still be there
+			});
+
+			it("should handle multiple label references to the same rule", () => {
+				const input = `driver. A **driver** passes the age test
+A **driver** gets a licence if §driver passes
+A **driver** is eligible if §driver passes`;
+				const result = highlightText(input);
+
+				// Should have two highlighted label references
+				const labelRefMatches = result.match(
+					new RegExp(`<span class="${referenceColor}">§driver</span>`, "g"),
+				);
+				expect(labelRefMatches).toHaveLength(2);
+
+				// The labeled rule should be highlighted as referenced
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes the age test</span>`,
+				);
+			});
+
+			it("should handle both label references and direct rule references", () => {
+				const input = `driver. A **driver** passes the age test
+A **driver** gets a licence if §driver passes and the **driver** passes the age test`;
+				const result = highlightText(input);
+
+				// Should highlight the label reference
+				expect(result).toContain(
+					`<span class="${referenceColor}">§driver</span>`,
+				);
+
+				// Should highlight the direct rule reference
+				expect(result).toContain(
+					`<span class="${referenceColor}">passes the age test</span>`,
+				);
+
+				// The labeled rule definition should be highlighted as referenced
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes the age test</span>`,
+				);
+			});
+
+			it("should handle compound label references (§label.sublabel)", () => {
+				const input = `driver.bob. A **driver** passes the age test
+A **driver** gets a licence if §driver.bob is valid`;
+				const result = highlightText(input);
+
+				// The compound label reference should be highlighted
+				expect(result).toContain(
+					`<span class="${referenceColor}">§driver.bob</span>`,
+				);
+
+				// The labeled rule should be highlighted as referenced
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes the age test</span>`,
+				);
+			});
+
+			it("should handle complex example with multiple labeled rules", () => {
+				const input = `# Driving Test Example
+driver. A **driver** passes the age test
+  if the __date of birth__ of the **person** is earlier than 2008-12-12.
+
+tester. A **driver** passes the test requirements
+  if **driver** passes the theory test
+  and the **driver** passes the practical test.
+
+A **driver** gets a driving licence
+  if §driver passes
+  and the **driver** passes the test requirements`;
+
+				const result = highlightText(input);
+
+				// Check label references are highlighted
+				expect(result).toContain(
+					`<span class="${referenceColor}">§driver</span>`,
+				);
+
+				// Check labeled rules are highlighted when referenced
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes the age test</span>`,
+				);
+
+				// Check regular rule references still work
+				expect(result).toContain(
+					`<span class="${referenceColor}">passes the test requirements</span>`,
+				);
+			});
+		});
+
 		it("should handle complex multi-line text", () => {
 			const input = `# Policy Rules
 rule1. A **Person** has an __age__ that is greater than 18
