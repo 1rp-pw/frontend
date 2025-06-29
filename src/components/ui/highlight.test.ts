@@ -1,5 +1,6 @@
 import {
 	commentColor,
+	dateColor,
 	functionColor,
 	highlightText,
 	labelColor,
@@ -31,6 +32,30 @@ describe("highlight", () => {
 
 			expect(result).toContain(`<span class="${numberColor}">25</span>`);
 			expect(result).toContain(`<span class="${numberColor}">100</span>`);
+		});
+
+		it("should highlight dates with dateColor instead of numberColor", () => {
+			const input = "The date is 2008-12-12 and date(2025-06-11)";
+			const result = highlightText(input);
+
+			// Dates should use dateColor
+			expect(result).toContain(`<span class="${dateColor}">2008-12-12</span>`);
+			expect(result).toContain(
+				`<span class="${dateColor}">date(2025-06-11)</span>`,
+			);
+
+			// Should not highlight individual parts as numbers
+			expect(result).not.toContain(`<span class="${numberColor}">2008</span>`);
+			expect(result).not.toContain(`<span class="${numberColor}">12</span>`);
+		});
+
+		it("should handle dates in complex contexts", () => {
+			const input = `driver. A **driver** passes the age test
+  if the __date of birth__ of the **person** is earlier than 2008-12-12.`;
+			const result = highlightText(input);
+
+			// Date should be highlighted with dateColor
+			expect(result).toContain(`<span class="${dateColor}">2008-12-12</span>`);
 		});
 
 		it("should highlight comparison phrases", () => {

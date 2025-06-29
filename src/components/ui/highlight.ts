@@ -233,6 +233,16 @@ export const highlightText = (text: string) => {
 	// Step 5: Apply all other static highlighting rules
 	// These should be run *after* the rule-based highlighting to avoid interference.
 
+	// Highlight dates (before numbers to take precedence)
+	// Matches date(yyyy-mm-dd) format
+	html = html.replace(/\bdate\(\d{4}-\d{2}-\d{2}\)/g, (match) => {
+		return createPlaceholder(`<span class="${dateColor}">${match}</span>`);
+	});
+	// Matches plain yyyy-mm-dd format
+	html = html.replace(/\b\d{4}-\d{2}-\d{2}\b/g, (match) => {
+		return createPlaceholder(`<span class="${dateColor}">${match}</span>`);
+	});
+
 	// Highlight numbers
 	html = html.replace(/\b(\d+)\b/g, (_match, p1) => {
 		return createPlaceholder(`<span class="${numberColor}">${p1}</span>`);
