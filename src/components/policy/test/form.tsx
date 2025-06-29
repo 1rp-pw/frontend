@@ -15,6 +15,13 @@ import { Input } from "~/components/ui/input";
 import { InputTags } from "~/components/ui/inputtags";
 import { Label } from "~/components/ui/label";
 import { RainbowBraces } from "~/components/ui/rainbow";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "~/components/ui/select";
 import { Slider } from "~/components/ui/slider";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -201,6 +208,20 @@ export function TestForm({
 			dob: "Date of Birth",
 			hazardPerception: "Hazard Perception",
 			multipleChoice: "Multiple Choice",
+			// Common enum values
+			bachelor_arts: "Bachelor of Arts",
+			bachelor_science: "Bachelor of Science",
+			bachelor_engineering: "Bachelor of Engineering",
+			master_arts: "Master of Arts",
+			master_science: "Master of Science",
+			master_business: "Master of Business Administration",
+			phd: "PhD",
+			doctorate: "Doctorate",
+			in_progress: "In Progress",
+			not_started: "Not Started",
+			self_pay: "Self Pay",
+			employer_sponsored: "Employer Sponsored",
+			partially_related: "Partially Related",
 		};
 
 		const lower = fieldName.toLowerCase();
@@ -254,7 +275,7 @@ export function TestForm({
 		// console.info("details", details);
 		switch (details.type) {
 			case "string":
-				if (details.format === "date-time") {
+				if (details.format === "date-time" || details.format === "date") {
 					return (
 						<div key={path} className={"space-y-1"}>
 							<Label htmlFor={path} className="text-sm">
@@ -267,6 +288,40 @@ export function TestForm({
 								onChange={(e) => setFormData(setNestedValue(formData, path, e))}
 								className="border-zinc-600 "
 							/>
+						</div>
+					);
+				}
+
+				// Check if field has enum values
+				if (details.enum && Array.isArray(details.enum)) {
+					return (
+						<div key={path} className="space-y-1">
+							<Label htmlFor={path} className="text-sm">
+								{formatFieldLabel(name)}{" "}
+								{isRequired && <span className="text-red-500">*</span>}
+							</Label>
+							<Select
+								value={getNestedValue(formData, path) || ""}
+								onValueChange={(value) =>
+									setFormData(setNestedValue(formData, path, value))
+								}
+							>
+								<SelectTrigger
+									id={path}
+									className="border-zinc-600 bg-zinc-700"
+								>
+									<SelectValue
+										placeholder={`Select ${formatFieldLabel(name).toLowerCase()}`}
+									/>
+								</SelectTrigger>
+								<SelectContent>
+									{details.enum.map((option: string) => (
+										<SelectItem key={option} value={option}>
+											{formatFieldLabel(option)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
 						</div>
 					);
 				}
