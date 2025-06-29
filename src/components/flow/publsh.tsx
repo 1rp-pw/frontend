@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -36,21 +36,74 @@ import { useFlowStore } from "~/lib/state/flow";
 export function PublishFlow() {
 	const [formOpen, setFormOpen] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
+	const [lastPublishedVersion, setLastPublishedVersion] = useState<number>(0);
+	const [minVersion, setMinVersion] = useState<number>(0.1);
 	const router = useRouter();
 
 	const { tests, saveFlow, id, updateFlowSpec, flowSpec } = useFlowStore();
 
+	// Fetch the last published version when dialog opens
+	useEffect(() => {
+		if (formOpen && id) {
+			fetchLastPublishedVersion();
+		}
+		// biome-ignore lint/correctness/useExhaustiveDependencies: fetchLastPublishedVersion is stable
+	}, [formOpen, id]);
+
+	const fetchLastPublishedVersion = async () => {
+		if (!id) return;
+
+		try {
+			const response = await fetch(`/api/flow/versions?flow_id=${id}`);
+			if (response.ok) {
+				const versions = await response.json();
+				// Find the highest published version
+				const publishedVersions = versions
+					// biome-ignore lint/suspicious/noExplicitAny: API response type
+					.filter((v: any) => v.status === "published")
+					// biome-ignore lint/suspicious/noExplicitAny: API response type
+					.map((v: any) => v.version)
+					.filter((v: number) => !Number.isNaN(v));
+
+				if (publishedVersions.length > 0) {
+					const maxVersion = Math.max(...publishedVersions);
+					setLastPublishedVersion(maxVersion);
+					// Set minimum version to be 0.1 above the last published version
+					const newMinVersion = Math.round((maxVersion + 0.1) * 10) / 10;
+					setMinVersion(newMinVersion);
+					// Update form default value
+					form.setValue("flowVersion", newMinVersion);
+				}
+			}
+		} catch (error) {
+			console.error("Failed to fetch versions:", error);
+		}
+	};
+
+	// Create form schema dynamically based on minVersion
 	const formSchema = z.object({
-		flowVersion: z.number().min(0.1, "Flow version must be at least 0.1"),
+		flowVersion: z
+			.number()
+			.min(minVersion, `Flow version must be at least ${minVersion}`)
+			.refine((val) => {
+				// Ensure the version is a valid increment (multiples of 0.1)
+				return Math.round(val * 10) / 10 === val;
+			}, "Version must be in increments of 0.1"),
 		flowChanges: z.string().min(1, "Flow changes must be at least 1 character"),
 	});
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			flowVersion: 0.1,
+			flowVersion: minVersion,
 			flowChanges: "",
 		},
 	});
+
+	// Update form when minVersion changes
+	useEffect(() => {
+		form.setValue("flowVersion", minVersion);
+	}, [minVersion, form]);
 
 	const onSubmit = async (data: z.infer<typeof formSchema>) => {
 		setIsLoading(true);
@@ -127,12 +180,19 @@ export function PublishFlow() {
 							name={"flowVersion"}
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel>Flow Version</FormLabel>
+									<FormLabel>
+										Flow Version
+										{lastPublishedVersion > 0 && (
+											<span className="ml-2 text-xs text-zinc-400">
+												(Last published: {lastPublishedVersion})
+											</span>
+										)}
+									</FormLabel>
 									<FormControl>
 										<Input
 											type={"number"}
 											step={"0.1"}
-											min={"0.1"}
+											min={minVersion}
 											placeholder="Flow Version"
 											{...field}
 											onChange={(e) => {
