@@ -42,9 +42,9 @@ export default function IDEPage() {
 				</div>
 			</header>
 
-			<main className="grid flex-1 grid-cols-2 gap-1 overflow-auto p-1">
+			<main className="grid flex-1 grid-cols-2 gap-1 overflow-hidden p-1">
 				{/* Left Column - Equal heights */}
-				<div className="grid grid-rows-2 gap-1">
+				<div className="grid grid-rows-2 gap-1 overflow-hidden">
 					<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 						<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
 							Policy Text
@@ -69,7 +69,7 @@ export default function IDEPage() {
 				</div>
 
 				{/* Right Column - Test Editor taller, Test List shorter */}
-				<div className="grid grid-rows-[2fr_1fr] gap-1">
+				<div className="grid grid-rows-[2.4fr_1fr] gap-1 overflow-hidden">
 					<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
 						<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
 							Test Editor

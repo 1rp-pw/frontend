@@ -288,7 +288,6 @@ export function TestForm({
 					</div>
 				);
 
-
 			case "number":
 			case "integer":
 				return (
