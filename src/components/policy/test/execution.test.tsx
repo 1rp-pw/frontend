@@ -110,6 +110,7 @@ describe("PolicyExecutionModal", () => {
 		result: true,
 		errors: null,
 		data: null,
+		labels: null,
 		rule: ["First rule line", "Second rule line"],
 		trace: {
 			execution: [

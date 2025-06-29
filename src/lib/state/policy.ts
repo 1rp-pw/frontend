@@ -18,6 +18,8 @@ export interface TestResultSet {
 	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	errors: any | null;
 	result: boolean;
+	// biome-ignore lint/suspicious/noExplicitAny: can be anything
+	labels: any | null;
 	trace: {
 		execution: Array<{
 			conditions: Array<{
@@ -983,6 +985,7 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 						rule: resp.rule,
 						errors: resp.errors,
 						result: resp.result,
+						labels: resp.labels,
 					},
 				});
 			} catch (e) {

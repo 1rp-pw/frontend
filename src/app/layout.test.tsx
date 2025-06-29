@@ -53,11 +53,6 @@ jest.mock("~/lib/utils", () => ({
 describe("RootLayout", () => {
 	const TestChild = () => <div data-testid="test-child">Test Content</div>;
 
-	// Skip HTML structure test since <html> can't be rendered in JSDOM
-	it.skip("should render the basic HTML structure", () => {
-		// This test would require E2E testing with a real browser
-	});
-
 	it("should set correct HTML attributes", () => {
 		// Can't test html attributes in JSDOM, would need E2E tests
 		// Just ensure layout renders without error
