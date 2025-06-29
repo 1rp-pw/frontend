@@ -436,6 +436,8 @@ The __score__ is equal to 100`;
 				"is not equal to",
 				"is not the same as",
 				"is later than",
+				"is older than",
+				"is younger than",
 				"is earlier than",
 				"is greater than",
 				"is less than",

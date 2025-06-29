@@ -15,6 +15,13 @@ import { Input } from "~/components/ui/input";
 import { InputTags } from "~/components/ui/inputtags";
 import { Label } from "~/components/ui/label";
 import { RainbowBraces } from "~/components/ui/rainbow";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "~/components/ui/select";
 import { Slider } from "~/components/ui/slider";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
@@ -151,6 +158,7 @@ export function TestForm({
 						initialData[propName] = "";
 						break;
 					case "number":
+					case "integer":
 						initialData[propName] = 0;
 						break;
 					case "boolean":
@@ -191,6 +199,46 @@ export function TestForm({
 		onSaveTest(formData, testName || `Test ${Date.now()}`, expectPass);
 	};
 
+	// Convert camelCase or PascalCase to Title Case
+	const formatFieldLabel = (fieldName: string): string => {
+		// Handle special cases
+		const specialCases: Record<string, string> = {
+			dateofbirth: "Date of Birth",
+			dateOfBirth: "Date of Birth",
+			dob: "Date of Birth",
+			hazardPerception: "Hazard Perception",
+			multipleChoice: "Multiple Choice",
+			// Common enum values
+			bachelor_arts: "Bachelor of Arts",
+			bachelor_science: "Bachelor of Science",
+			bachelor_engineering: "Bachelor of Engineering",
+			master_arts: "Master of Arts",
+			master_science: "Master of Science",
+			master_business: "Master of Business Administration",
+			phd: "PhD",
+			doctorate: "Doctorate",
+			in_progress: "In Progress",
+			not_started: "Not Started",
+			self_pay: "Self Pay",
+			employer_sponsored: "Employer Sponsored",
+			partially_related: "Partially Related",
+		};
+
+		const lower = fieldName.toLowerCase();
+		if (specialCases[lower]) {
+			return specialCases[lower];
+		}
+		if (specialCases[fieldName]) {
+			return specialCases[fieldName];
+		}
+
+		// Convert camelCase to Title Case
+		return fieldName
+			.replace(/([A-Z])/g, " $1") // Add space before capital letters
+			.replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
+			.trim();
+	};
+
 	const renderFormField = (field: {
 		name: string;
 		path: string;
@@ -202,11 +250,24 @@ export function TestForm({
 
 		// Object header (just a divider with title)
 		if (details.isObjectHeader) {
+			const level = path.split(".").length;
+			const marginTop = level === 1 ? "mt-4" : "mt-2";
+			const marginLeft = level > 1 ? "ml-4" : "";
+			const textSize =
+				level === 1 ? "text-sm text-zinc-300" : "text-xs text-zinc-400";
+
 			return (
-				<div key={path} className="col-span-full border-zinc-600">
-					<h4 className="mb-2 font-medium text-sm text-zinc-200">
-						{name} {isRequired && <span className="text-red-500">*</span>}
-					</h4>
+				<div key={path} className="col-span-full">
+					<div
+						className={`flex items-center gap-2 ${marginLeft} mb-3 ${marginTop}`}
+					>
+						<div className="h-px flex-1 bg-zinc-700" />
+						<h4 className={`font-medium ${textSize} px-2`}>
+							{formatFieldLabel(name)}{" "}
+							{isRequired && <span className="text-red-500">*</span>}
+						</h4>
+						<div className="h-px flex-1 bg-zinc-700" />
+					</div>
 				</div>
 			);
 		}
@@ -214,11 +275,12 @@ export function TestForm({
 		// console.info("details", details);
 		switch (details.type) {
 			case "string":
-				if (details.format === "date-time") {
+				if (details.format === "date-time" || details.format === "date") {
 					return (
 						<div key={path} className={"space-y-1"}>
 							<Label htmlFor={path} className="text-sm">
-								{name} {isRequired && <span className="text-red-500">*</span>}
+								{formatFieldLabel(name)}{" "}
+								{isRequired && <span className="text-red-500">*</span>}
 							</Label>
 							<DateTimeInput
 								id={path}
@@ -230,10 +292,45 @@ export function TestForm({
 					);
 				}
 
+				// Check if field has enum values
+				if (details.enum && Array.isArray(details.enum)) {
+					return (
+						<div key={path} className="space-y-1">
+							<Label htmlFor={path} className="text-sm">
+								{formatFieldLabel(name)}{" "}
+								{isRequired && <span className="text-red-500">*</span>}
+							</Label>
+							<Select
+								value={getNestedValue(formData, path) || ""}
+								onValueChange={(value) =>
+									setFormData(setNestedValue(formData, path, value))
+								}
+							>
+								<SelectTrigger
+									id={path}
+									className="border-zinc-600 bg-zinc-700"
+								>
+									<SelectValue
+										placeholder={`Select ${formatFieldLabel(name).toLowerCase()}`}
+									/>
+								</SelectTrigger>
+								<SelectContent>
+									{details.enum.map((option: string) => (
+										<SelectItem key={option} value={option}>
+											{formatFieldLabel(option)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					);
+				}
+
 				return (
 					<div key={path} className="space-y-1">
 						<Label htmlFor={path} className="text-sm">
-							{name} {isRequired && <span className="text-red-500">*</span>}
+							{formatFieldLabel(name)}{" "}
+							{isRequired && <span className="text-red-500">*</span>}
 						</Label>
 						<Input
 							id={path}
@@ -247,10 +344,12 @@ export function TestForm({
 				);
 
 			case "number":
+			case "integer":
 				return (
 					<div key={path} className="space-y-1">
 						<Label htmlFor={path} className="text-sm">
-							{name} {isRequired && <span className="text-red-500">*</span>}
+							{formatFieldLabel(name)}{" "}
+							{isRequired && <span className="text-red-500">*</span>}
 						</Label>
 						<div className="flex gap-2">
 							<Slider
@@ -282,7 +381,8 @@ export function TestForm({
 				return (
 					<div key={path} className="flex items-center justify-between">
 						<Label htmlFor={path} className="text-sm">
-							{name} {isRequired && <span className="text-red-500">*</span>}
+							{formatFieldLabel(name)}{" "}
+							{isRequired && <span className="text-red-500">*</span>}
 						</Label>
 						<Switch
 							id={path}
@@ -298,7 +398,8 @@ export function TestForm({
 				return (
 					<div key={path} className="space-y-1">
 						<Label htmlFor={path} className="text-sm">
-							{name} {isRequired && <span className="text-red-500">*</span>}
+							{formatFieldLabel(name)}{" "}
+							{isRequired && <span className="text-red-500">*</span>}
 						</Label>
 						<InputTags
 							value={getNestedValue(formData, path) || []}
@@ -346,11 +447,67 @@ export function TestForm({
 		);
 	}
 
-	// Calculate pagination
-	const totalPages = Math.ceil(flattenedFields.length / FIELDS_PER_PAGE);
-	const startIndex = currentPage * FIELDS_PER_PAGE;
-	const endIndex = startIndex + FIELDS_PER_PAGE;
-	const currentFields = flattenedFields.slice(startIndex, endIndex);
+	// Calculate pagination - only count actual fields, not object headers
+	const actualFields = flattenedFields.filter(
+		(field) => !field.details.isObjectHeader,
+	);
+	const totalPages = Math.ceil(actualFields.length / FIELDS_PER_PAGE);
+
+	// Get the fields for the current page
+	const startFieldIndex = currentPage * FIELDS_PER_PAGE;
+	const endFieldIndex = startFieldIndex + FIELDS_PER_PAGE;
+	const currentPageActualFields = actualFields.slice(
+		startFieldIndex,
+		endFieldIndex,
+	);
+
+	// Now we need to include the object headers that come before these fields
+	const currentFields: Array<{
+		name: string;
+		path: string;
+		// biome-ignore lint/suspicious/noExplicitAny: many details
+		details: any;
+		isRequired: boolean;
+	}> = [];
+
+	for (let i = 0; i < flattenedFields.length; i++) {
+		const field = flattenedFields[i];
+		if (!field) continue;
+
+		// If this is an object header, check if any of its children are in the current page
+		if (field.details.isObjectHeader) {
+			// Look ahead to see if any non-header fields under this header are in our page
+			let hasChildrenInPage = false;
+			for (let j = i + 1; j < flattenedFields.length; j++) {
+				const nextField = flattenedFields[j];
+				if (!nextField) continue;
+
+				// If we hit another object header at the same or higher level, stop looking
+				if (
+					nextField.details.isObjectHeader &&
+					nextField.path.split(".").length <= field.path.split(".").length
+				) {
+					break;
+				}
+				// If this is an actual field and it's in our current page, include the header
+				if (
+					!nextField.details.isObjectHeader &&
+					currentPageActualFields.some((f) => f.path === nextField.path)
+				) {
+					hasChildrenInPage = true;
+					break;
+				}
+			}
+			if (hasChildrenInPage) {
+				currentFields.push(field);
+			}
+		} else {
+			// This is an actual field - include it if it's in our current page
+			if (currentPageActualFields.some((f) => f.path === field.path)) {
+				currentFields.push(field);
+			}
+		}
+	}
 
 	const canGoNext = currentPage < totalPages - 1;
 	const canGoPrevious = currentPage > 0;
@@ -371,7 +528,7 @@ export function TestForm({
 			<TabsContent value={"form"}>
 				<div className="space-y-4">
 					{/* test Name and Expect Pass - on the same line */}
-					<div className="flex items-end gap-4">
+					<div className="flex items-end gap-4 rounded-sm bg-gray-500 p-2 text-black">
 						<div className="flex-1 space-y-2">
 							<Label htmlFor="test-name" className="font-medium text-sm">
 								Test Name

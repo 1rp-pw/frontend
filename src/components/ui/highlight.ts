@@ -274,6 +274,8 @@ export const highlightText = (text: string) => {
 		"is earlier than",
 		"is greater than",
 		"is less than",
+		"is older than",
+		"is younger than",
 		"is in",
 		"is not in",
 		"is within",

@@ -2,6 +2,8 @@
 
 import {
 	CheckIcon,
+	ChevronLeftIcon,
+	ChevronRightIcon,
 	CircleAlertIcon,
 	CircleCheckIcon,
 	CircleXIcon,
@@ -51,6 +53,9 @@ export function TestList({
 	const [testInfo, setTestInfo] = useState<Test | null>();
 	const [deleteTestDialogOpen, setDeleteTestDialogOpen] = useState(false);
 	const [executionModalOpen, setExecutionModalOpen] = useState(false);
+	const [currentPage, setCurrentPage] = useState(1);
+
+	const ITEMS_PER_PAGE = 5;
 
 	const handleDeleteTest = (test: Test | null) => {
 		setTestInfo(test);
@@ -188,6 +193,29 @@ export function TestList({
 	const validTests = tests.filter((t) => t.outcome.status !== "invalid");
 	const invalidTests = tests.filter((t) => t.outcome.status === "invalid");
 
+	// Calculate pagination
+	const totalTests = validTests.length + invalidTests.length;
+	const totalPages = Math.ceil(totalTests / ITEMS_PER_PAGE);
+
+	// Ensure current page is valid
+	if (currentPage > totalPages && totalPages > 0) {
+		setCurrentPage(totalPages);
+	}
+
+	// Get paginated tests
+	const allTests = [...validTests, ...invalidTests];
+	const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+	const endIndex = startIndex + ITEMS_PER_PAGE;
+	const paginatedTests = allTests.slice(startIndex, endIndex);
+
+	// Separate paginated tests back into valid and invalid
+	const paginatedValidTests = paginatedTests.filter(
+		(t) => t.outcome.status !== "invalid",
+	);
+	const paginatedInvalidTests = paginatedTests.filter(
+		(t) => t.outcome.status === "invalid",
+	);
+
 	if (tests.length === 0) {
 		return (
 			<div className="p-4 text-center text-zinc-500">
@@ -292,29 +320,63 @@ export function TestList({
 	);
 
 	return (
-		<div className={"w-full"}>
-			{validTests.length > 0 && (
-				<div>
-					<ul className={"divide-y divide-zinc-700"}>
-						{validTests.map(renderTest)}
-					</ul>
-				</div>
-			)}
-			{invalidTests.length > 0 && (
-				<div className={"mt-4"}>
-					<div
-						className={
-							"flex items-center gap-2 border-amber-500/20 border-t bg-amber-500/10 px-4 py-2"
-						}
-					>
-						<TriangleAlertIcon className="h-4 w-4" />
-						<span className={"font-medium text-amber-300 text-sm"}>
-							Schema Changed - Tests need repair
-						</span>
+		<div className={"flex h-full w-full flex-col"}>
+			<div className="flex-1 overflow-auto">
+				{paginatedValidTests.length > 0 && (
+					<div>
+						<ul className={"divide-y divide-zinc-700"}>
+							{paginatedValidTests.map(renderTest)}
+						</ul>
 					</div>
-					<ul className={"divide-y divide-zinc-700"}>
-						{invalidTests.map(renderTest)}
-					</ul>
+				)}
+				{paginatedInvalidTests.length > 0 && (
+					<div className={paginatedValidTests.length > 0 ? "mt-4" : ""}>
+						{invalidTests.length > 0 && startIndex < validTests.length && (
+							<div
+								className={
+									"flex items-center gap-2 border-amber-500/20 border-t bg-amber-500/10 px-4 py-2"
+								}
+							>
+								<TriangleAlertIcon className="h-4 w-4" />
+								<span className={"font-medium text-amber-300 text-sm"}>
+									Schema Changed - Tests need repair
+								</span>
+							</div>
+						)}
+						<ul className={"divide-y divide-zinc-700"}>
+							{paginatedInvalidTests.map(renderTest)}
+						</ul>
+					</div>
+				)}
+			</div>
+
+			{totalPages > 1 && (
+				<div className="flex items-center justify-between border-zinc-700 border-t px-4 py-2">
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+						disabled={currentPage === 1}
+						className="h-6 w-6"
+					>
+						<ChevronLeftIcon className="h-4 w-4" />
+					</Button>
+
+					<span className="text-xs text-zinc-400">
+						Page {currentPage} of {totalPages}
+					</span>
+
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() =>
+							setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+						}
+						disabled={currentPage === totalPages}
+						className="h-6 w-6"
+					>
+						<ChevronRightIcon className="h-4 w-4" />
+					</Button>
 				</div>
 			)}
 
