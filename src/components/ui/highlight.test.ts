@@ -288,6 +288,56 @@ A **person** fails if §nonexistent is valid`;
 				expect(result).toContain("§nonexistent is valid"); // But text should still be there
 			});
 
+			it("should support $ as alternative to § for label references", () => {
+				const input = `driver. A **driver** passes the age test
+A **driver** gets a licence if $driver passes`;
+				const result = highlightText(input);
+
+				// The label reference with $ should be highlighted
+				expect(result).toContain(
+					`<span class="${referenceColor}">$driver passes</span>`,
+				);
+
+				// The labeled rule should be highlighted as referenced
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes the age test</span>`,
+				);
+			});
+
+			it("should support $ with compound labels and predicates", () => {
+				const input = `driver.test. A **driver** completes requirements
+A **person** qualifies if $driver.test is valid`;
+				const result = highlightText(input);
+
+				// Should highlight $ label reference with predicate
+				expect(result).toContain(
+					`<span class="${referenceColor}">$driver.test is valid</span>`,
+				);
+			});
+
+			it("should support both § and $ in the same text", () => {
+				const input = `test1. A **driver** passes test one
+test2. A **driver** passes test two
+A **driver** succeeds if §test1 passes and $test2 succeeds`;
+				const result = highlightText(input);
+
+				// Both label reference styles should be highlighted
+				expect(result).toContain(
+					`<span class="${referenceColor}">§test1 passes</span>`,
+				);
+				expect(result).toContain(
+					`<span class="${referenceColor}">$test2 succeeds</span>`,
+				);
+
+				// Both rules should be marked as referenced
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes test one</span>`,
+				);
+				expect(result).toContain(
+					`<span class="${referencedColor}">passes test two</span>`,
+				);
+			});
+
 			it("should handle complex example with multiple labeled rules", () => {
 				const input = `# Driving Test Example
 driver. A **driver** passes the age test

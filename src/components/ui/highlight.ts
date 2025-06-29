@@ -6,8 +6,28 @@ export const functionColor = "text-purple-500";
 export const referenceColor = "text-teal-500"; // Color for references (e.g., "passes the practical driving test" in if clause)
 export const referencedColor = "text-fuchsia-500"; // Color for definitions that ARE referenced elsewhere
 export const labelColor = "text-yellow-500";
+export const labelReferenceColor = "text-yellow-800";
 export const falseColor = "text-red-500";
 export const trueColor = "text-emerald-500";
+
+// Label predicates that can follow label references
+const LABEL_PREDICATES = [
+	"clears",
+	"succeeds",
+	"qualifies",
+	"passes",
+	"meets requirements",
+	"satisfies",
+	"is valid",
+	"is approved",
+	"has passed",
+	"is authorized",
+	"is sanctioned",
+	"is certified",
+	"is permitted",
+	"is legitimate",
+	"is satisfied",
+];
 
 export const highlightText = (text: string) => {
 	// Escape &, <, >
@@ -87,8 +107,15 @@ export const highlightText = (text: string) => {
 			}
 		}
 
-		// Also check for label references (§label) in this line
-		const labelReferencePattern = /§([\w.]+)/g;
+		// Also check for label references (§label or $label) in this line
+		// Include optional predicates in the pattern
+		const predicatePatternForDetection = LABEL_PREDICATES.map((p) =>
+			p.replace(/\s+/g, "\\s+"),
+		).join("|");
+		const labelReferencePattern = new RegExp(
+			`[§$]([\\w.]+)(?:\\s+(?:${predicatePatternForDetection}))?`,
+			"g",
+		);
 		// biome-ignore lint/suspicious/noImplicitAnyLet: its fine
 		let labelMatch;
 		// biome-ignore lint/suspicious/noAssignInExpressions: its fine
@@ -273,16 +300,28 @@ export const highlightText = (text: string) => {
 		return createPlaceholder(`<span class="${selectorColor}">${match}</span>`);
 	});
 
-	// Highlight label references (§label)
-	html = html.replace(/§([\w.]+)/g, (match, labelName) => {
-		// Check if this label has a corresponding rule
-		if (labeledRules.has(labelName)) {
-			return createPlaceholder(
-				`<span class="${referenceColor}">${match}</span>`,
-			);
-		}
-		return match; // Don't highlight if no matching label exists
-	});
+	// Highlight label references (§label or $label) with optional predicates
+	// Create regex pattern for label references with optional predicates
+	const predicatePattern = LABEL_PREDICATES.map((p) =>
+		p.replace(/\s+/g, "\\s+"),
+	).join("|");
+	const labelWithPredicateRegex = new RegExp(
+		`[§$]([\\w.]+)(?:\\s+(${predicatePattern}))?`,
+		"g",
+	);
+
+	html = html.replace(
+		labelWithPredicateRegex,
+		(match, labelName, _predicate) => {
+			// Check if this label has a corresponding rule
+			if (labeledRules.has(labelName)) {
+				return createPlaceholder(
+					`<span class="${referenceColor}">${match}</span>`,
+				);
+			}
+			return match; // Don't highlight if no matching label exists
+		},
+	);
 
 	// Step 6: Replace all placeholders with their actual HTML
 	placeholders.forEach((placeholder, i) => {
