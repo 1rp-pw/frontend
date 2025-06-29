@@ -1,4 +1,5 @@
 export const numberColor = "text-orange-500";
+export const dateColor = "text-orange-700";
 export const objectColor = "text-blue-500";
 export const commentColor = "text-gray-400";
 export const selectorColor = "text-green-500";
@@ -6,7 +7,7 @@ export const functionColor = "text-purple-500";
 export const referenceColor = "text-teal-500"; // Color for references (e.g., "passes the practical driving test" in if clause)
 export const referencedColor = "text-fuchsia-500"; // Color for definitions that ARE referenced elsewhere
 export const labelColor = "text-yellow-500";
-export const labelReferenceColor = "text-yellow-800";
+export const labelReferenceColor = "text-yellow-700";
 export const falseColor = "text-red-500";
 export const trueColor = "text-emerald-500";
 
@@ -316,7 +317,7 @@ export const highlightText = (text: string) => {
 			// Check if this label has a corresponding rule
 			if (labeledRules.has(labelName)) {
 				return createPlaceholder(
-					`<span class="${referenceColor}">${match}</span>`,
+					`<span class="${labelReferenceColor}">${match}</span>`,
 				);
 			}
 			return match; // Don't highlight if no matching label exists
