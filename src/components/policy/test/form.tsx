@@ -38,7 +38,7 @@ interface TestFormProps {
 	disabled?: boolean;
 }
 
-const FIELDS_PER_PAGE = 4;
+const FIELDS_PER_PAGE = 9;
 
 export function TestForm({
 	schema,
@@ -151,6 +151,7 @@ export function TestForm({
 						initialData[propName] = "";
 						break;
 					case "number":
+					case "integer":
 						initialData[propName] = 0;
 						break;
 					case "boolean":
