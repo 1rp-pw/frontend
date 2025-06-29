@@ -157,9 +157,9 @@ A **Person** can drink if the **Person** is an adult`;
 A **driver** gets a driving licence if §driver passes`;
 				const result = highlightText(input);
 
-				// The label reference should be highlighted
+				// The label reference with predicate should be highlighted
 				expect(result).toContain(
-					`<span class="${referenceColor}">§driver</span>`,
+					`<span class="${referenceColor}">§driver passes</span>`,
 				);
 			});
 
@@ -191,9 +191,12 @@ A **driver** gets a licence if §driver passes
 A **driver** is eligible if §driver passes`;
 				const result = highlightText(input);
 
-				// Should have two highlighted label references
+				// Should have two highlighted label references with predicate
 				const labelRefMatches = result.match(
-					new RegExp(`<span class="${referenceColor}">§driver</span>`, "g"),
+					new RegExp(
+						`<span class="${referenceColor}">§driver passes</span>`,
+						"g",
+					),
 				);
 				expect(labelRefMatches).toHaveLength(2);
 
@@ -208,9 +211,9 @@ A **driver** is eligible if §driver passes`;
 A **driver** gets a licence if §driver passes and the **driver** passes the age test`;
 				const result = highlightText(input);
 
-				// Should highlight the label reference
+				// Should highlight the label reference with predicate
 				expect(result).toContain(
-					`<span class="${referenceColor}">§driver</span>`,
+					`<span class="${referenceColor}">§driver passes</span>`,
 				);
 
 				// Should highlight the direct rule reference
@@ -229,15 +232,60 @@ A **driver** gets a licence if §driver passes and the **driver** passes the age
 A **driver** gets a licence if §driver.bob is valid`;
 				const result = highlightText(input);
 
-				// The compound label reference should be highlighted
+				// The compound label reference with predicate should be highlighted
 				expect(result).toContain(
-					`<span class="${referenceColor}">§driver.bob</span>`,
+					`<span class="${referenceColor}">§driver.bob is valid</span>`,
 				);
 
 				// The labeled rule should be highlighted as referenced
 				expect(result).toContain(
 					`<span class="${referencedColor}">passes the age test</span>`,
 				);
+			});
+
+			it("should handle label references with various predicates", () => {
+				const predicateTests = [
+					{ predicate: "clears", label: "test1" },
+					{ predicate: "succeeds", label: "test2" },
+					{ predicate: "qualifies", label: "test3" },
+					{ predicate: "passes", label: "test4" },
+					{ predicate: "meets requirements", label: "test5" },
+					{ predicate: "satisfies", label: "test6" },
+					{ predicate: "is valid", label: "test7" },
+					{ predicate: "is approved", label: "test8" },
+					{ predicate: "has passed", label: "test9" },
+					{ predicate: "is authorized", label: "test10" },
+				];
+
+				predicateTests.forEach(({ predicate, label }) => {
+					// Use a different rule action to avoid conflicts
+					const input = `${label}. A **test** completes the requirements
+A **result** is good if §${label} ${predicate}`;
+					const result = highlightText(input);
+
+					// The label reference with predicate should be highlighted
+					expect(result).toContain(
+						`<span class="${referenceColor}">§${label} ${predicate}</span>`,
+					);
+				});
+			});
+
+			it("should only highlight label predicates for existing labels", () => {
+				const input = `driver. A **driver** passes the test
+A **person** qualifies if §driver is valid
+A **person** fails if §nonexistent is valid`;
+				const result = highlightText(input);
+
+				// Should highlight existing label with predicate
+				expect(result).toContain(
+					`<span class="${referenceColor}">§driver is valid</span>`,
+				);
+
+				// Should not highlight non-existent label with predicate
+				expect(result).not.toContain(
+					`<span class="${referenceColor}">§nonexistent is valid</span>`,
+				);
+				expect(result).toContain("§nonexistent is valid"); // But text should still be there
 			});
 
 			it("should handle complex example with multiple labeled rules", () => {
@@ -255,9 +303,9 @@ A **driver** gets a driving licence
 
 				const result = highlightText(input);
 
-				// Check label references are highlighted
+				// Check label references are highlighted with predicate
 				expect(result).toContain(
-					`<span class="${referenceColor}">§driver</span>`,
+					`<span class="${referenceColor}">§driver passes</span>`,
 				);
 
 				// Check labeled rules are highlighted when referenced
