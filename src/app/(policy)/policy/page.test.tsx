@@ -326,7 +326,9 @@ describe("IDEPage", () => {
 			"grid",
 			"flex-1",
 			"grid-cols-2",
-			"grid-rows-[1fr_1fr]",
+			"gap-1",
+			"overflow-hidden",
+			"p-1",
 		);
 	});
 
