@@ -281,8 +281,16 @@ export function TestForm({
 							</Label>
 							<DateTimeInput
 								id={path}
-								value={getNestedValue(formData, path) || ""}
-								onChange={(e) => setFormData(setNestedValue(formData, path, e))}
+								value={
+									getNestedValue(formData, path)
+										? new Date(getNestedValue(formData, path))
+										: undefined
+								}
+								onChange={(date) =>
+									setFormData(
+										setNestedValue(formData, path, date.toISOString()),
+									)
+								}
 								className="border-zinc-600 "
 								disabled={disabled}
 							/>
