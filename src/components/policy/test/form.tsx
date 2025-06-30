@@ -9,6 +9,7 @@ import {
 	FileTextIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { DateTimeInput } from "~/components/ui/date-time-input";
 import { Input } from "~/components/ui/input";
@@ -201,42 +202,39 @@ export function TestForm({
 
 	// Convert camelCase or PascalCase to Title Case
 	const formatFieldLabel = (fieldName: string): string => {
-		// Handle special cases
-		const specialCases: Record<string, string> = {
-			dateofbirth: "Date of Birth",
-			dateOfBirth: "Date of Birth",
-			dob: "Date of Birth",
-			hazardPerception: "Hazard Perception",
-			multipleChoice: "Multiple Choice",
-			// Common enum values
-			bachelor_arts: "Bachelor of Arts",
-			bachelor_science: "Bachelor of Science",
-			bachelor_engineering: "Bachelor of Engineering",
-			master_arts: "Master of Arts",
-			master_science: "Master of Science",
-			master_business: "Master of Business Administration",
-			phd: "PhD",
-			doctorate: "Doctorate",
-			in_progress: "In Progress",
-			not_started: "Not Started",
-			self_pay: "Self Pay",
-			employer_sponsored: "Employer Sponsored",
-			partially_related: "Partially Related",
-		};
+		// Connector words that should be lowercase
+		const connectorWords = new Set([
+			"of",
+			"in",
+			"and",
+			"or",
+			"the",
+			"a",
+			"an",
+			"to",
+			"for",
+			"with",
+		]);
 
-		const lower = fieldName.toLowerCase();
-		if (specialCases[lower]) {
-			return specialCases[lower];
-		}
-		if (specialCases[fieldName]) {
-			return specialCases[fieldName];
-		}
-
-		// Convert camelCase to Title Case
-		return fieldName
-			.replace(/([A-Z])/g, " $1") // Add space before capital letters
-			.replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
-			.trim();
+		return (
+			fieldName
+				// Handle underscores: convert to spaces
+				.replace(/_/g, " ")
+				// Handle camelCase: add space before capital letters
+				.replace(/([A-Z])/g, " $1")
+				// Split into words and process each
+				.split(" ")
+				.filter((word) => word.length > 0) // Remove empty strings
+				.map((word, index) => {
+					const lowerWord = word.toLowerCase();
+					// First word is always capitalized, connector words after first are lowercase
+					if (index === 0 || !connectorWords.has(lowerWord)) {
+						return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+					}
+					return lowerWord;
+				})
+				.join(" ")
+		);
 	};
 
 	const renderFormField = (field: {
@@ -284,9 +282,18 @@ export function TestForm({
 							</Label>
 							<DateTimeInput
 								id={path}
-								value={getNestedValue(formData, path) || ""}
-								onChange={(e) => setFormData(setNestedValue(formData, path, e))}
+								value={
+									getNestedValue(formData, path)
+										? new Date(getNestedValue(formData, path))
+										: undefined
+								}
+								onChange={(date) =>
+									setFormData(
+										setNestedValue(formData, path, date.toISOString()),
+									)
+								}
 								className="border-zinc-600 "
+								disabled={disabled}
 							/>
 						</div>
 					);
@@ -305,6 +312,7 @@ export function TestForm({
 								onValueChange={(value) =>
 									setFormData(setNestedValue(formData, path, value))
 								}
+								disabled={disabled}
 							>
 								<SelectTrigger
 									id={path}
@@ -339,6 +347,7 @@ export function TestForm({
 								setFormData(setNestedValue(formData, path, e.target.value))
 							}
 							className="border-zinc-600 bg-zinc-700"
+							disabled={disabled}
 						/>
 					</div>
 				);
@@ -362,6 +371,7 @@ export function TestForm({
 									setFormData(setNestedValue(formData, path, value[0]))
 								}
 								className="flex-1"
+								disabled={disabled}
 							/>
 							<Input
 								type="number"
@@ -372,6 +382,7 @@ export function TestForm({
 									)
 								}
 								className="w-20 border-zinc-600 bg-zinc-700"
+								disabled={disabled}
 							/>
 						</div>
 					</div>
@@ -390,6 +401,7 @@ export function TestForm({
 							onCheckedChange={(checked) =>
 								setFormData(setNestedValue(formData, path, checked))
 							}
+							disabled={disabled}
 						/>
 					</div>
 				);
@@ -408,6 +420,7 @@ export function TestForm({
 							}
 							placeholder="Type and press Enter to add tags..."
 							className="border-zinc-600 bg-zinc-700"
+							disabled={disabled}
 						/>
 					</div>
 				);
@@ -539,6 +552,7 @@ export function TestForm({
 								onChange={(e) => setTestName(e.target.value)}
 								placeholder="Enter test name..."
 								className="border-zinc-600 bg-zinc-700"
+								disabled={disabled}
 							/>
 						</div>
 						<div className="flex items-center space-x-2 pb-1">
@@ -546,6 +560,7 @@ export function TestForm({
 								name="expect-pass"
 								checked={expectPass}
 								onCheckedChange={setExpectPass}
+								disabled={disabled}
 							/>
 							<Label
 								htmlFor="expect-pass"
@@ -615,9 +630,11 @@ export function TestForm({
 							variant="outline"
 							size="sm"
 							onClick={() => {
-								navigator.clipboard.writeText(
-									JSON.stringify(formData, null, 2),
-								);
+								navigator.clipboard
+									.writeText(JSON.stringify(formData, null, 2))
+									.then(() => {
+										toast("Copied JSON to clipboard", {});
+									});
 							}}
 							className="h-7 px-2"
 						>
@@ -625,7 +642,7 @@ export function TestForm({
 							Copy JSON
 						</Button>
 					</div>
-					<pre className="max-h-70 overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
+					<pre className="overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
 						<RainbowBraces json={formData} className={"text-xs"} />
 					</pre>
 				</div>

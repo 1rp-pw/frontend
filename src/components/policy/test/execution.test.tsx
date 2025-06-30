@@ -103,6 +103,7 @@ jest.mock("~/components/ui/tooltip", () => ({
 jest.mock("lucide-react", () => ({
 	CheckCircle: () => <span data-testid="check-circle">✓</span>,
 	XCircle: () => <span data-testid="x-circle">✗</span>,
+	CopyIcon: () => <span data-testid="copy-icon">📋</span>,
 }));
 
 describe("PolicyExecutionModal", () => {

@@ -181,6 +181,65 @@ const validateDataAgainstSchema = (data: any, schema: any): boolean => {
 	return validateObject(data, schema);
 };
 
+// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
+const initializeTestDataFromSchema = (schema: any): any => {
+	if (!schema || !schema.properties) return {};
+
+	// biome-ignore lint/suspicious/noExplicitAny: default value can be anything
+	const getDefaultValue = (type: string, format?: string): any => {
+		switch (type) {
+			case "string":
+				// Check if it's a date format
+				if (format === "date" || format === "date-time") {
+					return new Date().toISOString();
+				}
+				return "";
+			case "number":
+			case "integer":
+				return 0;
+			case "boolean":
+				return false;
+			case "array":
+				return [];
+			case "object":
+				return {};
+			default:
+				return null;
+		}
+	};
+
+	// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
+	const initializeObject = (schemaObj: any): any => {
+		// biome-ignore lint/suspicious/noExplicitAny: obj can be anything
+		const initializedObj: any = {};
+
+		if (!schemaObj.properties) return initializedObj;
+
+		for (const [propName, propSchema] of Object.entries(schemaObj.properties)) {
+			// biome-ignore lint/suspicious/noExplicitAny: prop could be anything
+			const prop = propSchema as any;
+			const expectedType = prop.type;
+			const format = prop.format;
+
+			if (expectedType === "object") {
+				initializedObj[propName] = initializeObject(prop);
+			} else {
+				// Only initialize required fields or date fields
+				const isRequired = schemaObj.required?.includes(propName);
+				const isDateField = format === "date" || format === "date-time";
+
+				if (isRequired || isDateField) {
+					initializedObj[propName] = getDefaultValue(expectedType, format);
+				}
+			}
+		}
+
+		return initializedObj;
+	};
+
+	return initializeObject(schema);
+};
+
 // biome-ignore lint/suspicious/noExplicitAny: data and schema can be anything
 const repairDataToMatchSchema = (data: any, schema: any): any => {
 	if (!schema || !schema.properties) return {};
@@ -572,11 +631,11 @@ export const usePolicyStore = create<PolicyStore>((set, get) => {
 		},
 
 		createTest: () => {
-			const { tests, schemaVersion } = get();
+			const { tests, schemaVersion, schema } = get();
 			const newTest: Test = {
 				id: `temp-${Date.now()}`,
 				name: `Test ${tests.length + 1}`,
-				data: {},
+				data: initializeTestDataFromSchema(schema),
 				expectPass: true,
 				created: false,
 				createdAt: new Date(),

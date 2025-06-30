@@ -46,8 +46,11 @@ export default function IDEPage() {
 				{/* Left Column - Equal heights */}
 				<div className="grid grid-rows-2 gap-1 overflow-hidden">
 					<div className="flex flex-col overflow-hidden rounded-md border border-zinc-700 bg-zinc-800">
-						<div className="bg-zinc-700 px-4 py-2 font-medium text-sm">
-							Policy Text
+						<div className="flex items-center justify-between bg-zinc-700 px-4 py-2">
+							<span className="font-medium text-sm">Policy Text</span>
+							<span className="text-xs text-zinc-400">
+								Ctrl+G to go to line
+							</span>
 						</div>
 						<div className="flex-1 overflow-hidden">
 							<Editor rule={rule} onChange={setPolicyRule} />
