@@ -3,6 +3,7 @@ import { CheckCircle, CopyIcon, XCircle } from "lucide-react";
 import type { JSX } from "react";
 import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
 import {
 	Dialog,
 	DialogContent,
@@ -19,7 +20,6 @@ import {
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
 import type { TestResultSet } from "~/lib/state/policy";
-import {Button} from "~/components/ui/button";
 
 interface PolicyExecutionModalProps {
 	open: boolean;
@@ -517,7 +517,9 @@ export function PolicyExecutionModal({
 											variant="outline"
 											size="sm"
 											onClick={() => {
-												navigator.clipboard.writeText(JSON.stringify(executionData, null, 2));
+												navigator.clipboard.writeText(
+													JSON.stringify(executionData, null, 2),
+												);
 											}}
 											className="h-7 px-2"
 										>
