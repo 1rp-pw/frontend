@@ -8,7 +8,8 @@ export function debugLineCount(content: string, expectedLines?: number) {
 	// Find last non-empty line
 	let lastNonEmptyLine = -1;
 	for (let i = lines.length - 1; i >= 0; i--) {
-		if (lines[i].trim() !== "") {
+		const line = lines[i];
+		if (line && line.trim() !== "") {
 			lastNonEmptyLine = i;
 			break;
 		}
@@ -55,6 +56,12 @@ export function debugLineCount(content: string, expectedLines?: number) {
 }
 
 // Export a window function for easy debugging in browser console
+declare global {
+	interface Window {
+		debugLineCount: typeof debugLineCount;
+	}
+}
+
 if (typeof window !== "undefined") {
-	(window as any).debugLineCount = debugLineCount;
+	window.debugLineCount = debugLineCount;
 }

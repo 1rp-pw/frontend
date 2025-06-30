@@ -40,7 +40,10 @@ export function Editor({ rule, onChange, disabled = false }: EditorProps) {
 
 		// Calculate position of the target line
 		for (let i = 0; i < targetLine - 1; i++) {
-			position += lines[i].length + 1; // +1 for newline
+			const line = lines[i];
+			if (line !== undefined) {
+				position += line.length + 1; // +1 for newline
+			}
 		}
 
 		// Set cursor position and focus
