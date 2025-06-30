@@ -22,9 +22,15 @@ export async function GET(request: NextRequest) {
 
 		const resp = await response.json();
 
-		// Return the response regardless of baseId check
+		// Sort versions by newest activity first
 		if (Array.isArray(resp) && resp.length > 0) {
-			return NextResponse.json(resp, { status: 200 });
+			const sortedVersions = resp.sort((a: any, b: any) => {
+				// Use updatedAt if available, otherwise use createdAt
+				const dateA = new Date(a.updatedAt || a.createdAt);
+				const dateB = new Date(b.updatedAt || b.createdAt);
+				return dateB.getTime() - dateA.getTime(); // Descending order (newest first)
+			});
+			return NextResponse.json(sortedVersions, { status: 200 });
 		}
 
 		return NextResponse.json([], { status: 200 });
