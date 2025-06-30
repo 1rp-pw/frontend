@@ -3,6 +3,7 @@
 import { ArrowBigLeft, CopyIcon, FilePlusIcon, PlayIcon } from "lucide-react";
 import Link from "next/link";
 import { useEffect } from "react";
+import { toast } from "sonner";
 import { Editor } from "~/components/policy/editor";
 import { PublishPolicy } from "~/components/policy/publish";
 import { SavePolicy } from "~/components/policy/save";
@@ -12,7 +13,6 @@ import { TestList } from "~/components/policy/test/list";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { usePolicyStore } from "~/lib/state/policy";
-import {toast} from "sonner";
 
 export default function Maker({ policy_id }: { policy_id: string }) {
 	const {
@@ -89,7 +89,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 						size="sm"
 						onClick={() => {
 							navigator.clipboard.writeText(policy_id).then(() => {
-								toast("Policy ID copied to clipboard", {})
+								toast("Policy ID copied to clipboard", {});
 							});
 						}}
 						className="h-7 px-2"

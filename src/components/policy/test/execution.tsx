@@ -2,6 +2,7 @@
 import { CheckCircle, CopyIcon, XCircle } from "lucide-react";
 import type { JSX } from "react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
@@ -20,7 +21,6 @@ import {
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
 import type { TestResultSet } from "~/lib/state/policy";
-import {toast} from "sonner";
 
 interface PolicyExecutionModalProps {
 	open: boolean;
@@ -518,11 +518,11 @@ export function PolicyExecutionModal({
 											variant="outline"
 											size="sm"
 											onClick={() => {
-												navigator.clipboard.writeText(
-													JSON.stringify(executionData, null, 2),
-												).then(() => {
-													toast("Copied Execution to Clipboard", {})
-												});
+												navigator.clipboard
+													.writeText(JSON.stringify(executionData, null, 2))
+													.then(() => {
+														toast("Copied Execution to Clipboard", {});
+													});
 											}}
 											className="h-7 px-2"
 										>
