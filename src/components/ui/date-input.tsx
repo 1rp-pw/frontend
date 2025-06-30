@@ -16,6 +16,7 @@ interface DateInputProps {
 	value?: Date;
 	onChange: (date: Date) => void;
 	id?: string;
+	disabled?: boolean;
 }
 
 interface DateParts {
@@ -24,7 +25,7 @@ interface DateParts {
 	year: number;
 }
 
-const DateInput: FC<DateInputProps> = ({ value, onChange, id }) => {
+const DateInput: FC<DateInputProps> = ({ value, onChange, id, disabled = false }) => {
 	const [date, setDate] = useState<DateParts>(() => {
 		const d = value ? new Date(value) : new Date();
 		return {
@@ -230,6 +231,7 @@ const DateInput: FC<DateInputProps> = ({ value, onChange, id }) => {
 				className="w-7 border-none p-0 text-center outline-none"
 				placeholder="D"
 				id={`date-input-day-${id}`}
+				disabled={disabled}
 			/>
 			<span className="-mx-px opacity-20">/</span>
 			<Input
@@ -249,6 +251,7 @@ const DateInput: FC<DateInputProps> = ({ value, onChange, id }) => {
 				className="w-6 border-none p-0 text-center outline-none"
 				placeholder="M"
 				id={`date-input-month-${id}`}
+				disabled={disabled}
 			/>
 			<span className="-mx-px opacity-20">/</span>
 			<Input
@@ -268,6 +271,7 @@ const DateInput: FC<DateInputProps> = ({ value, onChange, id }) => {
 				className="w-12 border-none p-0 text-center outline-none"
 				placeholder="YYYY"
 				id={`date-input-year-${id}`}
+				disabled={disabled}
 			/>
 		</div>
 	);

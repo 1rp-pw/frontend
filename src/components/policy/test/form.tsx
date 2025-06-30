@@ -287,6 +287,7 @@ export function TestForm({
 								value={getNestedValue(formData, path) || ""}
 								onChange={(e) => setFormData(setNestedValue(formData, path, e))}
 								className="border-zinc-600 "
+								disabled={disabled}
 							/>
 						</div>
 					);
@@ -305,6 +306,7 @@ export function TestForm({
 								onValueChange={(value) =>
 									setFormData(setNestedValue(formData, path, value))
 								}
+								disabled={disabled}
 							>
 								<SelectTrigger
 									id={path}
@@ -339,6 +341,7 @@ export function TestForm({
 								setFormData(setNestedValue(formData, path, e.target.value))
 							}
 							className="border-zinc-600 bg-zinc-700"
+							disabled={disabled}
 						/>
 					</div>
 				);
@@ -362,6 +365,7 @@ export function TestForm({
 									setFormData(setNestedValue(formData, path, value[0]))
 								}
 								className="flex-1"
+								disabled={disabled}
 							/>
 							<Input
 								type="number"
@@ -372,6 +376,7 @@ export function TestForm({
 									)
 								}
 								className="w-20 border-zinc-600 bg-zinc-700"
+								disabled={disabled}
 							/>
 						</div>
 					</div>
@@ -390,6 +395,7 @@ export function TestForm({
 							onCheckedChange={(checked) =>
 								setFormData(setNestedValue(formData, path, checked))
 							}
+							disabled={disabled}
 						/>
 					</div>
 				);
@@ -408,6 +414,7 @@ export function TestForm({
 							}
 							placeholder="Type and press Enter to add tags..."
 							className="border-zinc-600 bg-zinc-700"
+							disabled={disabled}
 						/>
 					</div>
 				);
@@ -539,6 +546,7 @@ export function TestForm({
 								onChange={(e) => setTestName(e.target.value)}
 								placeholder="Enter test name..."
 								className="border-zinc-600 bg-zinc-700"
+								disabled={disabled}
 							/>
 						</div>
 						<div className="flex items-center space-x-2 pb-1">
@@ -546,6 +554,7 @@ export function TestForm({
 								name="expect-pass"
 								checked={expectPass}
 								onCheckedChange={setExpectPass}
+								disabled={disabled}
 							/>
 							<Label
 								htmlFor="expect-pass"
@@ -625,7 +634,7 @@ export function TestForm({
 							Copy JSON
 						</Button>
 					</div>
-					<pre className="max-h-70 overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
+					<pre className="overflow-auto rounded bg-zinc-700/30 p-2 text-xs">
 						<RainbowBraces json={formData} className={"text-xs"} />
 					</pre>
 				</div>
