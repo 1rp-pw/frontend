@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
 
 		// Sort versions by newest activity first
 		if (Array.isArray(resp) && resp.length > 0) {
+			// biome-ignore lint/suspicious/noExplicitAny: they can be anything
 			const sortedVersions = resp.sort((a: any, b: any) => {
 				// Use updatedAt if available, otherwise use createdAt
 				const dateA = new Date(a.updatedAt || a.createdAt);

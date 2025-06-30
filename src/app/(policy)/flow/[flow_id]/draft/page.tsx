@@ -24,7 +24,5 @@ export default async function IDEPage({
 		redirect(`/flow/${newFlowId}/edit`, RedirectType.push);
 	}
 
-	return (
-		<>There was an error while creating the draft. Please try again later.</>
-	);
+	return "There was an error while creating the draft. Please try again later.";
 }

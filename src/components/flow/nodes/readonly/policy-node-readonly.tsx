@@ -54,14 +54,12 @@ export function PolicyNodeReadonly({ data }: NodeProps) {
 			/>
 
 			{/* Keep handles for visual connection lines but make them invisible */}
-			{/** biome-ignore lint/nursery/useUniqueElementIds: needed for visual */}
 			<Handle
 				type="source"
 				position={Position.Right}
 				id="true"
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
-			{/** biome-ignore lint/nursery/useUniqueElementIds: needed for visual */}
 			<Handle
 				type="source"
 				position={Position.Right}
