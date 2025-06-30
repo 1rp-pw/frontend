@@ -20,6 +20,7 @@ import {
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
 import type { TestResultSet } from "~/lib/state/policy";
+import {toast} from "sonner";
 
 interface PolicyExecutionModalProps {
 	open: boolean;
@@ -519,7 +520,9 @@ export function PolicyExecutionModal({
 											onClick={() => {
 												navigator.clipboard.writeText(
 													JSON.stringify(executionData, null, 2),
-												);
+												).then(() => {
+													toast("Copied Execution to Clipboard", {})
+												});
 											}}
 											className="h-7 px-2"
 										>

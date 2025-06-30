@@ -12,6 +12,7 @@ import { TestList } from "~/components/policy/test/list";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { usePolicyStore } from "~/lib/state/policy";
+import {toast} from "sonner";
 
 export default function Maker({ policy_id }: { policy_id: string }) {
 	const {
@@ -87,7 +88,9 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 						variant="ghost"
 						size="sm"
 						onClick={() => {
-							navigator.clipboard.writeText(policy_id);
+							navigator.clipboard.writeText(policy_id).then(() => {
+								toast("Policy ID copied to clipboard", {})
+							});
 						}}
 						className="h-7 px-2"
 						title="Copy Policy ID"

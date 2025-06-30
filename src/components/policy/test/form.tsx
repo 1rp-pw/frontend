@@ -25,6 +25,7 @@ import {
 import { Slider } from "~/components/ui/slider";
 import { Switch } from "~/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import {toast} from "sonner";
 
 interface Test {
 	id: string;
@@ -631,7 +632,9 @@ export function TestForm({
 							onClick={() => {
 								navigator.clipboard.writeText(
 									JSON.stringify(formData, null, 2),
-								);
+								).then(() => {
+									toast("Copied JSON to clipboard", {})
+								});
 							}}
 							className="h-7 px-2"
 						>

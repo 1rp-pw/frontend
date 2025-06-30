@@ -3,6 +3,7 @@
 import { CopyIcon } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { RainbowBraces } from "~/components/ui/rainbow";
+import {toast} from "sonner";
 
 interface SchemaPreviewProps {
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
@@ -18,7 +19,9 @@ export function SchemaPreview({ schema }: SchemaPreviewProps) {
 					variant="outline"
 					size="sm"
 					onClick={() => {
-						navigator.clipboard.writeText(JSON.stringify(schema, null, 2));
+						navigator.clipboard.writeText(JSON.stringify(schema, null, 2)).then(() => {
+							toast("Copied JSON to clipboard", {})
+						});
 					}}
 					className="h-7 px-2"
 				>
