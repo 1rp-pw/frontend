@@ -68,7 +68,12 @@ export const DateTimeInput: FC<DateTimeInputProps> = ({
 		<div className={cn("flex flex-col space-y-1", className)}>
 			{label && <span className="text-muted-foreground text-xs">{label}</span>}
 			<div className="flex flex-col gap-2 sm:flex-row">
-				<DateInput value={date} onChange={handleDateChange} id={`date-${id}`} disabled={disabled} />
+				<DateInput
+					value={date}
+					onChange={handleDateChange}
+					id={`date-${id}`}
+					disabled={disabled}
+				/>
 				<TimeInput
 					value={date}
 					onChange={handleTimeChange}

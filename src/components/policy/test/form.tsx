@@ -202,26 +202,39 @@ export function TestForm({
 	// Convert camelCase or PascalCase to Title Case
 	const formatFieldLabel = (fieldName: string): string => {
 		// Connector words that should be lowercase
-		const connectorWords = new Set(['of', 'in', 'and', 'or', 'the', 'a', 'an', 'to', 'for', 'with']);
+		const connectorWords = new Set([
+			"of",
+			"in",
+			"and",
+			"or",
+			"the",
+			"a",
+			"an",
+			"to",
+			"for",
+			"with",
+		]);
 
-		return fieldName
-			// Handle underscores: convert to spaces
-			.replace(/_/g, ' ')
-			// Handle camelCase: add space before capital letters
-			.replace(/([A-Z])/g, ' $1')
-			// Split into words and process each
-			.split(' ')
-			.filter(word => word.length > 0) // Remove empty strings
-			.map((word, index) => {
-				const lowerWord = word.toLowerCase();
-				// First word is always capitalized, connector words after first are lowercase
-				if (index === 0 || !connectorWords.has(lowerWord)) {
-					return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-				}
-				return lowerWord;
-			})
-			.join(' ');
-	}
+		return (
+			fieldName
+				// Handle underscores: convert to spaces
+				.replace(/_/g, " ")
+				// Handle camelCase: add space before capital letters
+				.replace(/([A-Z])/g, " $1")
+				// Split into words and process each
+				.split(" ")
+				.filter((word) => word.length > 0) // Remove empty strings
+				.map((word, index) => {
+					const lowerWord = word.toLowerCase();
+					// First word is always capitalized, connector words after first are lowercase
+					if (index === 0 || !connectorWords.has(lowerWord)) {
+						return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+					}
+					return lowerWord;
+				})
+				.join(" ")
+		);
+	};
 
 	const renderFormField = (field: {
 		name: string;

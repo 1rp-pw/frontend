@@ -1,8 +1,8 @@
 "use client";
 
-import { RainbowBraces } from "~/components/ui/rainbow";
-import {Button} from "~/components/ui/button";
 import { CopyIcon } from "lucide-react";
+import { Button } from "~/components/ui/button";
+import { RainbowBraces } from "~/components/ui/rainbow";
 
 interface SchemaPreviewProps {
 	// biome-ignore lint/suspicious/noExplicitAny: schema can be anything
@@ -18,9 +18,7 @@ export function SchemaPreview({ schema }: SchemaPreviewProps) {
 					variant="outline"
 					size="sm"
 					onClick={() => {
-						navigator.clipboard.writeText(
-							JSON.stringify(schema, null, 2),
-						);
+						navigator.clipboard.writeText(JSON.stringify(schema, null, 2));
 					}}
 					className="h-7 px-2"
 				>

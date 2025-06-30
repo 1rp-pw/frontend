@@ -25,7 +25,12 @@ interface DateParts {
 	year: number;
 }
 
-const DateInput: FC<DateInputProps> = ({ value, onChange, id, disabled = false }) => {
+const DateInput: FC<DateInputProps> = ({
+	value,
+	onChange,
+	id,
+	disabled = false,
+}) => {
 	const [date, setDate] = useState<DateParts>(() => {
 		const d = value ? new Date(value) : new Date();
 		return {
