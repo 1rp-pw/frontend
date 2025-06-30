@@ -1,5 +1,5 @@
 "use client";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, CopyIcon, XCircle } from "lucide-react";
 import type { JSX } from "react";
 import { useState } from "react";
 import { Badge } from "~/components/ui/badge";
@@ -19,6 +19,7 @@ import {
 	TooltipTrigger,
 } from "~/components/ui/tooltip";
 import type { TestResultSet } from "~/lib/state/policy";
+import {Button} from "~/components/ui/button";
 
 interface PolicyExecutionModalProps {
 	open: boolean;
@@ -508,9 +509,22 @@ export function PolicyExecutionModal({
 
 							<TabsContent value="raw" className="mt-4 h-[calc(100%-3rem)]">
 								<div className="h-full">
-									<h3 className="mb-2 font-semibold text-lg">
-										Raw Policy Execution Data
-									</h3>
+									<div className="flex items-center justify-between">
+										<h3 className="mb-2 font-semibold text-lg">
+											Raw Policy Execution Data
+										</h3>
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => {
+												navigator.clipboard.writeText(JSON.stringify(executionData, null, 2));
+											}}
+											className="h-7 px-2"
+										>
+											<CopyIcon className="h-3 w-3" />
+											Copy Execution
+										</Button>
+									</div>
 									<ScrollArea className="h-[calc(100%-2rem)] max-w-[32vw] rounded border bg-muted">
 										<pre className="p-3 text-sm">
 											<RainbowBraces json={executionData} className="text-sm" />
