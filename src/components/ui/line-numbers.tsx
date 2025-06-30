@@ -2,6 +2,7 @@
 
 import { type FC, type ReactNode, useEffect, useRef, useState } from "react";
 import { cn } from "~/lib/utils";
+import { debugLineCount } from "~/lib/utils/debug-line-count";
 
 interface LineNumbersProps {
 	content: string;
@@ -29,6 +30,14 @@ export const LineNumbers: FC<LineNumbersProps> = ({
 	useEffect(() => {
 		const lines = content.split("\n").length;
 		setLineCount(lines);
+
+		// Debug logging for line count issues
+		if (process.env.NODE_ENV === "development") {
+			// Check for the specific 110 vs 127 issue
+			if (lines === 110) {
+				debugLineCount(content, 127);
+			}
+		}
 	}, [content]);
 
 	const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -52,6 +61,7 @@ export const LineNumbers: FC<LineNumbersProps> = ({
 					"flex-shrink-0 select-none overflow-hidden border-zinc-700 border-r bg-zinc-900/50 text-right text-zinc-500",
 					lineNumberClassName,
 				)}
+				title={`${lineCount} lines, ${content.length} characters`}
 			>
 				<div className="p-4 pr-3">
 					{Array.from({ length: lineCount }, (_, i) => {

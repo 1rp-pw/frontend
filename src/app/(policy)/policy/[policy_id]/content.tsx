@@ -69,6 +69,24 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 			// Auto-select the first version if available
 			if (respVersions.length > 0 && !selectedVersion) {
 				setSelectedVersion(respVersions[0]);
+				// Debug line count issue
+				const firstVersion = respVersions[0];
+				if (firstVersion.rule) {
+					const lines = firstVersion.rule.split("\n");
+					console.log(`Policy content debug:
+- Total lines: ${lines.length}
+- Total characters: ${firstVersion.rule.length}
+- Last line empty: ${lines[lines.length - 1] === ""}
+- First 50 chars: ${firstVersion.rule.substring(0, 50)}...
+- Last 50 chars: ...${firstVersion.rule.substring(firstVersion.rule.length - 50)}`);
+
+					if (lines.length === 110) {
+						console.warn(
+							"⚠️ Policy appears to be truncated at exactly 110 lines!",
+						);
+						console.log("Last few lines:", lines.slice(-5));
+					}
+				}
 			}
 			setVersionsLoading(false);
 		});
@@ -221,21 +239,33 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 
 					<div className={"min-h-0 flex-1"}>
 						{selectedVersion ? (
-							<LineNumbers
-								content={selectedVersion.rule || "No rule content available"}
-								className="h-full"
-								contentClassName="bg-background"
-								lineNumberClassName="bg-muted/30"
-								renderContent={(content) => (
-									<pre
-										className="whitespace-pre-wrap font-mono text-zinc-300"
-										// biome-ignore lint/security/noDangerouslySetInnerHtml: its fine
-										dangerouslySetInnerHTML={{
-											__html: highlightText(content),
-										}}
-									/>
-								)}
-							/>
+							<>
+								{selectedVersion.rule &&
+									selectedVersion.rule.split("\n").length === 110 && (
+										<div className="m-4 mb-0 rounded-md border border-amber-600 bg-amber-900/20 p-3">
+											<p className="text-amber-400 text-sm">
+												⚠️ Warning: This policy appears to be truncated at
+												exactly 110 lines. The full content may not be
+												displayed.
+											</p>
+										</div>
+									)}
+								<LineNumbers
+									content={selectedVersion.rule || "No rule content available"}
+									className="h-full"
+									contentClassName="bg-background"
+									lineNumberClassName="bg-muted/30"
+									renderContent={(content) => (
+										<pre
+											className="whitespace-pre-wrap font-mono text-zinc-300"
+											// biome-ignore lint/security/noDangerouslySetInnerHtml: its fine
+											dangerouslySetInnerHTML={{
+												__html: highlightText(content),
+											}}
+										/>
+									)}
+								/>
+							</>
 						) : (
 							<div
 								className={

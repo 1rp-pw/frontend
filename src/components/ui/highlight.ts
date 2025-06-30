@@ -31,6 +31,9 @@ const LABEL_PREDICATES = [
 ];
 
 export const highlightText = (text: string) => {
+	// Store the original line count to ensure we preserve it
+	const originalLineCount = text.split("\n").length;
+
 	// Escape &, <, >
 	let html = text
 		.replace(/&/g, "&amp;")
@@ -344,6 +347,14 @@ export const highlightText = (text: string) => {
 	});
 
 	//console.info("highlighted", html);
+
+	// Verify we haven't changed the line count
+	const finalLineCount = html.split("\n").length;
+	if (finalLineCount !== originalLineCount) {
+		console.warn(
+			`[highlightText] Line count changed during highlighting! Original: ${originalLineCount}, Final: ${finalLineCount}`,
+		);
+	}
 
 	return html;
 };
