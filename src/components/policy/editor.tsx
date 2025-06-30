@@ -95,6 +95,7 @@ export function Editor({ rule, onChange, disabled = false }: EditorProps) {
 			<div
 				ref={lineNumbersRef}
 				className="pointer-events-none absolute top-0 left-0 z-20 h-full overflow-hidden border-zinc-700 border-r bg-zinc-900/50 text-right text-zinc-500"
+				title={`${lineCount} lines, ${rule.length} characters`}
 			>
 				<div className="p-4 pr-3">
 					{Array.from({ length: lineCount }, (_, i) => (
