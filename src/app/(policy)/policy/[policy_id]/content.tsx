@@ -21,6 +21,7 @@ import {
 	CardTitle,
 } from "~/components/ui/card";
 import { highlightText } from "~/components/ui/highlight";
+import { LineNumbers } from "~/components/ui/line-numbers";
 import { RainbowBraces } from "~/components/ui/rainbow";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -219,30 +220,31 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 					</div>
 
 					<div className={"min-h-0 flex-1"}>
-						<ScrollArea className={"h-full"}>
-							<div className={"p-6"}>
-								{selectedVersion ? (
-									<pre className={"whitespace-pre-wrap"}>
-										<div
-											// biome-ignore lint/security/noDangerouslySetInnerHtml: its fine
-											dangerouslySetInnerHTML={{
-												__html: highlightText(
-													selectedVersion.rule || "No rule content available",
-												),
-											}}
-										/>
-									</pre>
-								) : (
-									<div
-										className={
-											"flex h-32 items-center justify-center text-muted-foreground"
-										}
-									>
-										Select a version to view its rule
-									</div>
+						{selectedVersion ? (
+							<LineNumbers
+								content={selectedVersion.rule || "No rule content available"}
+								className="h-full"
+								contentClassName="bg-background"
+								lineNumberClassName="bg-muted/30"
+								renderContent={(content) => (
+									<pre
+										className="whitespace-pre-wrap font-mono text-zinc-300"
+										// biome-ignore lint/security/noDangerouslySetInnerHtml: its fine
+										dangerouslySetInnerHTML={{
+											__html: highlightText(content),
+										}}
+									/>
 								)}
+							/>
+						) : (
+							<div
+								className={
+									"flex h-32 items-center justify-center text-muted-foreground"
+								}
+							>
+								Select a version to view its rule
 							</div>
-						</ScrollArea>
+						)}
 					</div>
 				</div>
 
