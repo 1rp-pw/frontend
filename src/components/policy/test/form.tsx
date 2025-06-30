@@ -201,43 +201,27 @@ export function TestForm({
 
 	// Convert camelCase or PascalCase to Title Case
 	const formatFieldLabel = (fieldName: string): string => {
-		// Handle special cases
-		const specialCases: Record<string, string> = {
-			dateofbirth: "Date of Birth",
-			dateOfBirth: "Date of Birth",
-			dob: "Date of Birth",
-			hazardPerception: "Hazard Perception",
-			multipleChoice: "Multiple Choice",
-			// Common enum values
-			bachelor_arts: "Bachelor of Arts",
-			bachelor_science: "Bachelor of Science",
-			bachelor_engineering: "Bachelor of Engineering",
-			master_arts: "Master of Arts",
-			master_science: "Master of Science",
-			master_business: "Master of Business Administration",
-			phd: "PhD",
-			doctorate: "Doctorate",
-			in_progress: "In Progress",
-			not_started: "Not Started",
-			self_pay: "Self Pay",
-			employer_sponsored: "Employer Sponsored",
-			partially_related: "Partially Related",
-		};
+		// Connector words that should be lowercase
+		const connectorWords = new Set(['of', 'in', 'and', 'or', 'the', 'a', 'an', 'to', 'for', 'with']);
 
-		const lower = fieldName.toLowerCase();
-		if (specialCases[lower]) {
-			return specialCases[lower];
-		}
-		if (specialCases[fieldName]) {
-			return specialCases[fieldName];
-		}
-
-		// Convert camelCase to Title Case
 		return fieldName
-			.replace(/([A-Z])/g, " $1") // Add space before capital letters
-			.replace(/^./, (str) => str.toUpperCase()) // Capitalize first letter
-			.trim();
-	};
+			// Handle underscores: convert to spaces
+			.replace(/_/g, ' ')
+			// Handle camelCase: add space before capital letters
+			.replace(/([A-Z])/g, ' $1')
+			// Split into words and process each
+			.split(' ')
+			.filter(word => word.length > 0) // Remove empty strings
+			.map((word, index) => {
+				const lowerWord = word.toLowerCase();
+				// First word is always capitalized, connector words after first are lowercase
+				if (index === 0 || !connectorWords.has(lowerWord)) {
+					return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+				}
+				return lowerWord;
+			})
+			.join(' ');
+	}
 
 	const renderFormField = (field: {
 		name: string;
