@@ -40,45 +40,61 @@ export function PublishPolicy() {
 	const [minVersion, setMinVersion] = useState<number>(0.1);
 	const router = useRouter();
 
-	const { tests, savePolicy, updatePolicySpec, id } = usePolicyStore();
+	const { tests, savePolicy, updatePolicySpec, id, policySpec } =
+		usePolicyStore();
 
 	// Fetch the last published version when dialog opens
 	useEffect(() => {
-		if (formOpen && id) {
-			fetchLastPublishedVersion();
-		}
-		// biome-ignore lint/correctness/useExhaustiveDependencies: fetchLastPublishedVersion is stable
-	}, [formOpen, id]);
+		const fetchVersions = async () => {
+			if (!formOpen || (!id && !policySpec?.baseId)) return;
 
-	const fetchLastPublishedVersion = async () => {
-		if (!id) return;
+			// Use baseId for drafts, otherwise use the current id
+			const policyId = policySpec?.baseId || id;
 
-		try {
-			const response = await fetch(`/api/policy/versions?policy_id=${id}`);
-			if (response.ok) {
-				const versions = await response.json();
-				// Find the highest published version
-				const publishedVersions = versions
-					// biome-ignore lint/suspicious/noExplicitAny: API response type
-					.filter((v: any) => v.status === "published")
-					// biome-ignore lint/suspicious/noExplicitAny: API response type
-					.map((v: any) => v.version)
-					.filter((v: number) => !Number.isNaN(v));
+			try {
+				const response = await fetch(
+					`/api/policy/versions?policy_id=${policyId}`,
+				);
+				if (response.ok) {
+					const versions = await response.json();
+					// Find the highest published version
+					const publishedVersions = versions
+						// biome-ignore lint/suspicious/noExplicitAny: API response type
+						.filter((v: any) => {
+							// Look for status "version" or "published"
+							return v.status === "version" || v.status === "published";
+						})
+						// biome-ignore lint/suspicious/noExplicitAny: API response type
+						.map((v: any) => {
+							// Handle version strings that may have "v" prefix
+							let versionStr = v.version;
+							if (typeof versionStr === "string") {
+								// Remove "v" prefix if present
+								versionStr = versionStr.replace(/^v/i, "");
+							}
+							const version = Number.parseFloat(versionStr);
+							return version;
+						})
+						.filter((v: number) => !Number.isNaN(v));
 
-				if (publishedVersions.length > 0) {
-					const maxVersion = Math.max(...publishedVersions);
-					setLastPublishedVersion(maxVersion);
-					// Set minimum version to be 0.1 above the last published version
-					const newMinVersion = Math.round((maxVersion + 0.1) * 10) / 10;
-					setMinVersion(newMinVersion);
-					// Update form default value
-					form.setValue("policyVersion", newMinVersion);
+					if (publishedVersions.length > 0) {
+						const maxVersion = Math.max(...publishedVersions);
+						setLastPublishedVersion(maxVersion);
+						// Set minimum version to be 0.1 above the last published version
+						const newMinVersion = Math.round((maxVersion + 0.1) * 10) / 10;
+						setMinVersion(newMinVersion);
+					} else {
+						// No published versions found, start at 0.1
+						setMinVersion(0.1);
+					}
 				}
+			} catch (error) {
+				console.error("Failed to fetch versions:", error);
 			}
-		} catch (error) {
-			console.error("Failed to fetch versions:", error);
-		}
-	};
+		};
+
+		fetchVersions();
+	}, [formOpen, id, policySpec]);
 
 	// Create form schema dynamically based on minVersion
 	const formSchema = z.object({
