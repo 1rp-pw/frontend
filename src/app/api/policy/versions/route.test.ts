@@ -38,6 +38,7 @@ describe("/api/policy/versions", () => {
 			];
 
 			mockFetch.mockResolvedValue({
+				ok: true,
 				json: jest.fn().mockResolvedValue(mockVersions),
 			} as unknown as Response);
 
@@ -52,13 +53,32 @@ describe("/api/policy/versions", () => {
 			expect(mockFetch).toHaveBeenCalledWith(
 				`${env.API_SERVER}/policy/policy-123/versions`,
 			);
-			expect(responseData).toEqual(mockVersions);
+			// Expect sorted versions (newest first)
+			expect(responseData).toEqual([
+				{
+					id: "version-2",
+					baseId: "policy-123",
+					version: "1.1",
+					status: "draft",
+					createdAt: "2023-01-02",
+				},
+				{
+					id: "version-1",
+					baseId: "policy-123",
+					version: "1.0",
+					status: "published",
+					createdAt: "2023-01-01",
+				},
+			]);
 			expect(response.status).toBe(200);
 		});
 
-		it("should return 404 when no versions found", async () => {
+		it("should handle API error responses", async () => {
 			mockFetch.mockResolvedValue({
-				json: jest.fn().mockResolvedValue([{}]),
+				ok: false,
+				status: 404,
+				statusText: "Not Found",
+				json: jest.fn().mockResolvedValue({ error: "Not found" }),
 			} as unknown as Response);
 
 			const url = new URL(
@@ -70,11 +90,12 @@ describe("/api/policy/versions", () => {
 			const responseData = await response.json();
 
 			expect(response.status).toBe(404);
-			expect(responseData).toEqual({ error: "failed request" });
+			expect(responseData).toEqual({ error: "Failed to fetch versions" });
 		});
 
 		it("should handle empty versions array", async () => {
 			mockFetch.mockResolvedValue({
+				ok: true,
 				json: jest.fn().mockResolvedValue([]),
 			} as unknown as Response);
 
@@ -84,8 +105,10 @@ describe("/api/policy/versions", () => {
 			const request = new NextRequest(url);
 
 			const response = await GET(request);
+			const responseData = await response.json();
 
-			expect(response.status).toBe(500);
+			expect(response.status).toBe(200);
+			expect(responseData).toEqual([]);
 		});
 
 		it("should handle missing policy_id parameter", async () => {
