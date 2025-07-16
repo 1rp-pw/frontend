@@ -7,12 +7,11 @@ import {
 	Controls,
 	type Edge,
 	MiniMap,
-	type NodeTypes,
 	ReactFlow,
 	useEdgesState,
 	useNodesState,
 } from "@xyflow/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { FlowContext } from "~/components/flow/flow-context";
 import { CustomNode } from "~/components/flow/nodes/custom-node";
 import { PolicyNode } from "~/components/flow/nodes/policy-node";
@@ -83,7 +82,7 @@ export function FlowEditor({
 		})) as RequiredStyleEdge[],
 	);
 
-	const nodeTypes: NodeTypes = useMemo(
+	const nodeTypes = useMemo(
 		() => ({
 			start: StartNode,
 			policy: PolicyNode,
@@ -463,7 +462,9 @@ export function FlowEditor({
 		(
 			nodeId: string,
 			nodeType: string,
+			// biome-ignore lint/suspicious/noExplicitAny: can be any value
 			oldValue: any,
+			// biome-ignore lint/suspicious/noExplicitAny: can be any value
 			newValue: any,
 			field: string,
 		) => {

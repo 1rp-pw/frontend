@@ -32,7 +32,7 @@ const LABEL_PREDICATES = [
 
 export const highlightText = (text: string) => {
 	// Store the original line count to ensure we preserve it
-	const originalLineCount = text.split("\n").length;
+	// const originalLineCount = text.split("\n").length;
 
 	// Escape &, <, >
 	let html = text

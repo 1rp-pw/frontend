@@ -17,7 +17,9 @@ export interface FlowContextType {
 	onNodeValueChange: (
 		nodeId: string,
 		nodeType: string,
+		// biome-ignore lint/suspicious/noExplicitAny: value can be anything
 		oldValue: any,
+		// biome-ignore lint/suspicious/noExplicitAny: value can be anything
 		newValue: any,
 		field: string,
 	) => void;

@@ -175,6 +175,7 @@ function FlowYamlPreview({ yaml }: { yaml: string }) {
 }
 
 function FlowOperationLog({ logs }: { logs: NodeOperationLog[] }) {
+	// biome-ignore lint/suspicious/noExplicitAny: node data can be anything
 	const formatNodeInfo = (nodeType: string, nodeData: any) => {
 		switch (nodeType) {
 			case "start":
@@ -244,8 +245,10 @@ function FlowOperationLog({ logs }: { logs: NodeOperationLog[] }) {
 									{log.operation === "update" && (
 										<span>
 											{Object.keys(log.details.from || {})[0]}:{" "}
-											{Object.values(log.details.from || {})[0] || "empty"} →{" "}
-											{Object.values(log.details.to || {})[0]}
+											{String(
+												Object.values(log.details.from || {})[0] || "empty",
+											)}{" "}
+											→ {String(Object.values(log.details.to || {})[0])}
 										</span>
 									)}
 									{log.operation === "delete" && (

@@ -10,27 +10,31 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import type { CustomNodeData } from "~/lib/types";
 
-export function CustomNode({ data, id }: NodeProps<CustomNodeData>) {
+export function CustomNode({ data, id }: NodeProps) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [outcome, setOutcome] = useState(data.outcome || "");
+	const nodeData = data as CustomNodeData;
+	const [outcome, setOutcome] = useState(nodeData?.outcome || "");
 	const { deleteNode, onNodeValueChange } = useFlowContext();
 
 	const handleSave = () => {
+		if (!nodeData) {
+			return;
+		}
 		// Log value change
-		if (data.outcome !== outcome) {
-			onNodeValueChange(id, "custom", data.outcome, outcome, "outcome");
+		if (nodeData.outcome !== outcome) {
+			onNodeValueChange(id, "custom", nodeData.outcome, outcome, "outcome");
 		}
 
-		data.outcome = outcome;
+		nodeData.outcome = outcome;
 		setIsEditing(false);
 	};
 
 	const handleCancel = () => {
-		setOutcome(data.outcome || "");
+		setOutcome(nodeData?.outcome || "");
 		setIsEditing(false);
 	};
 
-	const calledPath = data.calledPath;
+	const calledPath = nodeData?.calledPath;
 	const borderStyle =
 		calledPath === true
 			? "border-2 border-green-500"
@@ -69,7 +73,7 @@ export function CustomNode({ data, id }: NodeProps<CustomNodeData>) {
 								className="cursor-context-menu rounded bg-gray-300 p-2 text-gray-600 text-xs"
 								onClick={() => setIsEditing(true)}
 							>
-								{outcome || "No outcome set"}
+								{(outcome || "No outcome set") as string}
 							</div>
 						</div>
 					</div>
@@ -81,7 +85,7 @@ export function CustomNode({ data, id }: NodeProps<CustomNodeData>) {
 							</Label>
 							<Input
 								id={`outcome-${id}`}
-								value={outcome}
+								value={outcome as string}
 								onChange={(e) => setOutcome(e.target.value)}
 								onKeyUp={(e) => {
 									if (e.key === "Enter" || e.key === "Return") {
