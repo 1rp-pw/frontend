@@ -17,8 +17,6 @@ export async function POST(request: Request) {
 			flowFlat: yaml,
 		});
 
-		console.info("body", body);
-
 		const response = await fetch(`${env.API_SERVER}/flow`, {
 			method: "POST",
 			body,

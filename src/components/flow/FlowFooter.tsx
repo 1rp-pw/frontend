@@ -20,7 +20,7 @@ export function FlowFooter({
 	return (
 		<div className="h-full overflow-auto border-border border-t bg-card p-4">
 			<Card className="h-full rounded-lg border-border bg-card shadow-sm">
-				<CardContent className="h-[calc(100%-4rem)] overflow-auto">
+				<CardContent className="overflow-auto">
 					<Tabs defaultValue="instructions" className="w-full">
 						<TabsList className="grid w-full grid-cols-4">
 							<TabsTrigger value="instructions">Instructions</TabsTrigger>

@@ -89,7 +89,7 @@ export default function FlowInfo({ flow_id }: { flow_id: string }) {
 		return null;
 	}
 	if (loadError !== null && loadError !== undefined) {
-		console.info("loadError", loadError);
+		console.error("loadError", loadError);
 		return null;
 	}
 
