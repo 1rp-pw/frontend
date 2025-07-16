@@ -55,7 +55,6 @@ export function PolicyNode({ data, id }: NodeProps<PolicyNodeData>) {
 	};
 
 	const calledPath = data.calledPath;
-	console.info("PolicyNode - calledPath:", calledPath, "full data:", data);
 	const borderStyle =
 		calledPath === true
 			? "border-2 border-green-500"

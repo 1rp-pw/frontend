@@ -48,7 +48,6 @@ export function FlowEditor({
 }: FlowEditorProps) {
 	const onNodesChangeRef = useRef(onNodesChangeCallback);
 	const onEdgesChangeRef = useRef(onEdgesChangeCallback);
-	const [operationLogs, setOperationLogs] = useState<NodeOperationLog[]>([]);
 
 	// Update refs when callbacks change
 	useEffect(() => {
@@ -102,7 +101,6 @@ export function FlowEditor({
 				id: `log-${Date.now()}-${Math.random()}`,
 				timestamp: new Date(),
 			};
-			setOperationLogs((prev) => [...prev, newLog]);
 			onOperationLog?.(newLog);
 		},
 		[onOperationLog],
@@ -237,8 +235,7 @@ export function FlowEditor({
 				nodeType: targetType,
 				details: {
 					nodeData: data,
-					from: sourceNodeId,
-					to: `${targetType} node via ${outputType} path`,
+					from: outputType,
 				},
 			});
 		},
@@ -542,42 +539,6 @@ export function FlowEditor({
 					}}
 				/>
 			</ReactFlow>
-
-			{/* Operation Log Panel */}
-			{operationLogs.length > 0 && (
-				<div className="absolute bottom-4 left-4 z-10 max-h-48 w-96 overflow-y-auto rounded-lg border bg-background p-4 shadow-lg">
-					<h3 className="mb-2 font-semibold text-sm">Operation Log</h3>
-					<div className="space-y-1 text-xs">
-						{operationLogs
-							.slice(-10)
-							.reverse()
-							.map((log) => (
-								<div key={log.id} className="border-b pb-1">
-									<div className="font-medium">
-										{log.operation === "create" && "➕ Created"}
-										{log.operation === "update" && "✏️ Updated"}
-										{log.operation === "delete" && "🗑️ Deleted"}
-										{log.operation === "typeChange" && "🔄 Type Changed"}{" "}
-										{log.nodeType} node ({log.nodeId})
-									</div>
-									<div className="text-muted-foreground">
-										{log.operation === "create" && `from ${log.details.from}`}
-										{log.operation === "update" &&
-											`${Object.keys(log.details.from)[0]}: ${Object.values(log.details.from)[0]} → ${Object.values(log.details.to)[0]}`}
-										{log.operation === "delete" &&
-											log.details.cascadedDeletions?.length > 0 &&
-											`Also deleted ${log.details.cascadedDeletions.length} child nodes`}
-										{log.operation === "typeChange" &&
-											`from ${log.details.from.type} to ${log.details.to.type}`}
-									</div>
-									<div className="text-muted-foreground">
-										{new Date(log.timestamp).toLocaleTimeString()}
-									</div>
-								</div>
-							))}
-					</div>
-				</div>
-			)}
 		</FlowContext.Provider>
 	);
 }

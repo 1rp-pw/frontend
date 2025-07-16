@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FlowEditor } from "~/components/flow/FlowEditor";
 import { FlowFooter } from "~/components/flow/FlowFooter";
 import { FlowHeader } from "~/components/flow/FlowHeader";
@@ -12,7 +12,7 @@ import {
 	ResizablePanelGroup,
 } from "~/components/ui/resizable";
 import { useFlowStore } from "~/lib/state/flow";
-import type { FlowEdgeData, FlowNodeData } from "~/lib/types";
+import type { FlowEdgeData, FlowNodeData, NodeOperationLog } from "~/lib/types";
 import { flowToYaml } from "~/lib/utils/flow-to-yaml";
 
 export default function FlowPage() {
@@ -37,6 +37,8 @@ export default function FlowPage() {
 		validationResult,
 		validateFlow,
 	} = useFlowStore();
+
+	const [operationLogs, setOperationLogs] = useState<NodeOperationLog[]>([]);
 
 	// Run initial validation when component loads
 	useEffect(() => {
@@ -68,6 +70,10 @@ export default function FlowPage() {
 		}
 	}, [currentTest, runTest]);
 
+	const handleOperationLog = useCallback((log: NodeOperationLog) => {
+		setOperationLogs((prev) => [...prev, log]);
+	}, []);
+
 	// Generate YAML preview
 	const yamlPreview = flowToYaml(storeNodes, storeEdges);
 
@@ -86,6 +92,7 @@ export default function FlowPage() {
 									onNodesChange={handleNodesChange}
 									onEdgesChange={handleEdgesChange}
 									validationResult={validationResult}
+									onOperationLog={handleOperationLog}
 								/>
 							</ResizablePanel>
 							<ResizableHandle withHandle />
@@ -126,6 +133,7 @@ export default function FlowPage() {
 					<FlowFooter
 						validationResult={validationResult}
 						yamlPreview={yamlPreview}
+						operationLogs={operationLogs}
 					/>
 				</ResizablePanel>
 			</ResizablePanelGroup>

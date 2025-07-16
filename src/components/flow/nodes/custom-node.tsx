@@ -31,7 +31,6 @@ export function CustomNode({ data, id }: NodeProps<CustomNodeData>) {
 	};
 
 	const calledPath = data.calledPath;
-	console.info("CustomNode - calledPath:", calledPath, "full data:", data);
 	const borderStyle =
 		calledPath === true
 			? "border-2 border-green-500"
