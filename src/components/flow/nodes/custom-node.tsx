@@ -12,23 +12,40 @@ import type { CustomNodeData } from "~/lib/types";
 
 export function CustomNode({ data, id }: NodeProps) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [outcome, setOutcome] = useState(
-		(data as unknown as CustomNodeData).outcome || "",
-	);
-	const { deleteNode } = useFlowContext();
+	const nodeData = data as CustomNodeData;
+	const [outcome, setOutcome] = useState(nodeData?.outcome || "");
+	const { deleteNode, onNodeValueChange } = useFlowContext();
 
 	const handleSave = () => {
-		(data as unknown as CustomNodeData).outcome = outcome;
+		if (!nodeData) {
+			return;
+		}
+		// Log value change
+		if (nodeData.outcome !== outcome) {
+			onNodeValueChange(id, "custom", nodeData.outcome, outcome, "outcome");
+		}
+
+		nodeData.outcome = outcome;
 		setIsEditing(false);
 	};
 
 	const handleCancel = () => {
-		setOutcome((data as unknown as CustomNodeData).outcome || "");
+		setOutcome(nodeData?.outcome || "");
 		setIsEditing(false);
 	};
 
+	const calledPath = nodeData?.calledPath;
+	const borderStyle =
+		calledPath === true
+			? "border-2 border-green-500"
+			: calledPath === false
+				? "border-2 border-red-500"
+				: "border border-border";
+
 	return (
-		<Card className="min-h-28 w-56 rounded-xl border border-border bg-card shadow-sm">
+		<Card
+			className={`min-h-28 w-56 rounded-xl bg-card shadow-sm ${borderStyle}`}
+		>
 			<CardHeader className="pb-3">
 				<CardTitle className="flex items-center justify-between font-medium text-sm">
 					<div className="flex items-center gap-2">
@@ -56,7 +73,7 @@ export function CustomNode({ data, id }: NodeProps) {
 								className="cursor-context-menu rounded bg-gray-300 p-2 text-gray-600 text-xs"
 								onClick={() => setIsEditing(true)}
 							>
-								{outcome || "No outcome set"}
+								{(outcome || "No outcome set") as string}
 							</div>
 						</div>
 					</div>
@@ -68,7 +85,7 @@ export function CustomNode({ data, id }: NodeProps) {
 							</Label>
 							<Input
 								id={`outcome-${id}`}
-								value={outcome}
+								value={outcome as string}
 								onChange={(e) => setOutcome(e.target.value)}
 								onKeyUp={(e) => {
 									if (e.key === "Enter" || e.key === "Return") {

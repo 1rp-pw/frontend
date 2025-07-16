@@ -7,7 +7,6 @@ import {
 	Controls,
 	type Edge,
 	MiniMap,
-	type NodeTypes,
 	ReactFlow,
 	useEdgesState,
 	useNodesState,
@@ -22,6 +21,7 @@ import type {
 	CustomNodeData,
 	FlowEdgeData,
 	FlowNodeData,
+	NodeOperationLog,
 	PolicyNodeData,
 	ReturnNodeData,
 } from "~/lib/types";
@@ -34,6 +34,7 @@ interface FlowEditorProps {
 	onNodesChange?: (nodes: FlowNodeData[]) => void;
 	onEdgesChange?: (edges: FlowEdgeData[]) => void;
 	validationResult?: { unterminatedNodes: string[] } | null;
+	onOperationLog?: (log: NodeOperationLog) => void;
 }
 
 export function FlowEditor({
@@ -42,6 +43,7 @@ export function FlowEditor({
 	onNodesChange: onNodesChangeCallback,
 	onEdgesChange: onEdgesChangeCallback,
 	validationResult,
+	onOperationLog,
 }: FlowEditorProps) {
 	const onNodesChangeRef = useRef(onNodesChangeCallback);
 	const onEdgesChangeRef = useRef(onEdgesChangeCallback);
@@ -80,7 +82,7 @@ export function FlowEditor({
 		})) as RequiredStyleEdge[],
 	);
 
-	const nodeTypes: NodeTypes = useMemo(
+	const nodeTypes = useMemo(
 		() => ({
 			start: StartNode,
 			policy: PolicyNode,
@@ -88,6 +90,19 @@ export function FlowEditor({
 			custom: CustomNode,
 		}),
 		[],
+	);
+
+	// Helper function to add operation logs
+	const addOperationLog = useCallback(
+		(log: Omit<NodeOperationLog, "id" | "timestamp">) => {
+			const newLog: NodeOperationLog = {
+				...log,
+				id: `log-${Date.now()}-${Math.random()}`,
+				timestamp: new Date(),
+			};
+			onOperationLog?.(newLog);
+		},
+		[onOperationLog],
 	);
 
 	const onConnect = useCallback(
@@ -149,6 +164,7 @@ export function FlowEditor({
 						label: "Policy",
 						policyId: "",
 						policyName: "",
+						calledPath: outputType === "true",
 						data: null,
 						position: {
 							x: position.x,
@@ -175,6 +191,7 @@ export function FlowEditor({
 						type: "custom" as const,
 						label: "Custom",
 						outcome: "",
+						calledPath: outputType === "true",
 						data: null,
 						position: {
 							x: position.x,
@@ -188,7 +205,7 @@ export function FlowEditor({
 				id: targetId,
 				type: targetType,
 				position,
-				data,
+				data, // This entire object becomes the 'data' prop in the component
 			};
 
 			const newEdge: RequiredStyleEdge = {
@@ -209,8 +226,19 @@ export function FlowEditor({
 
 			setNodes((nds) => nds.concat(newNode));
 			setEdges((eds) => eds.concat(newEdge));
+
+			// Log the node creation
+			addOperationLog({
+				operation: "create",
+				nodeId: targetId,
+				nodeType: targetType,
+				details: {
+					nodeData: data,
+					from: outputType,
+				},
+			});
 		},
-		[nodes, setNodes, setEdges],
+		[nodes, setNodes, setEdges, addOperationLog],
 	);
 
 	const changeNodeType = useCallback(
@@ -221,14 +249,35 @@ export function FlowEditor({
 
 					let newData: PolicyNodeData | ReturnNodeData | CustomNodeData;
 
+					// Preserve calledPath from policy or custom nodes, or derive from return node
+					const currentCalledPath =
+						node.type === "policy"
+							? (node.data as PolicyNodeData).calledPath
+							: node.type === "custom"
+								? (node.data as CustomNodeData).calledPath
+								: node.type === "return"
+									? (node.data as ReturnNodeData).returnValue
+									: undefined;
+
 					switch (newType) {
-						case "policy":
+						case "policy": {
+							// Preserve existing policy data if converting from policy
+							const existingPolicyId =
+								node.type === "policy"
+									? (node.data as PolicyNodeData).policyId
+									: "";
+							const existingPolicyName =
+								node.type === "policy"
+									? (node.data as PolicyNodeData).policyName
+									: "";
+
 							newData = {
 								id: nodeId,
 								type: "policy" as const,
 								label: "Policy",
-								policyId: "",
-								policyName: "",
+								policyId: existingPolicyId || "",
+								policyName: existingPolicyName || "",
+								calledPath: currentCalledPath,
 								data: null,
 								position: {
 									x: node.position.x,
@@ -236,6 +285,7 @@ export function FlowEditor({
 								},
 							} satisfies PolicyNodeData;
 							break;
+						}
 						case "return": {
 							// Preserve the return value if converting from another return node
 							const currentReturnValue =
@@ -261,6 +311,7 @@ export function FlowEditor({
 								type: "custom" as const,
 								label: "Custom",
 								outcome: "",
+								calledPath: currentCalledPath,
 								data: null,
 								position: {
 									x: node.position.x,
@@ -270,6 +321,23 @@ export function FlowEditor({
 							break;
 					}
 
+					// Log the type change
+					addOperationLog({
+						operation: "typeChange",
+						nodeId,
+						nodeType: newType,
+						details: {
+							from: {
+								type: node.type,
+								data: node.data,
+							},
+							to: {
+								type: newType,
+								data: newData,
+							},
+						},
+					});
+
 					return {
 						...node,
 						type: newType,
@@ -278,7 +346,7 @@ export function FlowEditor({
 				}),
 			);
 		},
-		[setNodes],
+		[setNodes, addOperationLog],
 	);
 
 	const getConnectedNodes = useCallback(
@@ -305,15 +373,63 @@ export function FlowEditor({
 			// Prevent deleting the start node
 			if (nodeId === "start-1") return;
 
-			// Remove the node
-			setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+			// Find all child nodes (nodes that have this node as their source)
+			const findAllDescendants = (currentNodeId: string): string[] => {
+				const children: string[] = [];
+				const childEdges = edges.filter(
+					(edge) => edge.source === currentNodeId,
+				);
 
-			// Remove all edges connected to this node
+				for (const edge of childEdges) {
+					children.push(edge.target);
+					// Recursively find descendants of this child
+					children.push(...findAllDescendants(edge.target));
+				}
+
+				return children;
+			};
+
+			// Get all nodes to delete (current node + all descendants)
+			const nodesToDelete = new Set([nodeId, ...findAllDescendants(nodeId)]);
+
+			// Collect information about all nodes being deleted
+			const deletedNodesInfo = nodes
+				.filter((node) => nodesToDelete.has(node.id))
+				.map((node) => ({
+					nodeId: node.id,
+					nodeType: node.type,
+					nodeData: node.data,
+				}));
+
+			// Find the primary node being deleted
+			const primaryNode = nodes.find((node) => node.id === nodeId);
+			if (primaryNode) {
+				// Log the deletion with cascaded deletions info
+				addOperationLog({
+					operation: "delete",
+					nodeId,
+					nodeType: primaryNode.type,
+					details: {
+						nodeData: primaryNode.data,
+						cascadedDeletions: deletedNodesInfo.filter(
+							(n) => n.nodeId !== nodeId,
+						),
+					},
+				});
+			}
+
+			// Remove all nodes in the deletion set
+			setNodes((nds) => nds.filter((node) => !nodesToDelete.has(node.id)));
+
+			// Remove all edges connected to any of the deleted nodes
 			setEdges((eds) =>
-				eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+				eds.filter(
+					(edge) =>
+						!nodesToDelete.has(edge.source) && !nodesToDelete.has(edge.target),
+				),
 			);
 		},
-		[setNodes, setEdges],
+		[edges, nodes, setNodes, setEdges, addOperationLog],
 	);
 
 	// Notify parent of changes
@@ -342,6 +458,29 @@ export function FlowEditor({
 		}
 	}, [edges]);
 
+	const onNodeValueChange = useCallback(
+		(
+			nodeId: string,
+			nodeType: string,
+			// biome-ignore lint/suspicious/noExplicitAny: can be any value
+			oldValue: any,
+			// biome-ignore lint/suspicious/noExplicitAny: can be any value
+			newValue: any,
+			field: string,
+		) => {
+			addOperationLog({
+				operation: "update",
+				nodeId,
+				nodeType,
+				details: {
+					from: { [field]: oldValue },
+					to: { [field]: newValue },
+				},
+			});
+		},
+		[addOperationLog],
+	);
+
 	return (
 		<FlowContext.Provider
 			value={{
@@ -349,6 +488,7 @@ export function FlowEditor({
 				changeNodeType,
 				getConnectedNodes,
 				deleteNode,
+				onNodeValueChange,
 			}}
 		>
 			<ReactFlow

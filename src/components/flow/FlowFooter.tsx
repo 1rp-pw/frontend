@@ -3,23 +3,30 @@
 import { Card, CardContent } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import type { NodeOperationLog } from "~/lib/types";
 import type { FlowValidationResult } from "~/lib/utils/flow-validation";
 
 interface FlowFooterProps {
 	validationResult: FlowValidationResult | null;
 	yamlPreview: string;
+	operationLogs?: NodeOperationLog[];
 }
 
-export function FlowFooter({ validationResult, yamlPreview }: FlowFooterProps) {
+export function FlowFooter({
+	validationResult,
+	yamlPreview,
+	operationLogs = [],
+}: FlowFooterProps) {
 	return (
 		<div className="h-full overflow-auto border-border border-t bg-card p-4">
 			<Card className="h-full rounded-lg border-border bg-card shadow-sm">
-				<CardContent className="h-[calc(100%-4rem)] overflow-auto">
+				<CardContent className="overflow-auto">
 					<Tabs defaultValue="instructions" className="w-full">
-						<TabsList className="grid w-full grid-cols-3">
+						<TabsList className="grid w-full grid-cols-4">
 							<TabsTrigger value="instructions">Instructions</TabsTrigger>
 							<TabsTrigger value="validation">Validation</TabsTrigger>
 							<TabsTrigger value="yaml-preview">YAML Preview</TabsTrigger>
+							<TabsTrigger value="operation-log">Operation Log</TabsTrigger>
 						</TabsList>
 
 						<TabsContent
@@ -35,6 +42,10 @@ export function FlowFooter({ validationResult, yamlPreview }: FlowFooterProps) {
 
 						<TabsContent value="yaml-preview" className="space-y-3">
 							<FlowYamlPreview yaml={yamlPreview} />
+						</TabsContent>
+
+						<TabsContent value="operation-log" className="space-y-3">
+							<FlowOperationLog logs={operationLogs} />
 						</TabsContent>
 					</Tabs>
 				</CardContent>
@@ -159,6 +170,140 @@ function FlowYamlPreview({ yaml }: { yaml: string }) {
 			<pre className="max-h-64 overflow-auto rounded-md bg-muted p-3 text-xs">
 				<code>{yaml}</code>
 			</pre>
+		</div>
+	);
+}
+
+function FlowOperationLog({ logs }: { logs: NodeOperationLog[] }) {
+	// biome-ignore lint/suspicious/noExplicitAny: node data can be anything
+	const formatNodeInfo = (nodeType: string, nodeData: any) => {
+		switch (nodeType) {
+			case "start":
+				return nodeData?.policyId
+					? `policy: ${nodeData.policyId}`
+					: "no policy set";
+			case "policy":
+				return nodeData?.policyId
+					? `policy: ${nodeData.policyId}`
+					: "no policy set";
+			case "return":
+				return `returns: ${nodeData?.returnValue === true ? "true" : "false"}`;
+			case "custom":
+				return nodeData?.outcome
+					? `outcome: ${nodeData.outcome}`
+					: "no outcome set";
+			default:
+				return "";
+		}
+	};
+
+	if (logs.length === 0) {
+		return (
+			<div className="text-muted-foreground text-xs">
+				No operations recorded yet. Operations will appear here as you create,
+				update, delete, or change node types.
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-2">
+			<div className="flex items-center justify-between">
+				<Label className="font-medium text-foreground text-xs">
+					Operation History
+				</Label>
+				<span className="text-muted-foreground text-xs">
+					Showing {Math.min(50, logs.length)} of {logs.length} operations
+				</span>
+			</div>
+			<div className="max-h-64 space-y-2 overflow-y-auto">
+				{logs
+					.slice(-50)
+					.reverse()
+					.map((log) => (
+						<div
+							key={log.id}
+							className="rounded border bg-muted/50 p-2 text-xs"
+						>
+							<div className="space-y-1">
+								<div className="flex items-start justify-between">
+									<div className="font-medium">
+										{log.operation === "create" && "➕ Created"}
+										{log.operation === "update" && "✏️ Updated"}
+										{log.operation === "delete" && "🗑️ Deleted"}
+										{log.operation === "typeChange" && "🔄 Type Changed"}{" "}
+										{log.nodeType} node
+									</div>
+									<div className="whitespace-nowrap text-muted-foreground">
+										{new Date(log.timestamp).toLocaleTimeString()}
+									</div>
+								</div>
+								<div className="text-muted-foreground">
+									{log.operation === "create" && (
+										<span>Created from {log.details.from} path</span>
+									)}
+									{log.operation === "update" && (
+										<span>
+											{Object.keys(log.details.from || {})[0]}:{" "}
+											{String(
+												Object.values(log.details.from || {})[0] || "empty",
+											)}{" "}
+											→ {String(Object.values(log.details.to || {})[0])}
+										</span>
+									)}
+									{log.operation === "delete" && (
+										<div>
+											<div className="font-medium">
+												{formatNodeInfo(log.nodeType, log.details.nodeData)}
+											</div>
+											{log.details.cascadedDeletions &&
+												log.details.cascadedDeletions.length > 0 && (
+													<div className="mt-1">
+														<div>
+															Also deleted{" "}
+															{log.details.cascadedDeletions.length} child
+															node(s):
+														</div>
+														<ul className="mt-1 ml-4">
+															{log.details.cascadedDeletions.map((child) => (
+																<li key={child.nodeId}>
+																	• {child.nodeType}:{" "}
+																	{formatNodeInfo(
+																		child.nodeType,
+																		child.nodeData,
+																	)}
+																</li>
+															))}
+														</ul>
+													</div>
+												)}
+										</div>
+									)}
+									{log.operation === "typeChange" &&
+										log.details.from &&
+										log.details.to && (
+											<div>
+												<div>
+													From {log.details.from.type}:{" "}
+													{formatNodeInfo(
+														log.details.from.type,
+														log.details.from.data,
+													)}
+												</div>
+												<div>
+													To {log.details.to.type}:{" "}
+													{formatNodeInfo(
+														log.details.to.type,
+														log.details.to.data,
+													)}
+												</div>
+											</div>
+										)}
+								</div>
+							</div>
+						</div>
+					))}
+			</div>
 		</div>
 	);
 }

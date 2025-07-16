@@ -14,6 +14,15 @@ export interface FlowContextType {
 	) => void;
 	getConnectedNodes: (nodeId: string) => { true?: string; false?: string };
 	deleteNode: (nodeId: string) => void;
+	onNodeValueChange: (
+		nodeId: string,
+		nodeType: string,
+		// biome-ignore lint/suspicious/noExplicitAny: value can be anything
+		oldValue: any,
+		// biome-ignore lint/suspicious/noExplicitAny: value can be anything
+		newValue: any,
+		field: string,
+	) => void;
 }
 
 export const FlowContext = createContext<FlowContextType | null>(null);

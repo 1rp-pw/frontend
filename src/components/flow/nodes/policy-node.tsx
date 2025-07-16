@@ -20,35 +20,56 @@ import type { PolicyNodeData } from "~/lib/types";
 
 export function PolicyNode({ data, id }: NodeProps) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [policyId, setPolicyId] = useState(
-		(data as unknown as PolicyNodeData).policyId || "",
-	);
-	const [policyName, setPolicyName] = useState(
-		(data as unknown as PolicyNodeData).policyName || "",
-	);
+	const nodeData = data as PolicyNodeData;
+	const [policyId, setPolicyId] = useState(nodeData?.policyId || "");
+	const [policyName, setPolicyName] = useState(nodeData?.policyName || "");
 	const [showPolicySearch, setShowPolicySearch] = useState(false);
 	const { policies, isLoading } = usePolicySearch();
-	const { addConnectedNode, getConnectedNodes, deleteNode } = useFlowContext();
+	const { addConnectedNode, getConnectedNodes, deleteNode, onNodeValueChange } =
+		useFlowContext();
 	const connectedNodes = getConnectedNodes(id);
 
 	const handleSave = () => {
-		(data as unknown as PolicyNodeData).policyId = policyId;
-		(data as unknown as PolicyNodeData).policyName = policyName;
+		if (!nodeData) {
+			return;
+		}
+
+		// Log value changes
+		if (nodeData.policyId !== policyId) {
+			onNodeValueChange(id, "policy", nodeData?.policyId, policyId, "policyId");
+		}
+		if (nodeData.policyName !== policyName) {
+			onNodeValueChange(
+				id,
+				"policy",
+				nodeData.policyName,
+				policyName,
+				"policyName",
+			);
+		}
+
+		nodeData.policyId = policyId;
+		nodeData.policyName = policyName;
 		setIsEditing(false);
 	};
 
 	const handleCancel = () => {
-		setPolicyId((data as unknown as PolicyNodeData).policyId || "");
-		setPolicyName((data as unknown as PolicyNodeData).policyName || "");
+		setPolicyId(nodeData?.policyId || "");
+		setPolicyName(nodeData?.policyName || "");
 		setIsEditing(false);
 	};
 
-	const returnValue = (data as unknown as PolicyNodeData).truePath;
-	const bgColor = returnValue ? "border-green-500" : "border-red-500";
+	const calledPath = nodeData?.calledPath;
+	const borderStyle =
+		calledPath === true
+			? "border-2 border-green-500"
+			: calledPath === false
+				? "border-2 border-red-500"
+				: "border border-border";
 
 	return (
 		<Card
-			className={`min-h-32 w-96 rounded-xl border border-border bg-card shadow-sm ${bgColor}`}
+			className={`min-h-32 w-96 rounded-xl bg-card shadow-sm ${borderStyle}`}
 		>
 			<CardHeader className="pb-3">
 				<CardTitle className="flex items-center justify-between font-medium text-sm">
@@ -75,7 +96,7 @@ export function PolicyNode({ data, id }: NodeProps) {
 					>
 						<Label className="font-medium text-xs">Policy:</Label>
 						<div className="text-muted-foreground text-xs">
-							{policyName || policyId || "Not selected"}
+							{(policyName || policyId || "Not selected") as string}
 						</div>
 					</div>
 				) : (
@@ -85,7 +106,7 @@ export function PolicyNode({ data, id }: NodeProps) {
 							<div className="space-y-2">
 								<div className="flex gap-2">
 									<Input
-										value={policyId}
+										value={policyId as string}
 										onChange={(e) => setPolicyId(e.target.value)}
 										placeholder="Policy ID"
 										className="text-xs"

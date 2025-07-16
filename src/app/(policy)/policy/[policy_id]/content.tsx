@@ -69,24 +69,6 @@ export default function PolicyInfo({ policy_id }: { policy_id: string }) {
 			// Auto-select the first version if available
 			if (respVersions.length > 0 && !selectedVersion) {
 				setSelectedVersion(respVersions[0]);
-				// Debug line count issue
-				const firstVersion = respVersions[0];
-				if (firstVersion.rule) {
-					const lines = firstVersion.rule.split("\n");
-					console.log(`Policy content debug:
-- Total lines: ${lines.length}
-- Total characters: ${firstVersion.rule.length}
-- Last line empty: ${lines[lines.length - 1] === ""}
-- First 50 chars: ${firstVersion.rule.substring(0, 50)}...
-- Last 50 chars: ...${firstVersion.rule.substring(firstVersion.rule.length - 50)}`);
-
-					if (lines.length === 110) {
-						console.warn(
-							"⚠️ Policy appears to be truncated at exactly 110 lines!",
-						);
-						console.log("Last few lines:", lines.slice(-5));
-					}
-				}
 			}
 			setVersionsLoading(false);
 		});

@@ -54,7 +54,6 @@ export interface FlowNodeData extends Record<string, unknown> {
 		x: number;
 		y: number;
 	};
-	data: FlowNodeData | null;
 }
 
 export interface StartNodeData extends FlowNodeData {
@@ -67,6 +66,7 @@ export interface PolicyNodeData extends FlowNodeData {
 	type: "policy";
 	policyId: string;
 	policyName?: string;
+	calledPath?: boolean;
 }
 
 export interface ReturnNodeData extends FlowNodeData {
@@ -77,6 +77,7 @@ export interface ReturnNodeData extends FlowNodeData {
 export interface CustomNodeData extends FlowNodeData {
 	type: "custom";
 	outcome: string;
+	calledPath?: boolean;
 }
 
 export type FlowNode =
@@ -84,6 +85,28 @@ export type FlowNode =
 	| PolicyNodeData
 	| ReturnNodeData
 	| CustomNodeData;
+
+export interface NodeOperationLog {
+	id: string;
+	timestamp: Date;
+	operation: "create" | "update" | "delete" | "typeChange";
+	nodeId: string;
+	nodeType: string;
+	details: {
+		// biome-ignore lint/suspicious/noExplicitAny: details can be anything
+		from?: any;
+		// biome-ignore lint/suspicious/noExplicitAny: details can be anything
+		to?: any;
+		cascadedDeletions?: Array<{
+			nodeId: string;
+			nodeType: string;
+			// biome-ignore lint/suspicious/noExplicitAny: node data can be anything
+			nodeData: any;
+		}>;
+		// biome-ignore lint/suspicious/noExplicitAny: node data can be anything
+		nodeData?: any;
+	};
+}
 
 export interface FlowSpec {
 	baseId: string;
