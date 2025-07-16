@@ -10,25 +10,39 @@ import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import type { CustomNodeData } from "~/lib/types";
 
-export function CustomNode({ data, id }: NodeProps) {
+export function CustomNode({ data, id }: NodeProps<CustomNodeData>) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [outcome, setOutcome] = useState(
-		(data as unknown as CustomNodeData).outcome || "",
-	);
-	const { deleteNode } = useFlowContext();
+	const [outcome, setOutcome] = useState(data.outcome || "");
+	const { deleteNode, onNodeValueChange } = useFlowContext();
 
 	const handleSave = () => {
-		(data as unknown as CustomNodeData).outcome = outcome;
+		// Log value change
+		if (data.outcome !== outcome) {
+			onNodeValueChange(id, "custom", data.outcome, outcome, "outcome");
+		}
+
+		data.outcome = outcome;
 		setIsEditing(false);
 	};
 
 	const handleCancel = () => {
-		setOutcome((data as unknown as CustomNodeData).outcome || "");
+		setOutcome(data.outcome || "");
 		setIsEditing(false);
 	};
 
+	const calledPath = data.calledPath;
+	console.info("CustomNode - calledPath:", calledPath, "full data:", data);
+	const borderStyle =
+		calledPath === true
+			? "border-2 border-green-500"
+			: calledPath === false
+				? "border-2 border-red-500"
+				: "border border-border";
+
 	return (
-		<Card className="min-h-28 w-56 rounded-xl border border-border bg-card shadow-sm">
+		<Card
+			className={`min-h-28 w-56 rounded-xl bg-card shadow-sm ${borderStyle}`}
+		>
 			<CardHeader className="pb-3">
 				<CardTitle className="flex items-center justify-between font-medium text-sm">
 					<div className="flex items-center gap-2">

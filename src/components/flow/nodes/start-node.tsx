@@ -28,13 +28,30 @@ export function StartNode({ data, id }: NodeProps) {
 	);
 	const [showPolicySearch, setShowPolicySearch] = useState(false);
 	const { policies, isLoading } = usePolicySearch();
-	const { addConnectedNode, getConnectedNodes } = useFlowContext();
+	const { addConnectedNode, getConnectedNodes, onNodeValueChange } =
+		useFlowContext();
 	const connectedNodes = getConnectedNodes(id);
 
 	const handleSave = () => {
+		const nodeData = data as unknown as StartNodeData;
+
+		// Log value changes
+		if (nodeData.policyId !== policyId) {
+			onNodeValueChange(id, "start", nodeData.policyId, policyId, "policyId");
+		}
+		if (nodeData.policyName !== policyName) {
+			onNodeValueChange(
+				id,
+				"start",
+				nodeData.policyName,
+				policyName,
+				"policyName",
+			);
+		}
+
 		// Update node data
-		(data as unknown as StartNodeData).policyId = policyId;
-		(data as unknown as StartNodeData).policyName = policyName;
+		nodeData.policyId = policyId;
+		nodeData.policyName = policyName;
 		setIsEditing(false);
 	};
 

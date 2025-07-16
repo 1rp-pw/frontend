@@ -14,6 +14,13 @@ export interface FlowContextType {
 	) => void;
 	getConnectedNodes: (nodeId: string) => { true?: string; false?: string };
 	deleteNode: (nodeId: string) => void;
+	onNodeValueChange: (
+		nodeId: string,
+		nodeType: string,
+		oldValue: any,
+		newValue: any,
+		field: string,
+	) => void;
 }
 
 export const FlowContext = createContext<FlowContextType | null>(null);

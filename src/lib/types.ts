@@ -67,6 +67,7 @@ export interface PolicyNodeData extends FlowNodeData {
 	type: "policy";
 	policyId: string;
 	policyName?: string;
+	calledPath?: boolean;
 }
 
 export interface ReturnNodeData extends FlowNodeData {
@@ -77,6 +78,7 @@ export interface ReturnNodeData extends FlowNodeData {
 export interface CustomNodeData extends FlowNodeData {
 	type: "custom";
 	outcome: string;
+	calledPath?: boolean;
 }
 
 export type FlowNode =
@@ -84,6 +86,24 @@ export type FlowNode =
 	| PolicyNodeData
 	| ReturnNodeData
 	| CustomNodeData;
+
+export interface NodeOperationLog {
+	id: string;
+	timestamp: Date;
+	operation: "create" | "update" | "delete" | "typeChange";
+	nodeId: string;
+	nodeType: string;
+	details: {
+		from?: any;
+		to?: any;
+		cascadedDeletions?: Array<{
+			nodeId: string;
+			nodeType: string;
+			nodeData: any;
+		}>;
+		nodeData?: any;
+	};
+}
 
 export interface FlowSpec {
 	baseId: string;

@@ -18,37 +18,54 @@ import {
 import { usePolicySearch } from "~/hooks/use-policy-search";
 import type { PolicyNodeData } from "~/lib/types";
 
-export function PolicyNode({ data, id }: NodeProps) {
+export function PolicyNode({ data, id }: NodeProps<PolicyNodeData>) {
 	const [isEditing, setIsEditing] = useState(false);
-	const [policyId, setPolicyId] = useState(
-		(data as unknown as PolicyNodeData).policyId || "",
-	);
-	const [policyName, setPolicyName] = useState(
-		(data as unknown as PolicyNodeData).policyName || "",
-	);
+	const [policyId, setPolicyId] = useState(data.policyId || "");
+	const [policyName, setPolicyName] = useState(data.policyName || "");
 	const [showPolicySearch, setShowPolicySearch] = useState(false);
 	const { policies, isLoading } = usePolicySearch();
-	const { addConnectedNode, getConnectedNodes, deleteNode } = useFlowContext();
+	const { addConnectedNode, getConnectedNodes, deleteNode, onNodeValueChange } =
+		useFlowContext();
 	const connectedNodes = getConnectedNodes(id);
 
 	const handleSave = () => {
-		(data as unknown as PolicyNodeData).policyId = policyId;
-		(data as unknown as PolicyNodeData).policyName = policyName;
+		// Log value changes
+		if (data.policyId !== policyId) {
+			onNodeValueChange(id, "policy", data.policyId, policyId, "policyId");
+		}
+		if (data.policyName !== policyName) {
+			onNodeValueChange(
+				id,
+				"policy",
+				data.policyName,
+				policyName,
+				"policyName",
+			);
+		}
+
+		data.policyId = policyId;
+		data.policyName = policyName;
 		setIsEditing(false);
 	};
 
 	const handleCancel = () => {
-		setPolicyId((data as unknown as PolicyNodeData).policyId || "");
-		setPolicyName((data as unknown as PolicyNodeData).policyName || "");
+		setPolicyId(data.policyId || "");
+		setPolicyName(data.policyName || "");
 		setIsEditing(false);
 	};
 
-	const returnValue = (data as unknown as PolicyNodeData).truePath;
-	const bgColor = returnValue ? "border-green-500" : "border-red-500";
+	const calledPath = data.calledPath;
+	console.info("PolicyNode - calledPath:", calledPath, "full data:", data);
+	const borderStyle =
+		calledPath === true
+			? "border-2 border-green-500"
+			: calledPath === false
+				? "border-2 border-red-500"
+				: "border border-border";
 
 	return (
 		<Card
-			className={`min-h-32 w-96 rounded-xl border border-border bg-card shadow-sm ${bgColor}`}
+			className={`min-h-32 w-96 rounded-xl bg-card shadow-sm ${borderStyle}`}
 		>
 			<CardHeader className="pb-3">
 				<CardTitle className="flex items-center justify-between font-medium text-sm">
