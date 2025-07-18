@@ -6,8 +6,8 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { Editor } from "~/components/policy/editor";
 import { SchemaBuilder } from "~/components/policy/schema/builder";
-import { TestForm } from "~/components/policy/test/form";
 import { TestList } from "~/components/policy/test/list";
+import { TabbedTestForm } from "~/components/policy/test/tabbed-form";
 import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { usePolicyStore } from "~/lib/state/policy";
@@ -132,7 +132,7 @@ export default function Maker({ policy_id }: { policy_id: string }) {
 						</div>
 						<div className="flex-1 overflow-auto p-4">
 							{currentTest ? (
-								<TestForm
+								<TabbedTestForm
 									schema={schema}
 									currentTest={currentTest}
 									onSaveTest={saveTest}

@@ -50,8 +50,8 @@ jest.mock("~/components/policy/schema/builder", () => ({
 	),
 }));
 
-jest.mock("~/components/policy/test/form", () => ({
-	TestForm: ({
+jest.mock("~/components/policy/test/tabbed-form", () => ({
+	TabbedTestForm: ({
 		currentTest,
 		onSaveTest,
 	}: {

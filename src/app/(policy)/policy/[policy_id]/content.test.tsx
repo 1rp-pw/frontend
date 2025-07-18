@@ -35,8 +35,6 @@ jest.mock("~/components/ui/button", () => ({
 
 jest.mock("~/components/ui/card", () => ({
 	// biome-ignore lint/suspicious/noExplicitAny: Mock component
-	// biome-ignore lint/a11y/noStaticElementInteractions: Mock element
-	// biome-ignore lint/a11y/useKeyWithClickEvents: Mock element
 	Card: ({ children, className, onClick }: any) => (
 		// biome-ignore lint/a11y/noStaticElementInteractions: static
 		// biome-ignore lint/a11y/useKeyWithClickEvents: dont care about key
