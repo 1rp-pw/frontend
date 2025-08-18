@@ -200,7 +200,7 @@ export default function PolicyList() {
 									</Link>
 								</TableCell>
 								<TableCell>
-									<Link href={`/policy/${flow.baseId}`}>
+									<Link href={`/flow/${flow.baseId}`}>
 										{formatDate(flow.updatedAt)}
 									</Link>
 								</TableCell>
