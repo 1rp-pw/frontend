@@ -2,7 +2,7 @@
 
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useFlowContext } from "~/components/flow/flow-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -31,6 +31,8 @@ export function StartNode({ data, id }: NodeProps) {
 	const { addConnectedNode, getConnectedNodes, onNodeValueChange } =
 		useFlowContext();
 	const connectedNodes = getConnectedNodes(id);
+
+	const elemId = useId();
 
 	const handleSave = () => {
 		const nodeData = data as unknown as StartNodeData;
@@ -194,13 +196,13 @@ export function StartNode({ data, id }: NodeProps) {
 			<Handle
 				type="source"
 				position={Position.Right}
-				id="true"
+				id={`${elemId}-true`}
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
 			<Handle
 				type="source"
 				position={Position.Right}
-				id="false"
+				id={`${elemId}-false`}
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
 		</Card>

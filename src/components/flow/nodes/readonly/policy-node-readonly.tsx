@@ -1,6 +1,7 @@
 "use client";
 
 import { Handle, type NodeProps, Position } from "@xyflow/react";
+import { useId } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import type { PolicyNodeData } from "~/lib/types";
@@ -8,6 +9,7 @@ import type { PolicyNodeData } from "~/lib/types";
 export function PolicyNodeReadonly({ data }: NodeProps) {
 	const policyId = (data as unknown as PolicyNodeData).policyId || "";
 	const policyName = (data as unknown as PolicyNodeData).policyName || "";
+	const elemId = useId();
 
 	return (
 		<Card className="min-h-32 w-96 rounded-xl border border-border bg-card shadow-sm">
@@ -57,13 +59,13 @@ export function PolicyNodeReadonly({ data }: NodeProps) {
 			<Handle
 				type="source"
 				position={Position.Right}
-				id="true"
+				id={`${elemId}-true`}
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
 			<Handle
 				type="source"
 				position={Position.Right}
-				id="false"
+				id={`${elemId}-false`}
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
 		</Card>

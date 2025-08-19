@@ -292,7 +292,7 @@ export function TestForm({
 										setNestedValue(formData, path, date.toISOString()),
 									)
 								}
-								className="border-zinc-600 "
+								className="border-zinc-600"
 								disabled={disabled}
 							/>
 						</div>

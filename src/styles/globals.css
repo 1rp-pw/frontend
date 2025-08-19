@@ -1,14 +1,17 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/** biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
 @custom-variant dark (&:is(.dark *));
 
+/** biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
 @theme {
 	--font-sans:
 		var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
 		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
+/** biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
 @theme inline {
 	--radius-sm: calc(var(--radius) - 4px);
 	--radius-md: calc(var(--radius) - 2px);
@@ -118,9 +121,11 @@
 
 @layer base {
 	* {
+		/** biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
 		@apply border-border outline-ring/50;
 	}
 	body {
+		/** biome-ignore lint/suspicious/noUnknownAtRules: tailwind */
 		@apply bg-background text-foreground;
 	}
 
@@ -131,12 +136,15 @@
 }
 
 .react-flow__node {
+	/** biome-ignore lint/complexity/noImportantStyles: tailwind */
 	background: transparent !important;
 }
 .react-flow__minimap {
+	/** biome-ignore lint/complexity/noImportantStyles: tailwind */
 	background-color: var(--background) !important;
 }
 .react-flow__controls-button {
+	/** biome-ignore lint/complexity/noImportantStyles: tailwind */
 	background-color: var(--background) !important;
 }
 .react-flow__attribution {

@@ -77,6 +77,7 @@ class MockHeaders {
 
 	// biome-ignore lint/suspicious/noExplicitAny: can be anything
 	forEach(callbackfn: (value: string, key: string, parent: any) => void) {
+		// biome-ignore lint/suspicious/useIterableCallbackReturn: can be anything
 		this.headers.forEach((value, key) => callbackfn(value, key, this));
 	}
 }
