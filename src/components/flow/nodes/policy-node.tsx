@@ -2,7 +2,7 @@
 
 import { Handle, type NodeProps, Position } from "@xyflow/react";
 import { Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useFlowContext } from "~/components/flow/flow-context";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
@@ -28,6 +28,7 @@ export function PolicyNode({ data, id }: NodeProps) {
 	const { addConnectedNode, getConnectedNodes, deleteNode, onNodeValueChange } =
 		useFlowContext();
 	const connectedNodes = getConnectedNodes(id);
+	const elemId = useId();
 
 	const handleSave = () => {
 		if (!nodeData) {
@@ -91,7 +92,7 @@ export function PolicyNode({ data, id }: NodeProps) {
 				{!isEditing ? (
 					// biome-ignore lint/a11y: intentionally using click-only
 					<div
-						className=" cursor-pointer space-y-2"
+						className="cursor-pointer space-y-2"
 						onClick={() => setIsEditing(true)}
 					>
 						<Label className="font-medium text-xs">Policy:</Label>
@@ -213,13 +214,13 @@ export function PolicyNode({ data, id }: NodeProps) {
 			<Handle
 				type="source"
 				position={Position.Right}
-				id="true"
+				id={`${elemId}-true`}
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
 			<Handle
 				type="source"
 				position={Position.Right}
-				id="false"
+				id={`${elemId}-false`}
 				style={{ opacity: 0, pointerEvents: "none" }}
 			/>
 		</Card>

@@ -287,6 +287,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 		checkPreset();
 	}, [range, rangeCompare]);
 
+	// biome-ignore lint/correctness/noNestedComponentDefinitions: shadcn
 	const PresetButton = ({
 		preset,
 		label,

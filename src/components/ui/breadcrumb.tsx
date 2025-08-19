@@ -52,6 +52,7 @@ function BreadcrumbLink({
 function BreadcrumbPage({ className, ...props }: ComponentProps<"span">) {
 	return (
 		// biome-ignore lint/a11y/useFocusableInteractive: hmm
+		// biome-ignore lint/a11y/useSemanticElements: shadcn
 		<span
 			data-slot="breadcrumb-page"
 			role="link"
