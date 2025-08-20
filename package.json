@@ -18,7 +18,7 @@
 		"test:ci": "pnpm check && pnpm typecheck && jest --coverage --watchAll=false"
 	},
 	"dependencies": {
-		"@flags-gg/react-library": "^1.14.1",
+		"@flags-gg/react-library": "^1.14.5",
 		"@hookform/resolvers": "^5.1.1",
 		"@radix-ui/react-alert-dialog": "^1.1.14",
 		"@radix-ui/react-dialog": "^1.1.15",
