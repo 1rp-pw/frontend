@@ -64,7 +64,7 @@
 		"@types/diff": "^8.0.0",
 		"@types/jest": "^30.0.0",
 		"@types/node": "^24.0.14",
-		"@types/react": "^19.1.10",
+		"@types/react": "^19.1.12",
 		"@types/react-dom": "^19.1.8",
 		"identity-obj-proxy": "^3.0.0",
 		"jest": "^30.0.3",
